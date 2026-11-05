@@ -1,0 +1,2453 @@
+SOVI — PFAD-BUTTONS UND SUB-BUTTONS
+Vollständiger synthetischer Beispieldatensatz: Geburt bis 33 Jahre
+Stand / Demo-Snapshot: 05.11.2026, 09:00, Europe/Vienna
+
+WICHTIG: FIKTIVE PERSON, KEINE ECHTE PATIENTENAKTE
+Männlich; geboren am 12.03.1993; am Stichtag 33 Jahre alt; Österreich.
+Alle individuellen Daten, Datumsangaben, Befunde, Behandlungen, Impfungen,
+Medikamente, Termine, Rechnungen und Teilnahmebestätigungen sind erfunden.
+Keine Behauptung über die Gesundheit oder Krankengeschichte des Nutzers.
+Die Liste ist eine UI-/Seed-Datenvorlage, kein medizinischer Vorsorge-, Impf-
+oder Behandlungsplan. „Vollständig“ bezieht sich ausschließlich auf dieses
+gewählte Demo-Szenario, nicht auf alle möglichen Gesundheitsereignisse.
+
+SZENARIO
+- Historische Mutter-Kind-Pass-Einträge, Impfpass-Einträge und Schuluntersuchungen.
+- Zahnkontrollen, einzelne Zahnbehandlungen, Augenbefunde und Vorsorgebesuche.
+- Pro Kalenderjahr 1993–2026 ein oder zwei fiktive Atemwegsinfekte: insgesamt
+  51 Episoden. Nur 2 heißen „Grippe“, weil der erfundene Befund ausdrücklich
+  Influenza nennt; die übrigen heißen „Infekt“. Erkältung und Influenza sind
+  nicht dasselbe [Q1]. Anzahl/Häufigkeit sind Szenariowünsche, keine Norm.
+- Ein Armbruch links am 20.08.2026 mit dokumentierter Gipsversorgung,
+  Medikamentenbelegen, Kontrollen und einer fiktiv verordneten Physiotherapie.
+- Vier Therapiesitzungen sind bis zum Snapshot dokumentiert. Die fünfte ist
+  für heute vereinbart, die sechste für 12.11. — keine Teilnahme vorwegnehmen.
+- Der Entwurf zur Kostenerstattung ist offen. Keine Erstattungszusage.
+- Aktuell keine bestätigte Dauermedikation im Demo. Frühere Medikamente
+  bleiben historisch und erzeugen keine neuen Einnahmeerinnerungen.
+
+SO WERDEN DIE BUTTONS GERENDERT
+1. Die Zeile „BUTTON“ enthält den kurzen sichtbaren Titel; Datum ist Untertitel.
+2. Genau ein Button pro bekanntem Kalendertag. Mehrere Anlässe am selben Tag
+   werden in „Mein Tag“ zusammengeführt. Die einzelnen Einträge bleiben erhalten.
+3. Ein Sub-Button = kein segmentierter Halo. Mehrere Sub-Buttons = gleich viele
+   Halo-Segmente; 1 Segment entspricht genau einem Eintrag in der aufklappenden
+   Liste. Details, Quellen und Menüaktionen erzeugen keine weiteren Segmente.
+4. Keine Fortschritts- oder Gesundheitsbewertung durch den Halo. Impfung,
+   Verordnung, Einnahme, Termin und Teilnahme behalten unterschiedliche Zustände.
+5. Tippen: einzelner Eintrag direkt; mehrere Einträge als Liste. Jeder Eintrag
+   hat Details und „Mit Sovi ansehen“. Öffnen allein verändert keinen Status.
+6. Die eingerückte Kurzbezeichnung vor der Klammer ist der Sub-Button-Titel.
+   Die weiteren Zeilen sind Detailinhalt, nicht Text auf dem runden Button.
+7. Lebensabschnitte und Jahresüberschriften sind Orientierung, keine Buttons.
+8. Sortierung nach Ereignisdatum, nicht Upload-Datum. Spätere Digitalisierung
+   erzeugt keine historischen Duplikate. Episoden-IDs verbinden Folgetermine.
+9. Historische Jahre dürfen kompakt eingeklappt sein; alle hier gelisteten
+   Buttons bleiben nach Aufklappen erreichbar. Keine Pflichtaufgaben aus Lücken.
+10. Planungen nach dem Snapshot stehen separat am Ende. Das ist kein behaupteter
+    späterer Krankheitsverlauf. Aufgaben bleiben bis zur Bestätigung offen.
+
+QUELLEN UND DEMO-EVIDENZ SIND GETRENNT
+Q0–Q9 am Ende belegen österreichische Strukturen und Begriffe. Sie belegen
+keinen einzigen individuellen Termin dieses fiktiven Menschen. Die genannten
+„fiktiven Belege“ sind vorgeschlagene Fixture-Typen, keine beigefügten Scans,
+keine tatsächlich abgerufenen ELGA-Dokumente und keine verifizierten Akten.
+Historische Impfeinträge sind ausdrücklich keine rekonstruierte vollständige
+Impfserie. Bei unklaren Kinderimpfungen stehen Platzhalter statt erfundener
+Impfstoffnamen. Aktuelle Empfehlungen werden nicht auf 1993 zurückgerechnet.
+Der historische Mutter-Kind-Pass wird nicht rückwirkend in einen heutigen
+Eltern-Kind-Pass umbenannt [Q2]. Die erste e-card erscheint erst 2005 [Q8].
+Sovi ersetzt hier die Dokumentnavigation, nicht den rechtlichen Status eines
+Impfpasses, Rezepts oder ärztlichen Originals. Die Quellen bleiben verknüpft.
+
+UMFANG
+222 Pfad-Buttons / 328 Sub-Buttons insgesamt.
+73 Buttons mit segmentiertem Halo.
+217 Buttons bis einschließlich heute; 5 Buttons im geplanten Ausblick.
+
+===============================================================================
+CHRONOLOGISCHER PFAD
+===============================================================================
+
+-------------------------------------------------------------------------------
+1993 | Mein Start | Geburtsjahr
+-------------------------------------------------------------------------------
+
+P001 | 12.03.1993 | BUTTON: Geburt
+  Alter: 0 Tage | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: geburt
+  1. Geburt [Lebensereignis | Demo-dokumentiert]
+     Geburtsdatum 12.03.1993; männlich; Demo-Person ohne echten Namen.
+     Herkunft: Fiktiver Geburtsbericht.
+  2. Erstuntersuchung [Befund | Demo-dokumentiert]
+     Ärztliche Untersuchung nach der Geburt als eigener Eintrag.
+     Herkunft: Fiktiver Geburtsbericht.
+  3. Messwerte [Messung | Demo-dokumentiert]
+     Fiktive Geburtsmesswerte: 3.400 g und 51 cm; keine medizinische Bewertung.
+     Herkunft: Fiktiver Geburtsbericht.
+
+P002 | 15.03.1993 | BUTTON: Screening
+  Alter: 3 Tage | Halo: keiner (1 Eintrag)
+  Zusammenhang: geburt
+  1. Neugeborenen-Screening [Befund | Demo-dokumentiert]
+     Historischer Screening-Eintrag. Keine heutigen Testpanels auf das Jahr 1993 übertragen.
+     Herkunft: Fiktiver Screeningbeleg.
+
+P003 | 16.03.1993 | BUTTON: Nach Hause
+  Alter: 4 Tage | Halo: keiner (1 Eintrag)
+  Zusammenhang: geburt
+  1. Entlassung [Ereignis | Demo-dokumentiert]
+     Entlassung nach der Geburt; Originalbericht bleibt verknüpft.
+     Herkunft: Fiktiver Entlassungsbericht.
+
+P004 | 22.03.1993 | BUTTON: Versicherung
+  Alter: 10 Tage | Halo: keiner (1 Eintrag)
+  1. Mitversicherung [Verwaltung | Demo-dokumentiert]
+     Fiktiver historischer Versicherungsnachweis über einen Elternteil. Keine e-card und keine
+     rückwirkende ÖGK-Bezeichnung.
+     Herkunft: Fiktiver Versicherungsnachweis.
+
+P005 | 19.04.1993 | BUTTON: Kinderarzt
+  Alter: 1 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: kindheit
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Untersuchung in der 6. Lebenswoche, einschließlich dokumentierter orthopädischer
+     Untersuchung.
+     Herkunft: Fiktiver historischer Mutter-Kind-Pass.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Gewicht und Größe als historische Messung; keine erfundenen Normalwertbewertungen.
+     Herkunft: Fiktiver historischer Mutter-Kind-Pass.
+
+P006 | 17.05.1993 | BUTTON: Impfung
+  Alter: 2 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: impfung-Kinderimpfung A, impfung-Kinderimpfung B
+  1. Kinderimpfung A [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Kinderimpfung A. Vermerk: historischer Eintrag 1;
+     Impfstoffbezeichnung im Demo nicht überliefert. Produktname, Charge und impfende Stelle
+     sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage über
+     vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+  2. Kinderimpfung B [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Kinderimpfung B. Vermerk: historischer Eintrag 1; separater
+     Eintrag am selben Tag, Bezeichnung nicht überliefert. Produktname, Charge und impfende
+     Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage über
+     vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P007 | 14.06.1993 | BUTTON: Impfung
+  Alter: 3 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: impfung-Kinderimpfung A, impfung-Kinderimpfung B
+  1. Kinderimpfung A [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Kinderimpfung A. Vermerk: historischer Eintrag 2;
+     Impfstoffbezeichnung im Demo nicht überliefert. Produktname, Charge und impfende Stelle
+     sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage über
+     vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+  2. Kinderimpfung B [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Kinderimpfung B. Vermerk: historischer Eintrag 2; separater
+     Eintrag am selben Tag, Bezeichnung nicht überliefert. Produktname, Charge und impfende
+     Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage über
+     vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P008 | 12.07.1993 | BUTTON: Mein Tag
+  Alter: 4 Monate | Halo: 4 Segmente (4 Einträge)
+  Zusammenhang: kindheit, impfung-Kinderimpfung A, impfung-Kinderimpfung B
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Historische Kindesuntersuchung im vorgesehenen Fenster des 3.–5. Lebensmonats.
+     Herkunft: Fiktiver historischer Mutter-Kind-Pass.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Gewicht und Größe als historische Messung; keine erfundenen Normalwertbewertungen.
+     Herkunft: Fiktiver historischer Mutter-Kind-Pass.
+  3. Kinderimpfung A [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Kinderimpfung A. Vermerk: historischer Eintrag 3;
+     Impfstoffbezeichnung im Demo nicht überliefert. Produktname, Charge und impfende Stelle
+     sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage über
+     vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+  4. Kinderimpfung B [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Kinderimpfung B. Vermerk: historischer Eintrag 3; separater
+     Eintrag am selben Tag, Bezeichnung nicht überliefert. Produktname, Charge und impfende
+     Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage über
+     vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P009 | 12.11.1993 | BUTTON: Kinderarzt
+  Alter: 8 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: kindheit
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Historische Kindesuntersuchung im vorgesehenen Fenster des 7.–9. Lebensmonats.
+     Herkunft: Fiktiver historischer Mutter-Kind-Pass.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Gewicht und Größe als historische Messung; keine erfundenen Normalwertbewertungen.
+     Herkunft: Fiktiver historischer Mutter-Kind-Pass.
+  3. Hören & HNO [Befund | Demo-dokumentiert]
+     Dokumentierter Hals-, Nasen- und Ohrenbefund; keine automatisch ergänzte Diagnose.
+     Herkunft: Fiktiver Mutter-Kind-Pass.
+
+P010 | 23.11.1993 | BUTTON: Infekt
+  Alter: 8 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1993-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P011 | 29.11.1993 | BUTTON: Rückmeldung
+  Alter: 8 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1993-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+-------------------------------------------------------------------------------
+1994 | Kindheit | 1. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P012 | 14.02.1994 | BUTTON: Infekt
+  Alter: 11 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: atemwege-1994-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Kinderarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+
+P013 | 20.02.1994 | BUTTON: Rückmeldung
+  Alter: 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1994-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P014 | 14.03.1994 | BUTTON: Kinderarzt
+  Alter: 1 Jahre | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: kindheit
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Historische Kindesuntersuchung um den ersten Geburtstag.
+     Herkunft: Fiktiver historischer Mutter-Kind-Pass.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Gewicht und Größe als historische Messung; keine erfundenen Normalwertbewertungen.
+     Herkunft: Fiktiver historischer Mutter-Kind-Pass.
+  3. Augen [Befund | Demo-dokumentiert]
+     Dokumentierte Augenuntersuchung im Rahmen dieses Termins.
+     Herkunft: Fiktiver Mutter-Kind-Pass.
+
+P015 | 13.06.1994 | BUTTON: Impfung
+  Alter: 1 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-MMR
+  1. MMR [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: MMR. Vermerk: historischer Eintrag. Produktname, Charge und
+     impfende Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage
+     über vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P016 | 18.07.1994 | BUTTON: Impfung
+  Alter: 1 Jahre, 4 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: impfung-Kinderimpfung A, impfung-Kinderimpfung B
+  1. Kinderimpfung A [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Kinderimpfung A. Vermerk: weiterer historischer Eintrag;
+     Impfstoffbezeichnung im Demo nicht überliefert. Produktname, Charge und impfende Stelle
+     sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage über
+     vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+  2. Kinderimpfung B [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Kinderimpfung B. Vermerk: weiterer historischer Eintrag;
+     separater Eintrag am selben Tag, Bezeichnung nicht überliefert. Produktname, Charge und
+     impfende Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage
+     über vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P017 | 16.09.1994 | BUTTON: Infekt
+  Alter: 1 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1994-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P018 | 22.09.1994 | BUTTON: Rückmeldung
+  Alter: 1 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1994-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+-------------------------------------------------------------------------------
+1995 | Kindheit | 2. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P019 | 14.02.1995 | BUTTON: Infekt
+  Alter: 1 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1995-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P020 | 20.02.1995 | BUTTON: Rückmeldung
+  Alter: 1 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1995-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P021 | 13.03.1995 | BUTTON: Kinderarzt
+  Alter: 2 Jahre | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: kindheit
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Historische Kindesuntersuchung um den zweiten Geburtstag.
+     Herkunft: Fiktiver historischer Mutter-Kind-Pass.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Gewicht und Größe als historische Messung; keine erfundenen Normalwertbewertungen.
+     Herkunft: Fiktiver historischer Mutter-Kind-Pass.
+
+P022 | 27.03.1995 | BUTTON: Augenarzt
+  Alter: 2 Jahre | Halo: keiner (1 Eintrag)
+  Zusammenhang: kindheit
+  1. Augenuntersuchung [Befund | Demo-dokumentiert]
+     Zusätzlicher historischer augenfachärztlicher Untersuchungsbeleg.
+     Herkunft: Fiktiver Augenbefund.
+
+P023 | 15.06.1995 | BUTTON: Zahnarzt
+  Alter: 2 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+-------------------------------------------------------------------------------
+1996 | Kindheit | 3. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P024 | 15.02.1996 | BUTTON: Infekt
+  Alter: 2 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1996-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P025 | 21.02.1996 | BUTTON: Rückmeldung
+  Alter: 2 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1996-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P026 | 11.03.1996 | BUTTON: Kinderarzt
+  Alter: 2 Jahre, 11 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: kindheit
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Historische Kindesuntersuchung im Fenster des 34.–38. Lebensmonats.
+     Herkunft: Fiktiver historischer Mutter-Kind-Pass.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Gewicht und Größe als historische Messung; keine erfundenen Normalwertbewertungen.
+     Herkunft: Fiktiver historischer Mutter-Kind-Pass.
+
+P027 | 12.06.1996 | BUTTON: Zahnarzt
+  Alter: 3 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P028 | 11.09.1996 | BUTTON: Infekt
+  Alter: 3 Jahre, 5 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: atemwege-1996-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Kinderarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+
+P029 | 17.09.1996 | BUTTON: Rückmeldung
+  Alter: 3 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1996-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+-------------------------------------------------------------------------------
+1997 | Kindheit | 4. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P030 | 17.02.1997 | BUTTON: Infekt
+  Alter: 3 Jahre, 11 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: atemwege-1997-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Kinderarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+
+P031 | 23.02.1997 | BUTTON: Rückmeldung
+  Alter: 3 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1997-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P032 | 10.03.1997 | BUTTON: Kinderarzt
+  Alter: 3 Jahre, 11 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: kindheit
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Fiktiver dokumentierter Kontrolltermin um den vierten Geburtstag; keine heutigen
+     Vorschriften rückwirkend anwenden.
+     Herkunft: Fiktiver historischer Mutter-Kind-Pass.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Gewicht und Größe als historische Messung; keine erfundenen Normalwertbewertungen.
+     Herkunft: Fiktiver historischer Mutter-Kind-Pass.
+
+P033 | 13.06.1997 | BUTTON: Zahnarzt
+  Alter: 4 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+-------------------------------------------------------------------------------
+1998 | Kindheit | 5. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P034 | 09.02.1998 | BUTTON: Infekt
+  Alter: 4 Jahre, 10 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1998-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P035 | 15.02.1998 | BUTTON: Rückmeldung
+  Alter: 4 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1998-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P036 | 06.04.1998 | BUTTON: Impfung
+  Alter: 5 Jahre | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-FSME
+  1. FSME [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: FSME. Vermerk: 1. Eintrag. Produktname, Charge und impfende
+     Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage über
+     vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P037 | 11.05.1998 | BUTTON: Impfung
+  Alter: 5 Jahre, 1 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-FSME
+  1. FSME [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: FSME. Vermerk: 2. Eintrag. Produktname, Charge und impfende
+     Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage über
+     vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P038 | 15.06.1998 | BUTTON: Zahnarzt
+  Alter: 5 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P039 | 14.09.1998 | BUTTON: Infekt
+  Alter: 5 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1998-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P040 | 20.09.1998 | BUTTON: Rückmeldung
+  Alter: 5 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1998-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+-------------------------------------------------------------------------------
+1999 | Schulzeit | 6. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P041 | 09.02.1999 | BUTTON: Infekt
+  Alter: 5 Jahre, 10 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1999-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P042 | 15.02.1999 | BUTTON: Rückmeldung
+  Alter: 5 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-1999-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P043 | 12.04.1999 | BUTTON: Impfung
+  Alter: 6 Jahre, 1 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-FSME
+  1. FSME [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: FSME. Vermerk: 3. Eintrag. Produktname, Charge und impfende
+     Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage über
+     vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P044 | 14.06.1999 | BUTTON: Impfung
+  Alter: 6 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-Diphtherie / Tetanus
+  1. Diphtherie / Tetanus [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Diphtherie / Tetanus. Vermerk: Wirkkomponenten laut Beleg;
+     weitere Komponenten und Präparat nicht hinterlegt. Produktname, Charge und impfende
+     Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage über
+     vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P045 | 15.06.1999 | BUTTON: Zahnarzt
+  Alter: 6 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P046 | 06.09.1999 | BUTTON: Schulstart
+  Alter: 6 Jahre, 5 Monate | Halo: keiner (1 Eintrag)
+  1. Schulbeginn [Lebensereignis | Demo-Eigeneintrag]
+     Von der Familie hinterlegtes Lebensereignis; keine medizinische Untersuchung automatisch
+     daraus erzeugen.
+     Herkunft: Fiktive Familienangabe.
+
+P047 | 13.09.1999 | BUTTON: Impfung
+  Alter: 6 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-MMR
+  1. MMR [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: MMR. Vermerk: weiterer historischer Eintrag. Produktname,
+     Charge und impfende Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten.
+     Keine Aussage über vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P048 | 11.10.1999 | BUTTON: Schularzt
+  Alter: 6 Jahre, 6 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: schule
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Fiktiver Untersuchungsbeleg für das Schuljahr 1999/00.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Im Beleg vorhandene Messungen; fehlende Angaben bleiben leer.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+
+-------------------------------------------------------------------------------
+2000 | Schulzeit | 7. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P049 | 10.02.2000 | BUTTON: Infekt
+  Alter: 6 Jahre, 10 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: atemwege-2000-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Kinderarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+
+P050 | 16.02.2000 | BUTTON: Rückmeldung
+  Alter: 6 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2000-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P051 | 12.06.2000 | BUTTON: Zahnarzt
+  Alter: 7 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P052 | 15.09.2000 | BUTTON: Infekt
+  Alter: 7 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2000-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P053 | 21.09.2000 | BUTTON: Rückmeldung
+  Alter: 7 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2000-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P054 | 05.10.2000 | BUTTON: Schularzt
+  Alter: 7 Jahre, 6 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: schule
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Fiktiver Untersuchungsbeleg für das Schuljahr 2000/01.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Im Beleg vorhandene Messungen; fehlende Angaben bleiben leer.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+
+-------------------------------------------------------------------------------
+2001 | Schulzeit | 8. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P055 | 12.02.2001 | BUTTON: Infekt
+  Alter: 7 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2001-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P056 | 18.02.2001 | BUTTON: Rückmeldung
+  Alter: 7 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2001-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P057 | 13.06.2001 | BUTTON: Zahnarzt
+  Alter: 8 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P058 | 08.10.2001 | BUTTON: Schularzt
+  Alter: 8 Jahre, 6 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: schule
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Fiktiver Untersuchungsbeleg für das Schuljahr 2001/02.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Im Beleg vorhandene Messungen; fehlende Angaben bleiben leer.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+
+-------------------------------------------------------------------------------
+2002 | Schulzeit | 9. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P059 | 12.02.2002 | BUTTON: Infekt
+  Alter: 8 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2002-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P060 | 18.02.2002 | BUTTON: Rückmeldung
+  Alter: 8 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2002-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P061 | 15.04.2002 | BUTTON: Impfung
+  Alter: 9 Jahre, 1 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-FSME
+  1. FSME [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: FSME. Vermerk: Auffrischung laut Beleg. Produktname, Charge
+     und impfende Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine
+     Aussage über vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P062 | 14.06.2002 | BUTTON: Zahnarzt
+  Alter: 9 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P063 | 10.09.2002 | BUTTON: Infekt
+  Alter: 9 Jahre, 5 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: atemwege-2002-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Kinderarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+
+P064 | 16.09.2002 | BUTTON: Rückmeldung
+  Alter: 9 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2002-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P065 | 07.10.2002 | BUTTON: Schularzt
+  Alter: 9 Jahre, 6 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: schule
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Fiktiver Untersuchungsbeleg für das Schuljahr 2002/03.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Im Beleg vorhandene Messungen; fehlende Angaben bleiben leer.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+
+-------------------------------------------------------------------------------
+2003 | Schulzeit | 10. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P066 | 13.02.2003 | BUTTON: Infekt
+  Alter: 9 Jahre, 11 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: atemwege-2003-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Kinderarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+
+P067 | 19.02.2003 | BUTTON: Rückmeldung
+  Alter: 9 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2003-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P068 | 16.06.2003 | BUTTON: Zahnarzt
+  Alter: 10 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P069 | 22.09.2003 | BUTTON: Impfung
+  Alter: 10 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-Hepatitis B
+  1. Hepatitis B [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Hepatitis B. Vermerk: 1. dokumentierter Eintrag.
+     Produktname, Charge und impfende Stelle sind in dieser Textliste nicht hinterlegt; nicht
+     erraten. Keine Aussage über vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P070 | 08.10.2003 | BUTTON: Schularzt
+  Alter: 10 Jahre, 6 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: schule
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Fiktiver Untersuchungsbeleg für das Schuljahr 2003/04.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Im Beleg vorhandene Messungen; fehlende Angaben bleiben leer.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+
+P071 | 20.10.2003 | BUTTON: Impfung
+  Alter: 10 Jahre, 7 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-Hepatitis B
+  1. Hepatitis B [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Hepatitis B. Vermerk: 2. dokumentierter Eintrag.
+     Produktname, Charge und impfende Stelle sind in dieser Textliste nicht hinterlegt; nicht
+     erraten. Keine Aussage über vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+-------------------------------------------------------------------------------
+2004 | Schulzeit | 11. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P072 | 16.02.2004 | BUTTON: Infekt
+  Alter: 10 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2004-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P073 | 22.02.2004 | BUTTON: Rückmeldung
+  Alter: 10 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2004-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P074 | 22.03.2004 | BUTTON: Impfung
+  Alter: 11 Jahre | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-Hepatitis B
+  1. Hepatitis B [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Hepatitis B. Vermerk: 3. dokumentierter Eintrag.
+     Produktname, Charge und impfende Stelle sind in dieser Textliste nicht hinterlegt; nicht
+     erraten. Keine Aussage über vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P075 | 14.06.2004 | BUTTON: Zahnarzt
+  Alter: 11 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P076 | 13.09.2004 | BUTTON: Infekt
+  Alter: 11 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2004-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P077 | 19.09.2004 | BUTTON: Rückmeldung
+  Alter: 11 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2004-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P078 | 11.10.2004 | BUTTON: Schularzt
+  Alter: 11 Jahre, 6 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: schule
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Fiktiver Untersuchungsbeleg für das Schuljahr 2004/05.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Im Beleg vorhandene Messungen; fehlende Angaben bleiben leer.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+
+-------------------------------------------------------------------------------
+2005 | Schulzeit | 12. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P079 | 15.02.2005 | BUTTON: Infekt
+  Alter: 11 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2005-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P080 | 21.02.2005 | BUTTON: Rückmeldung
+  Alter: 11 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2005-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P081 | 13.06.2005 | BUTTON: Zahnarzt
+  Alter: 12 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P082 | 18.07.2005 | BUTTON: e-card
+  Alter: 12 Jahre, 4 Monate | Halo: keiner (1 Eintrag)
+  1. Erste e-card [Verwaltung | Demo-dokumentiert]
+     Fiktiv dokumentierter Erhalt 2005. Der österreichweite Rollout war 2005; die Karte
+     speichert keine komplette Krankengeschichte.
+     Herkunft: Fiktive Familienangabe.
+
+P083 | 05.10.2005 | BUTTON: Schularzt
+  Alter: 12 Jahre, 6 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: schule
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Fiktiver Untersuchungsbeleg für das Schuljahr 2005/06.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Im Beleg vorhandene Messungen; fehlende Angaben bleiben leer.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+
+-------------------------------------------------------------------------------
+2006 | Schulzeit | 13. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P084 | 16.02.2006 | BUTTON: Infekt
+  Alter: 12 Jahre, 11 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: atemwege-2006-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Kinderarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+
+P085 | 22.02.2006 | BUTTON: Rückmeldung
+  Alter: 12 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2006-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P086 | 14.06.2006 | BUTTON: Zahnarzt
+  Alter: 13 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P087 | 14.09.2006 | BUTTON: Infekt
+  Alter: 13 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2006-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P088 | 20.09.2006 | BUTTON: Rückmeldung
+  Alter: 13 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2006-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P089 | 06.10.2006 | BUTTON: Schularzt
+  Alter: 13 Jahre, 6 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: schule
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Fiktiver Untersuchungsbeleg für das Schuljahr 2006/07.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Im Beleg vorhandene Messungen; fehlende Angaben bleiben leer.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+
+-------------------------------------------------------------------------------
+2007 | Schulzeit | 14. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P090 | 08.02.2007 | BUTTON: Infekt
+  Alter: 13 Jahre, 10 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2007-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P091 | 14.02.2007 | BUTTON: Rückmeldung
+  Alter: 13 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2007-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P092 | 16.04.2007 | BUTTON: Impfung
+  Alter: 14 Jahre, 1 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-FSME
+  1. FSME [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: FSME. Vermerk: Auffrischung laut Beleg. Produktname, Charge
+     und impfende Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine
+     Aussage über vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P093 | 15.06.2007 | BUTTON: Zahnarzt
+  Alter: 14 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P094 | 08.10.2007 | BUTTON: Schularzt
+  Alter: 14 Jahre, 6 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: schule
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Fiktiver Untersuchungsbeleg für das Schuljahr 2007/08.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Im Beleg vorhandene Messungen; fehlende Angaben bleiben leer.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+
+-------------------------------------------------------------------------------
+2008 | Schulzeit | 15. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P095 | 11.02.2008 | BUTTON: Infekt
+  Alter: 14 Jahre, 10 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2008-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+
+P096 | 17.02.2008 | BUTTON: Rückmeldung
+  Alter: 14 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2008-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P097 | 12.06.2008 | BUTTON: Zahnarzt
+  Alter: 15 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P098 | 30.06.2008 | BUTTON: Zahnarzt
+  Alter: 15 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Füllung [Behandlung | Demo-dokumentiert]
+     Fiktive dokumentierte Zahnfüllung; Zahnnummer und Material können aus einem tatsächlichen
+     Beleg ergänzt werden.
+     Herkunft: Fiktiver Zahnbehandlungsbeleg.
+
+P099 | 16.09.2008 | BUTTON: Infekt
+  Alter: 15 Jahre, 6 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: atemwege-2008-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Elternangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Kinderarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+
+P100 | 22.09.2008 | BUTTON: Rückmeldung
+  Alter: 15 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2008-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Elternangabe.
+
+P101 | 08.10.2008 | BUTTON: Schularzt
+  Alter: 15 Jahre, 6 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: schule
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Fiktiver Untersuchungsbeleg für das Schuljahr 2008/09.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Im Beleg vorhandene Messungen; fehlende Angaben bleiben leer.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+
+-------------------------------------------------------------------------------
+2009 | Schulzeit | 16. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P102 | 10.02.2009 | BUTTON: Infekt
+  Alter: 15 Jahre, 10 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: atemwege-2009-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Hausarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+
+P103 | 16.02.2009 | BUTTON: Rückmeldung
+  Alter: 15 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2009-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P104 | 15.06.2009 | BUTTON: Mein Tag
+  Alter: 16 Jahre, 3 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: impfung-Diphtherie / Tetanus, zaehne
+  1. Diphtherie / Tetanus [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Diphtherie / Tetanus. Vermerk: Wirkkomponenten laut Beleg;
+     weitere Komponenten und Präparat nicht hinterlegt. Produktname, Charge und impfende
+     Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage über
+     vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+  2. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P105 | 09.10.2009 | BUTTON: Schularzt
+  Alter: 16 Jahre, 6 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: schule
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Fiktiver Untersuchungsbeleg für das Schuljahr 2009/10.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Im Beleg vorhandene Messungen; fehlende Angaben bleiben leer.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+
+-------------------------------------------------------------------------------
+2010 | Schulzeit | 17. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P106 | 11.02.2010 | BUTTON: Infekt
+  Alter: 16 Jahre, 10 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2010-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P107 | 17.02.2010 | BUTTON: Rückmeldung
+  Alter: 16 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2010-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P108 | 14.06.2010 | BUTTON: Zahnarzt
+  Alter: 17 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P109 | 13.09.2010 | BUTTON: Infekt
+  Alter: 17 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2010-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P110 | 19.09.2010 | BUTTON: Rückmeldung
+  Alter: 17 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2010-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P111 | 05.10.2010 | BUTTON: Schularzt
+  Alter: 17 Jahre, 6 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: schule
+  1. Untersuchung [Befund | Demo-dokumentiert]
+     Fiktiver Untersuchungsbeleg für das Schuljahr 2010/11.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+  2. Messwerte [Messung | Demo-dokumentiert]
+     Im Beleg vorhandene Messungen; fehlende Angaben bleiben leer.
+     Herkunft: Fiktiver schulärztlicher Beleg.
+
+-------------------------------------------------------------------------------
+2011 | Erwachsen | 18. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P112 | 14.02.2011 | BUTTON: Infekt
+  Alter: 17 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2011-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P113 | 20.02.2011 | BUTTON: Rückmeldung
+  Alter: 17 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2011-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P114 | 15.06.2011 | BUTTON: Zahnarzt
+  Alter: 18 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P115 | 01.09.2011 | BUTTON: Versicherung
+  Alter: 18 Jahre, 5 Monate | Halo: keiner (1 Eintrag)
+  1. Mitversicherung [Verwaltung | Demo-dokumentiert]
+     Fiktiver Nachweis einer weiter bestehenden Mitversicherung während der Ausbildung. Kein
+     Anspruch aus dem Alter allein abgeleitet.
+     Herkunft: Fiktiver Versicherungsnachweis.
+
+P116 | 14.11.2011 | BUTTON: Augenarzt
+  Alter: 18 Jahre, 8 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: augen
+  1. Sehtest [Befund | Demo-dokumentiert]
+     Fiktiv dokumentierte Augenuntersuchung; Ergebnisse nur aus dem Befund anzeigen.
+     Herkunft: Fiktiver Augenbefund.
+  2. Brille [Verordnung | Demo-dokumentiert]
+     Dokumentierte Brillenverordnung ohne erfundene Dioptrienwerte.
+     Herkunft: Fiktive Brillenverordnung.
+
+-------------------------------------------------------------------------------
+2012 | Erwachsen | 19. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P117 | 13.02.2012 | BUTTON: Infekt
+  Alter: 18 Jahre, 11 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: atemwege-2012-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Hausarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+
+P118 | 19.02.2012 | BUTTON: Rückmeldung
+  Alter: 18 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2012-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P119 | 16.04.2012 | BUTTON: Impfung
+  Alter: 19 Jahre, 1 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-FSME
+  1. FSME [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: FSME. Vermerk: Auffrischung laut Beleg. Produktname, Charge
+     und impfende Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine
+     Aussage über vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P120 | 07.05.2012 | BUTTON: Vorsorge
+  Alter: 19 Jahre, 1 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: vorsorge-2012
+  1. Anamnese [Formular | Demo-dokumentiert]
+     Fiktive patientenseitige Antworten; einschließlich ausdrücklich unbekannter Angaben. Kein
+     automatisch ausgefüllter ärztlicher Befund.
+     Herkunft: Fiktiver Anamnesebogen.
+  2. Untersuchung [Befund | Demo-dokumentiert]
+     Ärztlicher Untersuchungsbeleg; Werte und Bewertungen nicht von Sovi erfinden.
+     Herkunft: Fiktives ärztliches Befundblatt.
+  3. Blutabnahme [Untersuchung | Demo-dokumentiert]
+     Dokumentierte Probenentnahme; noch kein Laborergebnis.
+     Herkunft: Fiktiver Probenbeleg.
+
+P121 | 10.05.2012 | BUTTON: Labor
+  Alter: 19 Jahre, 1 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: vorsorge-2012
+  1. Laborbefund [Befund | Demo-dokumentiert]
+     Fiktiver Laboreingang mit Probenbezug. Keine künstlichen Laborwerte und keine
+     App-Auslegung.
+     Herkunft: Fiktiver Laborbefund.
+
+P122 | 14.05.2012 | BUTTON: Ergebnisse
+  Alter: 19 Jahre, 2 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: vorsorge-2012
+  1. Befundgespräch [Kontakt | Demo-dokumentiert]
+     Ärztliche Befundbesprechung laut fiktivem Beleg; dokumentierte nächste Schritte nur bei
+     tatsächlich vorhandenem Auftrag übernehmen.
+     Herkunft: Fiktiver Gesprächsbeleg.
+
+P123 | 12.06.2012 | BUTTON: Zahnarzt
+  Alter: 19 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P124 | 13.09.2012 | BUTTON: Infekt
+  Alter: 19 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2012-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P125 | 19.09.2012 | BUTTON: Rückmeldung
+  Alter: 19 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2012-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+-------------------------------------------------------------------------------
+2013 | Erwachsen | 20. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P126 | 14.02.2013 | BUTTON: Infekt
+  Alter: 19 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2013-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P127 | 20.02.2013 | BUTTON: Rückmeldung
+  Alter: 19 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2013-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P128 | 13.06.2013 | BUTTON: Zahnarzt
+  Alter: 20 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P129 | 02.09.2013 | BUTTON: Berufsstart
+  Alter: 20 Jahre, 5 Monate | Halo: 2 Segmente (2 Einträge)
+  1. Berufsstart [Lebensereignis | Demo-Eigeneintrag]
+     Beginn eines fiktiven Arbeitsverhältnisses.
+     Herkunft: Fiktive Eigenangabe.
+  2. Versicherung [Verwaltung | Demo-dokumentiert]
+     Versicherungsbeginn laut fiktivem Nachweis; kein Antrag automatisch abgeschickt.
+     Herkunft: Fiktiver Versicherungsnachweis.
+
+-------------------------------------------------------------------------------
+2014 | Erwachsen | 21. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P130 | 17.02.2014 | BUTTON: Infekt
+  Alter: 20 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2014-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P131 | 23.02.2014 | BUTTON: Rückmeldung
+  Alter: 20 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2014-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P132 | 16.06.2014 | BUTTON: Zahnarzt
+  Alter: 21 Jahre, 3 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+  2. Mundhygiene [Behandlung | Demo-dokumentiert]
+     Am selben Tag dokumentierte Mundhygiene; keine automatische Kostenübernahme behaupten.
+     Herkunft: Fiktiver Behandlungsbeleg.
+
+P133 | 15.09.2014 | BUTTON: Infekt
+  Alter: 21 Jahre, 6 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: atemwege-2014-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Hausarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+  3. Krankenstand [Verwaltung | Demo-dokumentiert]
+     Historische Arbeitsunfähigkeitsbestätigung laut fiktivem Beleg; Zeitraum im Detail, keine
+     automatische Meldung.
+     Herkunft: Fiktive Krankenstandsbestätigung.
+
+P134 | 21.09.2014 | BUTTON: Rückmeldung
+  Alter: 21 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2014-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+-------------------------------------------------------------------------------
+2015 | Erwachsen | 22. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P135 | 16.02.2015 | BUTTON: Infekt
+  Alter: 21 Jahre, 11 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: atemwege-2015-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Hausarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+  3. Krankenstand [Verwaltung | Demo-dokumentiert]
+     Historische Arbeitsunfähigkeitsbestätigung laut fiktivem Beleg; Zeitraum im Detail, keine
+     automatische Meldung.
+     Herkunft: Fiktive Krankenstandsbestätigung.
+
+P136 | 22.02.2015 | BUTTON: Rückmeldung
+  Alter: 21 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2015-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P137 | 15.06.2015 | BUTTON: Zahnarzt
+  Alter: 22 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P138 | 06.07.2015 | BUTTON: Magen-Darm
+  Alter: 22 Jahre, 3 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: magen-darm-2015
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldete Magen-Darm-Beschwerden, keine App-Diagnose.
+     Herkunft: Fiktive Eigenangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Fiktiver Ordinationskontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+  3. Krankenstand [Verwaltung | Demo-dokumentiert]
+     Fiktiv ausgestellte Arbeitsunfähigkeitsbestätigung; kein Arbeitgeber wurde durch Sovi
+     verständigt.
+     Herkunft: Fiktive Krankenstandsbestätigung.
+
+P139 | 16.11.2015 | BUTTON: Augenarzt
+  Alter: 22 Jahre, 8 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: augen
+  1. Sehtest [Befund | Demo-dokumentiert]
+     Fiktiv dokumentierte Augenuntersuchung; Ergebnisse nur aus dem Befund anzeigen.
+     Herkunft: Fiktiver Augenbefund.
+  2. Brille [Verordnung | Demo-dokumentiert]
+     Dokumentierte Brillenverordnung ohne erfundene Dioptrienwerte.
+     Herkunft: Fiktive Brillenverordnung.
+
+-------------------------------------------------------------------------------
+2016 | Erwachsen | 23. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P140 | 08.02.2016 | BUTTON: Grippe
+  Alter: 22 Jahre, 10 Monate | Halo: 5 Segmente (5 Einträge)
+  Zusammenhang: atemwege-2016-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Hausarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+  3. Influenza [Diagnose im Beleg | Demo-dokumentiert]
+     Influenza ausdrücklich im fiktiven ärztlichen Befund dokumentiert; nicht von Sovi aus
+     Beschwerden abgeleitet.
+     Herkunft: Fiktiver ärztlicher Befund.
+  4. Krankenstand [Verwaltung | Demo-dokumentiert]
+     Historische Arbeitsunfähigkeitsbestätigung laut fiktivem Beleg; Zeitraum im Detail, keine
+     automatische Meldung.
+     Herkunft: Fiktive Krankenstandsbestätigung.
+  5. Medikament [Medikationsnachweis | Demo-dokumentiert]
+     Fiktiver historischer Medikamenteneintrag. Präparat nicht spezifiziert; kein
+     Dosierschema, keine Erinnerungen, keine Empfehlung.
+     Herkunft: Fiktive Medikationsnotiz.
+
+P141 | 17.02.2016 | BUTTON: Rückmeldung
+  Alter: 22 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2016-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P142 | 09.05.2016 | BUTTON: Vorsorge
+  Alter: 23 Jahre, 1 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: vorsorge-2016
+  1. Anamnese [Formular | Demo-dokumentiert]
+     Fiktive patientenseitige Antworten; einschließlich ausdrücklich unbekannter Angaben. Kein
+     automatisch ausgefüllter ärztlicher Befund.
+     Herkunft: Fiktiver Anamnesebogen.
+  2. Untersuchung [Befund | Demo-dokumentiert]
+     Ärztlicher Untersuchungsbeleg; Werte und Bewertungen nicht von Sovi erfinden.
+     Herkunft: Fiktives ärztliches Befundblatt.
+  3. Blutabnahme [Untersuchung | Demo-dokumentiert]
+     Dokumentierte Probenentnahme; noch kein Laborergebnis.
+     Herkunft: Fiktiver Probenbeleg.
+
+P143 | 12.05.2016 | BUTTON: Labor
+  Alter: 23 Jahre, 2 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: vorsorge-2016
+  1. Laborbefund [Befund | Demo-dokumentiert]
+     Fiktiver Laboreingang mit Probenbezug. Keine künstlichen Laborwerte und keine
+     App-Auslegung.
+     Herkunft: Fiktiver Laborbefund.
+
+P144 | 16.05.2016 | BUTTON: Ergebnisse
+  Alter: 23 Jahre, 2 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: vorsorge-2016
+  1. Befundgespräch [Kontakt | Demo-dokumentiert]
+     Ärztliche Befundbesprechung laut fiktivem Beleg; dokumentierte nächste Schritte nur bei
+     tatsächlich vorhandenem Auftrag übernehmen.
+     Herkunft: Fiktiver Gesprächsbeleg.
+
+P145 | 13.06.2016 | BUTTON: Zahnarzt
+  Alter: 23 Jahre, 3 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+  2. Mundhygiene [Behandlung | Demo-dokumentiert]
+     Am selben Tag dokumentierte Mundhygiene; keine automatische Kostenübernahme behaupten.
+     Herkunft: Fiktiver Behandlungsbeleg.
+
+P146 | 12.09.2016 | BUTTON: Infekt
+  Alter: 23 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2016-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P147 | 18.09.2016 | BUTTON: Rückmeldung
+  Alter: 23 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2016-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+-------------------------------------------------------------------------------
+2017 | Erwachsen | 24. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P148 | 09.02.2017 | BUTTON: Infekt
+  Alter: 23 Jahre, 10 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2017-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P149 | 15.02.2017 | BUTTON: Rückmeldung
+  Alter: 23 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2017-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P150 | 18.04.2017 | BUTTON: Impfung
+  Alter: 24 Jahre, 1 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-FSME
+  1. FSME [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: FSME. Vermerk: Auffrischung laut Beleg. Produktname, Charge
+     und impfende Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine
+     Aussage über vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+
+P151 | 13.06.2017 | BUTTON: Zahnarzt
+  Alter: 24 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+-------------------------------------------------------------------------------
+2018 | Erwachsen | 25. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P152 | 12.02.2018 | BUTTON: Infekt
+  Alter: 24 Jahre, 11 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: atemwege-2018-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Hausarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+  3. Krankenstand [Verwaltung | Demo-dokumentiert]
+     Historische Arbeitsunfähigkeitsbestätigung laut fiktivem Beleg; Zeitraum im Detail, keine
+     automatische Meldung.
+     Herkunft: Fiktive Krankenstandsbestätigung.
+
+P153 | 18.02.2018 | BUTTON: Rückmeldung
+  Alter: 24 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2018-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P154 | 14.06.2018 | BUTTON: Zahnarzt
+  Alter: 25 Jahre, 3 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+  2. Mundhygiene [Behandlung | Demo-dokumentiert]
+     Am selben Tag dokumentierte Mundhygiene; keine automatische Kostenübernahme behaupten.
+     Herkunft: Fiktiver Behandlungsbeleg.
+
+P155 | 02.07.2018 | BUTTON: Zahnarzt
+  Alter: 25 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Füllung [Behandlung | Demo-dokumentiert]
+     Fiktive dokumentierte Zahnfüllung; Zahnnummer und Material können aus einem tatsächlichen
+     Beleg ergänzt werden.
+     Herkunft: Fiktiver Zahnbehandlungsbeleg.
+
+P156 | 12.09.2018 | BUTTON: Infekt
+  Alter: 25 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2018-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P157 | 18.09.2018 | BUTTON: Rückmeldung
+  Alter: 25 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2018-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+-------------------------------------------------------------------------------
+2019 | Erwachsen | 26. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P158 | 11.02.2019 | BUTTON: Infekt
+  Alter: 25 Jahre, 10 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2019-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P159 | 17.02.2019 | BUTTON: Rückmeldung
+  Alter: 25 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2019-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P160 | 17.06.2019 | BUTTON: Mein Tag
+  Alter: 26 Jahre, 3 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: impfung-Diphtherie / Tetanus, zaehne
+  1. Diphtherie / Tetanus [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Diphtherie / Tetanus. Vermerk: Wirkkomponenten laut Beleg;
+     weitere Komponenten und Präparat nicht hinterlegt. Produktname, Charge und impfende
+     Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage über
+     vollständigen Impfschutz.
+     Herkunft: Fiktiver Papier-Impfpass.
+  2. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+-------------------------------------------------------------------------------
+2020 | Erwachsen | 27. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P161 | 12.02.2020 | BUTTON: Infekt
+  Alter: 26 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2020-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P162 | 18.02.2020 | BUTTON: Rückmeldung
+  Alter: 26 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2020-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P163 | 12.06.2020 | BUTTON: Zahnarzt
+  Alter: 27 Jahre, 3 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+  2. Mundhygiene [Behandlung | Demo-dokumentiert]
+     Am selben Tag dokumentierte Mundhygiene; keine automatische Kostenübernahme behaupten.
+     Herkunft: Fiktiver Behandlungsbeleg.
+
+P164 | 22.06.2020 | BUTTON: Vorsorge
+  Alter: 27 Jahre, 3 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: vorsorge-2020
+  1. Anamnese [Formular | Demo-dokumentiert]
+     Fiktive patientenseitige Antworten; einschließlich ausdrücklich unbekannter Angaben. Kein
+     automatisch ausgefüllter ärztlicher Befund.
+     Herkunft: Fiktiver Anamnesebogen.
+  2. Untersuchung [Befund | Demo-dokumentiert]
+     Ärztlicher Untersuchungsbeleg; Werte und Bewertungen nicht von Sovi erfinden.
+     Herkunft: Fiktives ärztliches Befundblatt.
+  3. Blutabnahme [Untersuchung | Demo-dokumentiert]
+     Dokumentierte Probenentnahme; noch kein Laborergebnis.
+     Herkunft: Fiktiver Probenbeleg.
+
+P165 | 25.06.2020 | BUTTON: Labor
+  Alter: 27 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: vorsorge-2020
+  1. Laborbefund [Befund | Demo-dokumentiert]
+     Fiktiver Laboreingang mit Probenbezug. Keine künstlichen Laborwerte und keine
+     App-Auslegung.
+     Herkunft: Fiktiver Laborbefund.
+
+P166 | 29.06.2020 | BUTTON: Ergebnisse
+  Alter: 27 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: vorsorge-2020
+  1. Befundgespräch [Kontakt | Demo-dokumentiert]
+     Ärztliche Befundbesprechung laut fiktivem Beleg; dokumentierte nächste Schritte nur bei
+     tatsächlich vorhandenem Auftrag übernehmen.
+     Herkunft: Fiktiver Gesprächsbeleg.
+
+P167 | 14.09.2020 | BUTTON: Infekt
+  Alter: 27 Jahre, 6 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: atemwege-2020-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Hausarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+  3. Krankenstand [Verwaltung | Demo-dokumentiert]
+     Historische Arbeitsunfähigkeitsbestätigung laut fiktivem Beleg; Zeitraum im Detail, keine
+     automatische Meldung.
+     Herkunft: Fiktive Krankenstandsbestätigung.
+
+P168 | 20.09.2020 | BUTTON: Rückmeldung
+  Alter: 27 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2020-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P169 | 16.11.2020 | BUTTON: Augenarzt
+  Alter: 27 Jahre, 8 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: augen
+  1. Sehtest [Befund | Demo-dokumentiert]
+     Fiktiv dokumentierte Augenuntersuchung; Ergebnisse nur aus dem Befund anzeigen.
+     Herkunft: Fiktiver Augenbefund.
+  2. Brille [Verordnung | Demo-dokumentiert]
+     Dokumentierte Brillenverordnung ohne erfundene Dioptrienwerte.
+     Herkunft: Fiktive Brillenverordnung.
+
+-------------------------------------------------------------------------------
+2021 | Erwachsen | 28. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P170 | 15.02.2021 | BUTTON: Infekt
+  Alter: 27 Jahre, 11 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: atemwege-2021-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Hausarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+  3. Krankenstand [Verwaltung | Demo-dokumentiert]
+     Historische Arbeitsunfähigkeitsbestätigung laut fiktivem Beleg; Zeitraum im Detail, keine
+     automatische Meldung.
+     Herkunft: Fiktive Krankenstandsbestätigung.
+
+P171 | 21.02.2021 | BUTTON: Rückmeldung
+  Alter: 27 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2021-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P172 | 14.06.2021 | BUTTON: Mein Tag
+  Alter: 28 Jahre, 3 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: impfung-COVID-19, zaehne
+  1. COVID-19-Impfung [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: COVID-19. Vermerk: Eintrag 1. Produktname, Charge und
+     impfende Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage
+     über vollständigen Impfschutz.
+     Herkunft: Fiktiver Impfbeleg.
+  2. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P173 | 26.07.2021 | BUTTON: Impfung
+  Alter: 28 Jahre, 4 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-COVID-19
+  1. COVID-19-Impfung [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: COVID-19. Vermerk: Eintrag 2. Produktname, Charge und
+     impfende Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine Aussage
+     über vollständigen Impfschutz.
+     Herkunft: Fiktiver Impfbeleg.
+
+-------------------------------------------------------------------------------
+2022 | Erwachsen | 29. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P174 | 24.01.2022 | BUTTON: Impfung
+  Alter: 28 Jahre, 10 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-COVID-19
+  1. COVID-19-Impfung [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: COVID-19. Vermerk: weiterer Eintrag. Produktname, Charge
+     und impfende Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine
+     Aussage über vollständigen Impfschutz.
+     Herkunft: Fiktiver Impfbeleg.
+
+P175 | 14.02.2022 | BUTTON: Infekt
+  Alter: 28 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2022-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P176 | 20.02.2022 | BUTTON: Rückmeldung
+  Alter: 28 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2022-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P177 | 19.04.2022 | BUTTON: Impfung
+  Alter: 29 Jahre, 1 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-FSME
+  1. FSME [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: FSME. Vermerk: Auffrischung laut Beleg. Produktname, Charge
+     und impfende Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine
+     Aussage über vollständigen Impfschutz.
+     Herkunft: Fiktiver Impfbeleg.
+
+P178 | 14.06.2022 | BUTTON: Zahnarzt
+  Alter: 29 Jahre, 3 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+  2. Mundhygiene [Behandlung | Demo-dokumentiert]
+     Am selben Tag dokumentierte Mundhygiene; keine automatische Kostenübernahme behaupten.
+     Herkunft: Fiktiver Behandlungsbeleg.
+
+P179 | 16.09.2022 | BUTTON: Infekt
+  Alter: 29 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2022-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P180 | 22.09.2022 | BUTTON: Rückmeldung
+  Alter: 29 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2022-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+-------------------------------------------------------------------------------
+2023 | Mein Leben heute | 30. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P181 | 15.02.2023 | BUTTON: Grippe
+  Alter: 29 Jahre, 11 Monate | Halo: 5 Segmente (5 Einträge)
+  Zusammenhang: atemwege-2023-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Hausarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+  3. Influenza [Diagnose im Beleg | Demo-dokumentiert]
+     Influenza ausdrücklich im fiktiven ärztlichen Befund dokumentiert; nicht von Sovi aus
+     Beschwerden abgeleitet.
+     Herkunft: Fiktiver ärztlicher Befund.
+  4. Krankenstand [Verwaltung | Demo-dokumentiert]
+     Historische Arbeitsunfähigkeitsbestätigung laut fiktivem Beleg; Zeitraum im Detail, keine
+     automatische Meldung.
+     Herkunft: Fiktive Krankenstandsbestätigung.
+  5. Medikament [Medikationsnachweis | Demo-dokumentiert]
+     Fiktiver historischer Medikamenteneintrag. Präparat nicht spezifiziert; kein
+     Dosierschema, keine Erinnerungen, keine Empfehlung.
+     Herkunft: Fiktive Medikationsnotiz.
+
+P182 | 24.02.2023 | BUTTON: Rückmeldung
+  Alter: 29 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2023-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P183 | 17.04.2023 | BUTTON: Vorsorge
+  Alter: 30 Jahre, 1 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: vorsorge-2023
+  1. Anamnese [Formular | Demo-dokumentiert]
+     Fiktive patientenseitige Antworten; einschließlich ausdrücklich unbekannter Angaben. Kein
+     automatisch ausgefüllter ärztlicher Befund.
+     Herkunft: Fiktiver Anamnesebogen.
+  2. Untersuchung [Befund | Demo-dokumentiert]
+     Ärztlicher Untersuchungsbeleg; Werte und Bewertungen nicht von Sovi erfinden.
+     Herkunft: Fiktives ärztliches Befundblatt.
+  3. Blutabnahme [Untersuchung | Demo-dokumentiert]
+     Dokumentierte Probenentnahme; noch kein Laborergebnis.
+     Herkunft: Fiktiver Probenbeleg.
+
+P184 | 20.04.2023 | BUTTON: Labor
+  Alter: 30 Jahre, 1 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: vorsorge-2023
+  1. Laborbefund [Befund | Demo-dokumentiert]
+     Fiktiver Laboreingang mit Probenbezug. Keine künstlichen Laborwerte und keine
+     App-Auslegung.
+     Herkunft: Fiktiver Laborbefund.
+
+P185 | 24.04.2023 | BUTTON: Ergebnisse
+  Alter: 30 Jahre, 1 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: vorsorge-2023
+  1. Befundgespräch [Kontakt | Demo-dokumentiert]
+     Ärztliche Befundbesprechung laut fiktivem Beleg; dokumentierte nächste Schritte nur bei
+     tatsächlich vorhandenem Auftrag übernehmen.
+     Herkunft: Fiktiver Gesprächsbeleg.
+
+P186 | 15.06.2023 | BUTTON: Zahnarzt
+  Alter: 30 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P187 | 16.10.2023 | BUTTON: Impfung
+  Alter: 30 Jahre, 7 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: impfung-COVID-19, impfung-Influenza
+  1. COVID-19-Impfung [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: COVID-19. Vermerk: weiterer Eintrag. Produktname, Charge
+     und impfende Stelle sind in dieser Textliste nicht hinterlegt; nicht erraten. Keine
+     Aussage über vollständigen Impfschutz.
+     Herkunft: Fiktiver Impfbeleg.
+  2. Grippeimpfung [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Influenza. Vermerk: individuell dokumentierte Impfung; kein
+     automatischer nächster Impftermin. Produktname, Charge und impfende Stelle sind in dieser
+     Textliste nicht hinterlegt; nicht erraten. Keine Aussage über vollständigen Impfschutz.
+     Herkunft: Fiktiver Impfbeleg.
+
+-------------------------------------------------------------------------------
+2024 | Mein Leben heute | 31. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P188 | 16.02.2024 | BUTTON: Infekt
+  Alter: 30 Jahre, 11 Monate | Halo: 4 Segmente (4 Einträge)
+  Zusammenhang: atemwege-2024-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Hausarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+  3. Krankenstand [Verwaltung | Demo-dokumentiert]
+     Historische Arbeitsunfähigkeitsbestätigung laut fiktivem Beleg; Zeitraum im Detail, keine
+     automatische Meldung.
+     Herkunft: Fiktive Krankenstandsbestätigung.
+  4. Medikament [Medikationsnachweis | Demo-dokumentiert]
+     Fiktiver historischer Medikamenteneintrag. Präparat nicht spezifiziert; kein
+     Dosierschema, keine Erinnerungen, keine Empfehlung.
+     Herkunft: Fiktive Medikationsnotiz.
+
+P189 | 22.02.2024 | BUTTON: Rückmeldung
+  Alter: 30 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2024-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P190 | 12.06.2024 | BUTTON: Zahnarzt
+  Alter: 31 Jahre, 3 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+  2. Mundhygiene [Behandlung | Demo-dokumentiert]
+     Am selben Tag dokumentierte Mundhygiene; keine automatische Kostenübernahme behaupten.
+     Herkunft: Fiktiver Behandlungsbeleg.
+
+P191 | 11.09.2024 | BUTTON: Infekt
+  Alter: 31 Jahre, 5 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2024-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P192 | 17.09.2024 | BUTTON: Rückmeldung
+  Alter: 31 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2024-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P193 | 14.10.2024 | BUTTON: Impfung
+  Alter: 31 Jahre, 7 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-Influenza
+  1. Grippeimpfung [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Influenza. Vermerk: individuell dokumentierte Impfung; kein
+     automatischer nächster Impftermin. Produktname, Charge und impfende Stelle sind in dieser
+     Textliste nicht hinterlegt; nicht erraten. Keine Aussage über vollständigen Impfschutz.
+     Herkunft: Fiktiver Impfbeleg.
+
+-------------------------------------------------------------------------------
+2025 | Mein Leben heute | 32. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P194 | 10.02.2025 | BUTTON: Infekt
+  Alter: 31 Jahre, 10 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2025-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P195 | 16.02.2025 | BUTTON: Rückmeldung
+  Alter: 31 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2025-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P196 | 13.06.2025 | BUTTON: Zahnarzt
+  Alter: 32 Jahre, 3 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+
+P197 | 13.10.2025 | BUTTON: Impfung
+  Alter: 32 Jahre, 7 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: impfung-Influenza
+  1. Grippeimpfung [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Influenza. Vermerk: individuell dokumentierte Impfung; kein
+     automatischer nächster Impftermin. Produktname, Charge und impfende Stelle sind in dieser
+     Textliste nicht hinterlegt; nicht erraten. Keine Aussage über vollständigen Impfschutz.
+     Herkunft: Fiktiver Impfbeleg.
+
+P198 | 17.11.2025 | BUTTON: Augenarzt
+  Alter: 32 Jahre, 8 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: augen
+  1. Sehtest [Befund | Demo-dokumentiert]
+     Fiktiv dokumentierte Augenuntersuchung; Ergebnisse nur aus dem Befund anzeigen.
+     Herkunft: Fiktiver Augenbefund.
+  2. Brille [Verordnung | Demo-dokumentiert]
+     Dokumentierte Brillenverordnung ohne erfundene Dioptrienwerte.
+     Herkunft: Fiktive Brillenverordnung.
+
+-------------------------------------------------------------------------------
+2026 | Mein Leben heute | 33. Geburtstag in diesem Jahr
+-------------------------------------------------------------------------------
+
+P199 | 09.02.2026 | BUTTON: Infekt
+  Alter: 32 Jahre, 10 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2026-1
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+
+P200 | 15.02.2026 | BUTTON: Rückmeldung
+  Alter: 32 Jahre, 11 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2026-1
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P201 | 15.06.2026 | BUTTON: Zahnarzt
+  Alter: 33 Jahre, 3 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: zaehne
+  1. Kontrolle [Befund | Demo-dokumentiert]
+     Fiktiver tatsächlich erfolgter Zahnarztbesuch; Befund aus dem Beleg öffnen, keine
+     Bewertung durch Sovi.
+     Herkunft: Fiktiver Zahnarztbeleg.
+  2. Mundhygiene [Behandlung | Demo-dokumentiert]
+     Am selben Tag dokumentierte Mundhygiene; keine automatische Kostenübernahme behaupten.
+     Herkunft: Fiktiver Behandlungsbeleg.
+
+P202 | 20.08.2026 | BUTTON: Armbruch
+  Alter: 33 Jahre, 5 Monate | Halo: 5 Segmente (5 Einträge)
+  Zusammenhang: armbruch-2026
+  1. Unfall [Ereignis | Demo-Eigeneintrag]
+     Fiktiver Freizeitsturz; linker Unterarm. Keine Arbeitsunfall- oder
+     Versicherungsentscheidung daraus ableiten.
+     Herkunft: Fiktive Eigenangabe.
+  2. Röntgen [Befund | Demo-dokumentiert]
+     Im fiktiven ärztlichen Bericht steht ausdrücklich: Fraktur am linken Unterarm. Keine
+     Bilddiagnose durch Sovi.
+     Herkunft: Fiktiver Röntgenbefund.
+  3. Gips [Behandlung | Demo-dokumentiert]
+     Gipsversorgung in der fiktiven Ambulanz dokumentiert. Kein Behandlungsplan für andere
+     Personen.
+     Herkunft: Fiktiver Ambulanzbericht.
+  4. Medikament [Verordnung | Demo-dokumentiert]
+     Historische Verordnung DEMO-A, kein echtes Arzneimittel. Kein Wirkstoff oder Dosierung in
+     dieser Liste; nicht als echte Einnahmeanweisung verwenden.
+     Herkunft: Fiktiver Medikamentenplan.
+  5. Nachsorge [Information | Demo-dokumentiert]
+     Kontrolle am 24.08.2026 ausdrücklich im fiktiven Ambulanzbrief genannt. Details zum
+     damaligen Auftrag öffnen.
+     Herkunft: Fiktiver Ambulanzbrief.
+
+P203 | 21.08.2026 | BUTTON: Medikament
+  Alter: 33 Jahre, 5 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: armbruch-2026
+  1. Abgabe [Medikationsnachweis | Demo-dokumentiert]
+     Fiktiv dokumentierte Ausgabe von DEMO-A. Abgabe ist kein Einnahmenachweis.
+     Herkunft: Fiktiver Apothekenbeleg.
+  2. Einnahme [Eigenangabe | Demo-Eigeneintrag]
+     Ein einzelner historischer Einnahmeeintrag für DEMO-A wurde im Demo aktiv bestätigt. Kein
+     aktueller Einnahmeplan und keine Dosierungsangabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P204 | 24.08.2026 | BUTTON: Kontrolle
+  Alter: 33 Jahre, 5 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: armbruch-2026
+  1. Arm [Befund | Demo-dokumentiert]
+     Dokumentierte Nachkontrolle des linken Arms; keine eigene Bewertung des Heilungsverlaufs.
+     Herkunft: Fiktiver Kontrollbefund.
+  2. Gips [Behandlung | Demo-dokumentiert]
+     Gipskontrolle laut fiktiver Ambulanzdokumentation.
+     Herkunft: Fiktiver Kontrollbefund.
+  3. Krankenstand [Verwaltung | Demo-dokumentiert]
+     Fiktiver Nachweis für 21.08.–04.09.2026. Eine Arbeitgebermeldung wird nicht behauptet.
+     Herkunft: Fiktive Krankenstandsbestätigung.
+
+P205 | 27.08.2026 | BUTTON: Medikament
+  Alter: 33 Jahre, 5 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: armbruch-2026
+  1. Planende [Medikationsnachweis | Demo-dokumentiert]
+     Ende des im fiktiven historischen Beleg befristeten DEMO-A-Plans. Keine Aussage über
+     tatsächliche Einnahme; keine Absetzempfehlung.
+     Herkunft: Fiktiver Medikamentenplan.
+
+P206 | 03.09.2026 | BUTTON: Kontrolle
+  Alter: 33 Jahre, 5 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: armbruch-2026
+  1. Röntgen [Befund | Demo-dokumentiert]
+     Fiktiver Röntgen-Kontrollbericht als eigener, datierter Beleg.
+     Herkunft: Fiktiver Röntgenbefund.
+  2. Arm [Befund | Demo-dokumentiert]
+     Dokumentierte ärztliche Kontrolle. Nächster tatsächlich dokumentierter Termin:
+     01.10.2026.
+     Herkunft: Fiktiver Kontrollbefund.
+
+P207 | 04.09.2026 | BUTTON: Krankenstand
+  Alter: 33 Jahre, 5 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: armbruch-2026
+  1. Bestätigung [Verwaltung | Demo-dokumentiert]
+     Historisch dokumentiertes Ende des angegebenen Krankenstands; nicht allein durch Ablauf
+     des Kalenders als medizinisch gesund werten.
+     Herkunft: Fiktive Krankenstandsbestätigung.
+
+P208 | 14.09.2026 | BUTTON: Infekt
+  Alter: 33 Jahre, 6 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: atemwege-2026-2
+  1. Beschwerden [Eigenangabe | Demo-Eigeneintrag]
+     Fiktiv gemeldeter Husten/Schnupfen bzw. Krankheitsgefühl; keine Diagnose aus Symptomen
+     ableiten.
+     Herkunft: Fiktive Eigenangabe.
+  2. Arztbesuch [Kontakt | Demo-dokumentiert]
+     Dokumentierter Hausarztkontakt.
+     Herkunft: Fiktiver Ordinationsbeleg.
+  3. Krankenstand [Verwaltung | Demo-dokumentiert]
+     Historische Arbeitsunfähigkeitsbestätigung laut fiktivem Beleg; Zeitraum im Detail, keine
+     automatische Meldung.
+     Herkunft: Fiktive Krankenstandsbestätigung.
+
+P209 | 20.09.2026 | BUTTON: Rückmeldung
+  Alter: 33 Jahre, 6 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: atemwege-2026-2
+  1. Verlauf [Eigenangabe | Demo-Eigeneintrag]
+     Fiktive Rückmeldung: Beschwerden werden nicht mehr angegeben. Kein medizinischer
+     Heilungsnachweis; Abschluss nur durch diese aktive Angabe.
+     Herkunft: Fiktive Eigenangabe.
+
+P210 | 01.10.2026 | BUTTON: Kontrolle
+  Alter: 33 Jahre, 6 Monate | Halo: 4 Segmente (4 Einträge)
+  Zusammenhang: armbruch-2026
+  1. Gipsabnahme [Behandlung | Demo-dokumentiert]
+     Im fiktiven Beleg tatsächlich dokumentiert. Das Datum ist ein erfundener Einzelfall, kein
+     allgemeines Behandlungsintervall.
+     Herkunft: Fiktiver Kontrollbefund.
+  2. Arm [Befund | Demo-dokumentiert]
+     Ärztliche Nachuntersuchung laut Beleg; keine selbst berechnete Heilungsquote.
+     Herkunft: Fiktiver Kontrollbefund.
+  3. Physiotherapie [Verordnung | Demo-dokumentiert]
+     Sechs Einheiten ausdrücklich im fiktiven ärztlichen Auftrag. Anzahl und Beginn sind
+     Demo-Annahmen, keine automatische Behandlungsempfehlung.
+     Herkunft: Fiktive Therapieverordnung.
+  4. Kontrolltermin [Terminplanung | Demo-Terminbestätigung]
+     Folgetermin 19.11.2026 um 09:00 im Demo vereinbart.
+     Herkunft: Fiktive Terminbestätigung.
+
+P211 | 05.10.2026 | BUTTON: Physiotherapie
+  Alter: 33 Jahre, 6 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: armbruch-2026
+  1. Termine [Terminplanung | Demo-Terminbestätigung]
+     Sechs fiktiv vereinbarte Termine: 08.10., 15.10., 22.10., 29.10., 05.11. und 12.11.2026,
+     jeweils 16:00. Die geplanten Termine bleiben getrennt von der Teilnahme.
+     Herkunft: Fiktive Terminbestätigung.
+  2. Verordnung [Aufgabe | Demo-erledigt]
+     Weitergabe der Demo-Verordnung an die fiktive Praxis im Szenario bestätigt. In der realen
+     App nur nach tatsächlicher Freigabe und Übermittlung so anzeigen.
+     Herkunft: Fiktive Übermittlungsbestätigung.
+
+P212 | 08.10.2026 | BUTTON: Mein Tag
+  Alter: 33 Jahre, 6 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: impfung-Influenza, armbruch-2026
+  1. Grippeimpfung [Impfung | Verabreichung im Demo dokumentiert]
+     Schutz laut fiktivem Eintrag: Influenza. Vermerk: individuell dokumentierte Impfung; kein
+     automatischer nächster Impftermin. Produktname, Charge und impfende Stelle sind in dieser
+     Textliste nicht hinterlegt; nicht erraten. Keine Aussage über vollständigen Impfschutz.
+     Herkunft: Fiktiver Impfbeleg.
+  2. Sitzung [Behandlung | Demo-dokumentiert]
+     Einheit 1 von 6; Teilnahme im fiktiven Beleg bestätigt. Keine Aussage über prozentuale
+     Genesung.
+     Herkunft: Fiktiver Therapienachweis.
+  3. Übungen [Information | Demo-dokumentiert]
+     Vorhandene fiktive Übungsanleitung der behandelnden Fachperson öffnen; Sovi erstellt oder
+     verändert keine Übungen.
+     Herkunft: Fiktive Therapieunterlage.
+
+P213 | 15.10.2026 | BUTTON: Physiotherapie
+  Alter: 33 Jahre, 7 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: armbruch-2026
+  1. Sitzung [Behandlung | Demo-dokumentiert]
+     Einheit 2 von 6; Teilnahme im fiktiven Beleg bestätigt. Keine Aussage über prozentuale
+     Genesung.
+     Herkunft: Fiktiver Therapienachweis.
+
+P214 | 22.10.2026 | BUTTON: Physiotherapie
+  Alter: 33 Jahre, 7 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: armbruch-2026
+  1. Sitzung [Behandlung | Demo-dokumentiert]
+     Einheit 3 von 6; Teilnahme im fiktiven Beleg bestätigt. Keine Aussage über prozentuale
+     Genesung.
+     Herkunft: Fiktiver Therapienachweis.
+
+P215 | 29.10.2026 | BUTTON: Physiotherapie
+  Alter: 33 Jahre, 7 Monate | Halo: 2 Segmente (2 Einträge)
+  Zusammenhang: armbruch-2026
+  1. Sitzung [Behandlung | Demo-dokumentiert]
+     Einheit 4 von 6; Teilnahme im fiktiven Beleg bestätigt. Keine Aussage über prozentuale
+     Genesung.
+     Herkunft: Fiktiver Therapienachweis.
+  2. Rechnung [Verwaltung | Demo-dokumentiert]
+     Fiktive Rechnung für vier bereits dokumentierte Einheiten; kein Betrag und keine
+     Erstattungszusage erfunden.
+     Herkunft: Fiktive Honorarnote.
+
+P216 | 30.10.2026 | BUTTON: Rechnung
+  Alter: 33 Jahre, 7 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: armbruch-2026
+  1. Zahlung [Verwaltung | Demo-dokumentiert]
+     Fiktiver Zahlungsnachweis zur Honorarnote vom 29.10.2026; eigenständiges Ereignis am
+     Zahlungstag.
+     Herkunft: Fiktiver Zahlungsnachweis.
+
+P217 | 05.11.2026 | BUTTON: Mein Tag
+  Alter: 33 Jahre, 7 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: armbruch-2026, vorsorge-2026
+  Hinweis: Sovi steht hier. Demo-Snapshot: 05.11.2026, 09:00 Europe/Vienna.
+  1. Physiotherapie [Termin | Demo-geplant]
+     Einheit 5 von 6 um 16:00; in der Demo vereinbart, Teilnahme noch nicht erfasst. Öffnen
+     oder verstrichene Zeit bestätigen keine Teilnahme.
+     Herkunft: Fiktive Terminbestätigung.
+  2. Kostenerstattung [Aufgabe | Offen]
+     Entwurf zur Honorarnote vom 29.10. prüfen. Verordnung, Honorarnote und Zahlungsnachweis
+     sind verlinkt; Anspruch und zuständige Stelle bleiben zu prüfen. Nichts eingereicht.
+     Herkunft: Fiktiver Antragsentwurf.
+  3. Vorsorge [Aufgabe | Offen]
+     Anamnesebogen für den im Demo bestätigten Termin am 24.11. vorbereiten; Angaben prüfen,
+     unbekannte Antworten offen lassen.
+     Herkunft: Fiktiver Terminbezug + öffentliches Formular.
+
+===============================================================================
+AUSBLICK — NUR FIKTIVE PLANUNGEN, KEINE BEREITS ERFOLGTEN BEHANDLUNGEN
+===============================================================================
+
+P218 | 12.11.2026 | BUTTON: Physiotherapie
+  Alter: 33 Jahre, 8 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: armbruch-2026
+  1. Sitzung [Termin | Demo-geplant]
+     Einheit 6 von 6 um 16:00; nur Demo-Terminbestätigung. Teilnahme nicht erfasst.
+     Herkunft: Fiktive Terminbestätigung.
+
+P219 | 19.11.2026 | BUTTON: Kontrolle
+  Alter: 33 Jahre, 8 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: armbruch-2026
+  1. Arm [Termin | Demo-geplant]
+     Ärztliche Nachkontrolle um 09:00; kein Ergebnis vorwegnehmen.
+     Herkunft: Fiktive Terminbestätigung.
+
+P220 | 23.11.2026 | BUTTON: Vorbereitung
+  Alter: 33 Jahre, 8 Monate | Halo: 3 Segmente (3 Einträge)
+  Zusammenhang: vorsorge-2026
+  1. Anamnese [Aufgabe | Offen]
+     Vorbereitete Antworten vor dem Vorsorgetermin prüfen; gleicher Fragebogen wie am 05.11.,
+     keine zweite Kopie anlegen.
+     Herkunft: Fiktiver Terminbezug.
+  2. Medikamentenliste [Aufgabe | Offen]
+     Aktuelle Angaben selbst bestätigen, einschließlich keiner aktuellen Medikation. Den
+     abgeschlossenen DEMO-A-Plan nicht als laufend übernehmen.
+     Herkunft: Fiktiver Terminbezug.
+  3. Unterlagen [Aufgabe | Offen]
+     Vorbefunde, Versicherungsnachweis und konkrete Vorbereitungshinweise der Ordination
+     prüfen. Keine eigenen Nüchternheits- oder Absetzanweisungen erzeugen.
+     Herkunft: Fiktiver Terminbezug.
+
+P221 | 24.11.2026 | BUTTON: Vorsorge
+  Alter: 33 Jahre, 8 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: vorsorge-2026
+  1. Untersuchung [Termin | Demo-geplant]
+     Um 08:30 in einer fiktiven teilnehmenden Ordination vereinbart. Untersuchung und
+     Probenentnahme noch nicht durchgeführt; keine Ergebnisse vorhanden.
+     Herkunft: Fiktive Terminbestätigung.
+
+P222 | 01.12.2026 | BUTTON: Ergebnisse
+  Alter: 33 Jahre, 8 Monate | Halo: keiner (1 Eintrag)
+  Zusammenhang: vorsorge-2026
+  1. Befundgespräch [Termin | Demo-geplant]
+     Um 09:30 im Demo vereinbart. Nur Termin, kein vorweggenommener Befund oder
+     Therapieauftrag.
+     Herkunft: Fiktive Terminbestätigung.
+
+
+===============================================================================
+VERHALTEN DER SUB-BUTTONS — FÜR DIE IMPLEMENTIERUNG
+===============================================================================
+Befund / Messung / Information:
+  Inhalt und ursprüngliche Herkunft öffnen. „Gelesen“ ist optional und verändert
+  nicht die historische Behandlung, Diagnose oder Verabreichung.
+
+Impfung:
+  Datum, Schutzkomponenten, verabreichtes Präparat, Charge, impfende Stelle und
+  Beleg anzeigen, soweit vorhanden [Q3]. Fehlende Angaben als unbekannt belassen.
+  Ein importierter Impfeintrag ist keine Aufforderung, dieselbe Impfung zu wiederholen.
+  Ein Impftermin und eine dokumentierte Verabreichung dürfen nie gleichgesetzt werden.
+
+Medikament / Einnahme:
+  Verordnung, Ausgabe und Einnahmeeintrag getrennt anzeigen. Kein universelles
+  „erledigt“. Diese Textdatei enthält bewusst keine echten Dosierungen und daher
+  keine startfertigen Medikamentenalarme. Dafür wäre eine vollständige, ausdrücklich
+  bestätigte Anweisung erforderlich. Unklarheit erzeugt Rückfrage, kein Raten.
+
+Termin:
+  Datum, Uhrzeit, Ort soweit vorhanden, Herkunft der Terminbestätigung und
+  Teilnahmezustand öffnen. Nur eine explizite Angabe dokumentiert Teilnahme.
+  Abgelaufene Zeit ist weder „teilgenommen“ noch „versäumt“.
+
+Aufgabe / Antrag:
+  Entwurf bzw. Checkliste öffnen, Eingaben prüfen und explizit bestätigen.
+  „Exportiert“ ist nicht „eingereicht“, ein Entwurf ist nicht „bewilligt“.
+  Für den Kostenerstattungsfall wird keine konkrete Deckung oder Höhe versprochen.
+
+Verknüpfungen:
+  Gleiche Ursprungsdokumente können mehreren Einträgen als Quelle dienen.
+  Dieselbe Aufgabe (z.B. Anamnesebogen) wird bei einer Erinnerung verlinkt und nicht
+  als zweiter Auftrag dupliziert. Jeder konkrete historische Einnahmeeintrag bleibt
+  ein einzelner Datensatz. Medien, Quellen und Aktionen zählen nicht als Halo-Segmente.
+
+Keine automatisch eingefügten Standard-Ereignisse:
+  Fehlende Impfungen, fehlende Kinderuntersuchungen oder fehlende Arztberichte sind
+  unbekannte Informationen, kein Beweis einer Unterlassung. Die Jahreslisten sind
+  Demo-Daten, keine Agenda für alle Männer. Keine automatisch fällige Koloskopie,
+  kein routinemäßiger PSA-Auftrag und keine medizinischen Risiko-Scores im Demo.
+
+Abgrenzung zum offiziellen Use Case:
+  Die Aufgabenstellung erlaubt Unterstützung bei Formularen, Terminen und weiteren
+  Schritten sowie die Verwendung ausdrücklich dokumentierter Informationen.
+  Diagnosen, selbstständige Befundinterpretation und Therapie-/Medikamentenempfehlungen
+  sind ausgeschlossen [Q0]. Der Weg, die Halos, Sovi und alle Personenereignisse
+  sind unsere Produkt-/Demo-Ausgestaltung, keine Vorgabe der Veranstalter.
+
+===============================================================================
+ÖSTERREICHISCHE QUELLEN — KONTEXT, NICHT INDIVIDUELLE BEFUNDE
+Prüfdatum: 05.11.2026
+===============================================================================
+[Q0] Hochgeladene Aufgabenstellung „Use Case 1: SV KI-Lotse“, Seiten 1, 4, 6–7.
+     Seiten 1 und 4: praktische Hilfe, Termine und administrative Schritte.
+     Seiten 6–7: keine Diagnosen oder Therapieentscheidungen; dokumentierte
+     Informationen für die Navigation verwenden. Keine Krankengeschichte enthalten.
+
+[Q1] Öffentliches Gesundheitsportal Österreich: „Erkältung oder Influenza?“
+     Belegt die begriffliche Unterscheidung; keine Häufigkeit für unsere Demo-Person.
+     https://www.gesundheit.gv.at/krankheiten/atemwege/grippe/grippe-oder-grippaler-infekt.html
+
+[Q2] RIS: historische Mutter-Kind-Paß-Verordnung, BGBl. Nr. 663/1986.
+     Hintergrund der frühen Untersuchungsfenster; keine vollständige Rekonstruktion
+     sämtlicher späteren Änderungen. Alle individuellen Termine sind erfunden.
+     https://ris.bka.gv.at/Dokumente/BgblPdf/1986_663_0/1986_663_0.html
+
+[Q3] Öffentliches Gesundheitsportal: „Impfpass und e-Impfpass: Dokumentation von Impfungen“.
+     Verwendet für Dokumentationsfelder, nicht für ein rückwirkendes Impfschema.
+     https://www.gesundheit.gv.at/leben/gesundheitsvorsorge/impfungen/Impfdokumentation.html
+
+[Q4] ÖGK: Vorsorgeuntersuchung.
+     Präventiver Gesundheits-Check für Erwachsene ab 18. Die gewählten Demo-Termine
+     sind keine Empfehlung eines universellen Untersuchungsintervalls.
+     https://www.oegk.at/cdscontent/?contentid=10007.878943&portal=oegkportal
+
+[Q5] Öffentliches Gesundheitsportal: Ablauf der Vorsorgeuntersuchung.
+     Vorbereitung, Untersuchung und ärztliche Befundbesprechung als Arbeitsablauf.
+     https://www.gesundheit.gv.at/leben/gesundheitsvorsorge/vorsorgeuntersuchung/ablauf.html
+     Offizielle Formulare:
+     https://www.sozialversicherung.at/cdscontent/?contentid=10007.854314&portal=svportal
+
+[Q6] Bundesministerium für Bildung: Schulärztlicher Dienst.
+     Österreichischer Kontext der schulärztlichen Untersuchungen.
+     https://www.bmb.gv.at/Themen/schule/schulpraxis/schwerpunkte/gesund/schularzt.html
+
+[Q7] MedUni Wien: 60 Jahre österreichisches Neugeborenen-Screening, 24.06.2026.
+     Historischer Hintergrund seit 1966; heutige Testinhalte werden nicht auf 1993 übertragen.
+     https://www.meduniwien.ac.at/web/ueber-uns/news/2026/news-im-juni-2026/60-jahre-oesterreichisches-neugeborenen-screening/universitaet/
+
+[Q8] Sozialversicherung / e-card: e-card Statistiken.
+     Österreichweiter Rollout 2005. Der individuelle Erhalt im Juli ist frei erfunden.
+     https://www.chipkarte.at/cdscontent/?contentid=10007.727761&portal=ecardportal
+     Ergänzende Information zur Karte:
+     https://www.oesterreich.gv.at/de/themen/gesundheit/elektronisches-gesundheitssystem/ecard/ecard
+
+[Q9] Keine Quelle für die konkrete Armbruch-Behandlung:
+     Die Abfolge aus Gipsversorgung, Kontrollen und sechs Therapiesitzungen ist eine
+     ausdrücklich erfundene Geschichte. Sie ist kein allgemeines Frakturprotokoll,
+     keine ärztliche Empfehlung und keine Aussage über Kassenleistungen.
+
+ENDE DER TXT-DATEI

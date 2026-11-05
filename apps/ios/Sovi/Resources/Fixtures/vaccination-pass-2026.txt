@@ -1,0 +1,128 @@
+Seite 1
+Elektronischer Impfpass
+vom 15. Oktober 2026 um 09:29 Uhr | Version: 8
+Person: Testpatient (W) geb. 22. März 1987
+Sozialversicherungsnummer: 123456789
+e-Impfpass
+Einträge
+COVID-19
+3. Nov. 2025 4. Dez. 2022 9. Dez. 2021 8. Juli 2021 3. Juni 2021 Impfstoff: COMIRNATY LP.8.1 INJ30 10x6
+Ch.-Nr.: MT0705
+PZN: 6062367
+Impfsetting: Ordination
+Impfdatum: 3. November 2025
+Eingetragen am: 3. November 2025 um 14:02 Uhr
+Impfstoff: COMIRNATY COV19 BA4/5 10x6
+Ch.-Nr.: GH9722
+PZN: 5516866
+Impfdatum: 4. Dezember 2022 um 18:25 Uhr (UTC+1)
+Eingetragen am: 4. Dezember 2022 um 18:25 Uhr
+Impfstoff: PFIZER-BION COV19 KONZ30 1x6
+Ch.-Nr.: 31134TB
+PZN: 5424472
+Impfdatum: 9. Dezember 2021 um 09:29 Uhr (UTC+1)
+Eingetragen am: 9. Dezember 2021 um 09:32 Uhr
+Impfstoff: PFIZER-BION COV19 KONZ30 1x6
+Ch.-Nr.: FD6840
+PZN: 5424472
+Impfdatum: 8. Juli 2021 um 15:33 Uhr (UTC+2)
+Eingetragen am: 8. Juli 2021 um 16:37 Uhr
+Impfstoff: PFIZER-BION COV19 KONZ30 1x6
+Ch.-Nr.: FC2473
+PZN: 5424472
+Impfdatum: 3. Juni 2021 um 15:30 Uhr (UTC+2)
+Eingetragen am: 3. Juni 2021 um 23:19 Uhr
+Auffrischung Impfort: Heinestraße 11/12
+1020 Wien, Wien
+Med. verantwortl. Person: DR. HANNES 
+RIEDL
+DR. HANNES RIEDL
+Heinestraße 11/12
+1020 Wien, Wien
+Auffrischung Impfort: Bruno-Kreisky-Platz 1
+1220 Wien
+Med. verantwortl. Person: Dr. Philipp SA-
+BANAS
+Impfzentrum ACV
+Bruno-Kreisky-Platz 1
+1220 Wien
+Dosis 3 Impfort: Bruno-Kreisky-Platz 1
+1220 Wien
+Med. verantwortl. Person: Dr. Ferdinand 
+WALDENBERGER
+Covid19 - Impfzentrum ACV
+Bruno-Kreisky-Platz 1
+1220 Wien
+Dosis 2 Impfort: Theresiengasse 53-55/1/1
+1180 Wien, Wien
+Med. verantwortl. Person: Dr. Harald Heinz 
+Manfreda
+Dr. med. YVETTA ZAKARIAN
+Theresiengasse 53-55/1/1
+1180 Wien, Wien
+Dosis 1 Impfort: Theresiengasse 53-55/1/1
+1180 Wien, Wien
+Med. verantwortl. Person: Dr. Harald Heinz 
+Manfreda
+Dr. med. YVETTA ZAKARIAN
+Theresiengasse 53-55/1/1
+1180 Wien, Wien
+Influenza ('echte Grippe')
+3. Nov. 2025 6. Nov. 2024 22. Nov. 2023 Impfstoff: INFLUVAC TRI FSPR 0,5ML O.K.
+Ch.-Nr.: L34
+PZN: 6052771
+Impfsetting: Ordination
+Impfdatum: 3. November 2025
+Eingetragen am: 3. November 2025 um 14:03 Uhr
+Impfstoff: INFLUVAC TETRA FSPR0,5ML O.K
+Ch.-Nr.: J08
+PZN: 5534491
+Impfsetting: Arbeitsplatz/Betrieb
+Impfprogramm: Öffentliches Impfprogramm (ÖIP) Influenza
+Impfdatum: 6. November 2024 um 14:15 Uhr (UTC+1)
+Eingetragen am: 6. November 2024 um 14:16 Uhr
+Impfstoff: VAXIGRIP TETRA FSPR O.K
+Ch.-Nr.: X3E681V
+PZN: 4467858
+Impfsetting: Arbeitsplatz/Betrieb
+Impfdatum: 22. November 2023 um 14:13 Uhr (UTC+1)
+Eingetragen am: 22. November 2023 um 14:13 Uhr
+Auffrischung Impfort: Heinestraße 11/12
+1020 Wien, Wien
+Med. verantwortl. Person: DR. HANNES 
+RIEDL
+DR. HANNES RIEDL
+Heinestraße 11/12
+1020 Wien, Wien
+Auffrischung Impfort: St.-Veit-Gasse 68
+1130 Wien, 00
+Med. verantwortl. Person: Dr. Claudia Kap-
+pel
+Dr. Claudia Kappel
+St.-Veit-Gasse 68
+1130 Wien, 00
+Auffrischung Impfort: Triesterstraße 29/1/7
+2620 Neunkirchen, 00
+Med. verantwortl. Person: Dr. Claudia Kap-
+pel
+Dr. Claudia Kappel
+Triesterstraße 29/1/7
+2620 Neunkirchen, 00
+PDF-Erstellung Seite 1 von 2
+
+Seite 2
+Patient: Stefan Testpatient geboren am: 22. März 1987
+17. Nov. 2021 Impfstoff: VAXIGRIP TETRA FSPR 0,5ML
+Ch.-Nr.: V3H731V
+PZN: 4467841
+Impfsetting: Arbeitsplatz/Betrieb
+Impfdatum: 17. November 2021 um 13:43 Uhr (UTC+1)
+Eingetragen am: 17. November 2021 um 13:44 Uhr
+Dosis 1 Impfort: Thaliastraße 88
+1160 Wien, 00
+Med. verantwortl. Person: Dr. GEORG KU-
+BALEK
+Dr. GEORG KUBALEK
+Thaliastraße 88
+1160 Wien, 00
+PDF-Erstellung Seite 2 von 2

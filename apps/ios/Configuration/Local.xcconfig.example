@@ -1,0 +1,4 @@
+// Copy this file to Local.xcconfig for physical-device development.
+// Use your own Apple Developer team and a registered bundle identifier.
+DEVELOPMENT_TEAM = YOUR_TEAM_ID
+PRODUCT_BUNDLE_IDENTIFIER = at.yourorganisation.sovi

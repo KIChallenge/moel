@@ -1,0 +1,113 @@
+{
+  "fill-specializations": [
+    {
+      "value": {
+        "automatic-gradient": "srgb:0.00000,0.55686,0.36078,1.00000",
+        "orientation": {
+          "start": {
+            "x": 0.5,
+            "y": 0
+          },
+          "stop": {
+            "x": 0.5,
+            "y": 0.7
+          }
+        }
+      }
+    },
+    {
+      "appearance": "dark",
+      "value": {
+        "automatic-gradient": "srgb:0.00000,0.55686,0.36078,1.00000",
+        "orientation": {
+          "start": {
+            "x": 0.5,
+            "y": 0
+          },
+          "stop": {
+            "x": 0.5,
+            "y": 0.7
+          }
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "layers": [],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.5
+      }
+    },
+    {
+      "layers": [
+        {
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "solid": "srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            }
+          ],
+          "image-name": "mouth.svg",
+          "name": "mouth",
+          "position": {
+            "scale": 3,
+            "translation-in-points": [
+              17.5445256109399,
+              287.8313288089754
+            ]
+          }
+        },
+        {
+          "image-name": "left.svg",
+          "name": "left",
+          "position": {
+            "scale": 3,
+            "translation-in-points": [
+              -223.00015624999992,
+              -149.09375
+            ]
+          }
+        },
+        {
+          "image-name": "right.svg",
+          "name": "right",
+          "position": {
+            "scale": 3,
+            "translation-in-points": [
+              224.65015625,
+              -149.09375
+            ]
+          }
+        }
+      ],
+      "name": "Group",
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.5
+      }
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  }
+}

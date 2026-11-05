@@ -1,0 +1,11 @@
+SYNTHETISCHES DEMODOKUMENT A – keine medizinische Anweisung, keine echte Verordnung
+
+Fiktive Person: Alex Beispiel. Fiktive Entlassung: {{discharge}}. Alle Angaben dienen ausschließlich der Funktionsdemonstration.
+
+Vollständige fiktive Demo-Anweisung: Demo-Präparat A — kein echtes Arzneimittel. Je 1 Demo-Einheit um 08:00 und 20:00 vom {{start}} bis einschließlich {{end}}, Zeitzone {{timezone}}. Das sind genau sechs einzelne Demo-Vorkommnisse an drei Tagen. Außerhalb dieser sechs Vorkommnisse enthält diese Unterlage keine Anweisung.
+
+Fiktive Verordnung: sechs Einheiten Physiotherapie. Bitte die Organisation selbst übernehmen. Es wurde kein Termin vereinbart und keine Anfrage versandt.
+
+Bitte eine Nachkontrolle bei der behandelnden Stelle organisieren. Diese Demo-Unterlage nennt dafür weder einen vereinbarten Termin noch eine Frist.
+
+Dies ist ein frei erfundenes Beispiel. Es enthält keine Beurteilung medizinischer Befunde und begründet keine Versicherungsansprüche.

@@ -1,0 +1,43 @@
+# macOS and editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Xcode and Swift
+.build/
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcarchive
+*.ipa
+*.dSYM/
+*.xcresult/
+*.xccheckout
+*.xcscmblueprint
+.swiftpm/
+
+# Local credentials and signing
+.env
+.env.*
+!.env.example
+*.p8
+*.p12
+*.mobileprovision
+apps/ios/Configuration/Local.xcconfig
+apps/backend/sovi.local.php
+apps/backend/config.php
+
+# Future web tooling
+node_modules/
+.next/
+dist/
+coverage/
+
+# Generated QA artifacts
+artifacts/
+
+# Local medical source scans without documented synthetic provenance
+/marketing/assets/impfpass.png
+/marketing/assets/*.tiff

@@ -1,0 +1,37 @@
+# Apache 2.4. Install ONLY in the dedicated sovi-api directory, not public_html.
+# Required protections deliberately fail closed if a directive is unavailable.
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+AcceptPathInfo Off
+LimitRequestBody 32768
+
+# Only these two PHP entry points may be requested over HTTP. PHP can still
+# require config.php internally; this does not grant direct web access to it.
+<FilesMatch "^(?!(?:index|sovi)\.php$).+">
+    Require all denied
+</FilesMatch>
+
+RewriteEngine On
+
+# Reject unsupported methods reaching directory rules. OPTIONS supports CORS.
+# Apache handles TRACE earlier; disabling it requires host-level TraceEnable Off.
+RewriteCond %{REQUEST_METHOD} !^(GET|POST|OPTIONS)$
+RewriteRule ^ - [F,END]
+
+# Deny every other path, including nested tests/index.php, dotfiles, backups,
+# README, config.php and arbitrary uploaded files. Query parameters are retained.
+RewriteRule !^(?:index\.php|sovi\.php)?$ - [F,END]
+
+# Generic errors must not inherit a parent site's application error handler.
+ErrorDocument 403 "Forbidden"
+ErrorDocument 404 "Not found"
+ErrorDocument 413 "Request too large"
+
+<IfModule mod_headers.c>
+    Header always unset X-Powered-By
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "no-referrer"
+    Header always set Content-Security-Policy "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+    Header always set Cache-Control "no-store, private"
+</IfModule>

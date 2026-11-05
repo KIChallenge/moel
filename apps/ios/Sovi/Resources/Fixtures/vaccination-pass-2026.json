@@ -1,0 +1,197 @@
+{
+  "version": 1,
+  "documentDate": "15.10.2026, 09:29",
+  "documentVersion": "8",
+  "timeZone": "Europe/Vienna",
+  "entries": [
+    {
+      "id": "covid-2025",
+      "date": "2025-11-03",
+      "page": 1,
+      "quote": "Impfstoff: COMIRNATY LP.8.1 INJ30 10x6\nCh.-Nr.: MT0705\nPZN: 6062367\nImpfsetting: Ordination\nImpfdatum: 3. November 2025\nEingetragen am: 3. November 2025 um 14:02 Uhr",
+      "record": {
+        "disease": "COVID-19",
+        "hasDocumentedTime": false,
+        "administrationText": "3. November 2025",
+        "product": "COMIRNATY LP.8.1 INJ30 10x6",
+        "batch": "MT0705",
+        "productNumber": "6062367",
+        "doseLabel": "Auffrischung",
+        "location": "Heinestraße 11/12, 1020 Wien, Wien",
+        "responsiblePerson": "DR. HANNES RIEDL",
+        "facility": "DR. HANNES RIEDL",
+        "setting": "Ordination",
+        "program": null,
+        "recordedAtText": "3. November 2025 um 14:02 Uhr"
+      }
+    },
+    {
+      "id": "covid-2022",
+      "date": "2022-12-04T18:25:00+01:00",
+      "page": 1,
+      "quote": "Impfstoff: COMIRNATY COV19 BA4/5 10x6\nCh.-Nr.: GH9722\nPZN: 5516866\nImpfdatum: 4. Dezember 2022 um 18:25 Uhr (UTC+1)\nEingetragen am: 4. Dezember 2022 um 18:25 Uhr",
+      "record": {
+        "disease": "COVID-19",
+        "hasDocumentedTime": true,
+        "administrationText": "4. Dezember 2022 um 18:25 Uhr (UTC+1)",
+        "product": "COMIRNATY COV19 BA4/5 10x6",
+        "batch": "GH9722",
+        "productNumber": "5516866",
+        "doseLabel": "Auffrischung",
+        "location": "Bruno-Kreisky-Platz 1, 1220 Wien",
+        "responsiblePerson": "Dr. Philipp SABANAS",
+        "facility": "Impfzentrum ACV",
+        "setting": null,
+        "program": null,
+        "recordedAtText": "4. Dezember 2022 um 18:25 Uhr"
+      }
+    },
+    {
+      "id": "covid-2021-3",
+      "date": "2021-12-09T09:29:00+01:00",
+      "page": 1,
+      "quote": "Impfstoff: PFIZER-BION COV19 KONZ30 1x6\nCh.-Nr.: 31134TB\nPZN: 5424472\nImpfdatum: 9. Dezember 2021 um 09:29 Uhr (UTC+1)\nEingetragen am: 9. Dezember 2021 um 09:32 Uhr",
+      "record": {
+        "disease": "COVID-19",
+        "hasDocumentedTime": true,
+        "administrationText": "9. Dezember 2021 um 09:29 Uhr (UTC+1)",
+        "product": "PFIZER-BION COV19 KONZ30 1x6",
+        "batch": "31134TB",
+        "productNumber": "5424472",
+        "doseLabel": "Dosis 3",
+        "location": "Bruno-Kreisky-Platz 1, 1220 Wien",
+        "responsiblePerson": "Dr. Ferdinand WALDENBERGER",
+        "facility": "Covid19 - Impfzentrum ACV",
+        "setting": null,
+        "program": null,
+        "recordedAtText": "9. Dezember 2021 um 09:32 Uhr"
+      }
+    },
+    {
+      "id": "covid-2021-2",
+      "date": "2021-07-08T15:33:00+02:00",
+      "page": 1,
+      "quote": "Impfstoff: PFIZER-BION COV19 KONZ30 1x6\nCh.-Nr.: FD6840\nPZN: 5424472\nImpfdatum: 8. Juli 2021 um 15:33 Uhr (UTC+2)\nEingetragen am: 8. Juli 2021 um 16:37 Uhr",
+      "record": {
+        "disease": "COVID-19",
+        "hasDocumentedTime": true,
+        "administrationText": "8. Juli 2021 um 15:33 Uhr (UTC+2)",
+        "product": "PFIZER-BION COV19 KONZ30 1x6",
+        "batch": "FD6840",
+        "productNumber": "5424472",
+        "doseLabel": "Dosis 2",
+        "location": "Theresiengasse 53-55/1/1, 1180 Wien, Wien",
+        "responsiblePerson": "Dr. Harald Heinz Manfreda",
+        "facility": "Dr. med. YVETTA ZAKARIAN",
+        "setting": null,
+        "program": null,
+        "recordedAtText": "8. Juli 2021 um 16:37 Uhr"
+      }
+    },
+    {
+      "id": "covid-2021-1",
+      "date": "2021-06-03T15:30:00+02:00",
+      "page": 1,
+      "quote": "Impfstoff: PFIZER-BION COV19 KONZ30 1x6\nCh.-Nr.: FC2473\nPZN: 5424472\nImpfdatum: 3. Juni 2021 um 15:30 Uhr (UTC+2)\nEingetragen am: 3. Juni 2021 um 23:19 Uhr",
+      "record": {
+        "disease": "COVID-19",
+        "hasDocumentedTime": true,
+        "administrationText": "3. Juni 2021 um 15:30 Uhr (UTC+2)",
+        "product": "PFIZER-BION COV19 KONZ30 1x6",
+        "batch": "FC2473",
+        "productNumber": "5424472",
+        "doseLabel": "Dosis 1",
+        "location": "Theresiengasse 53-55/1/1, 1180 Wien, Wien",
+        "responsiblePerson": "Dr. Harald Heinz Manfreda",
+        "facility": "Dr. med. YVETTA ZAKARIAN",
+        "setting": null,
+        "program": null,
+        "recordedAtText": "3. Juni 2021 um 23:19 Uhr"
+      }
+    },
+    {
+      "id": "influenza-2025",
+      "date": "2025-11-03",
+      "page": 1,
+      "quote": "Impfstoff: INFLUVAC TRI FSPR 0,5ML O.K.\nCh.-Nr.: L34\nPZN: 6052771\nImpfsetting: Ordination\nImpfdatum: 3. November 2025\nEingetragen am: 3. November 2025 um 14:03 Uhr",
+      "record": {
+        "disease": "Influenza",
+        "hasDocumentedTime": false,
+        "administrationText": "3. November 2025",
+        "product": "INFLUVAC TRI FSPR 0,5ML O.K.",
+        "batch": "L34",
+        "productNumber": "6052771",
+        "doseLabel": "Auffrischung",
+        "location": "Heinestraße 11/12, 1020 Wien, Wien",
+        "responsiblePerson": "DR. HANNES RIEDL",
+        "facility": "DR. HANNES RIEDL",
+        "setting": "Ordination",
+        "program": null,
+        "recordedAtText": "3. November 2025 um 14:03 Uhr"
+      }
+    },
+    {
+      "id": "influenza-2024",
+      "date": "2024-11-06T14:15:00+01:00",
+      "page": 1,
+      "quote": "Impfstoff: INFLUVAC TETRA FSPR0,5ML O.K\nCh.-Nr.: J08\nPZN: 5534491\nImpfsetting: Arbeitsplatz/Betrieb\nImpfprogramm: Öffentliches Impfprogramm (ÖIP) Influenza\nImpfdatum: 6. November 2024 um 14:15 Uhr (UTC+1)\nEingetragen am: 6. November 2024 um 14:16 Uhr",
+      "record": {
+        "disease": "Influenza",
+        "hasDocumentedTime": true,
+        "administrationText": "6. November 2024 um 14:15 Uhr (UTC+1)",
+        "product": "INFLUVAC TETRA FSPR0,5ML O.K",
+        "batch": "J08",
+        "productNumber": "5534491",
+        "doseLabel": "Auffrischung",
+        "location": "St.-Veit-Gasse 68, 1130 Wien, 00",
+        "responsiblePerson": "Dr. Claudia Kappel",
+        "facility": "Dr. Claudia Kappel",
+        "setting": "Arbeitsplatz/Betrieb",
+        "program": "Öffentliches Impfprogramm (ÖIP) Influenza",
+        "recordedAtText": "6. November 2024 um 14:16 Uhr"
+      }
+    },
+    {
+      "id": "influenza-2023",
+      "date": "2023-11-22T14:13:00+01:00",
+      "page": 1,
+      "quote": "Impfstoff: VAXIGRIP TETRA FSPR O.K\nCh.-Nr.: X3E681V\nPZN: 4467858\nImpfsetting: Arbeitsplatz/Betrieb\nImpfdatum: 22. November 2023 um 14:13 Uhr (UTC+1)\nEingetragen am: 22. November 2023 um 14:13 Uhr",
+      "record": {
+        "disease": "Influenza",
+        "hasDocumentedTime": true,
+        "administrationText": "22. November 2023 um 14:13 Uhr (UTC+1)",
+        "product": "VAXIGRIP TETRA FSPR O.K",
+        "batch": "X3E681V",
+        "productNumber": "4467858",
+        "doseLabel": "Auffrischung",
+        "location": "Triesterstraße 29/1/7, 2620 Neunkirchen, 00",
+        "responsiblePerson": "Dr. Claudia Kappel",
+        "facility": "Dr. Claudia Kappel",
+        "setting": "Arbeitsplatz/Betrieb",
+        "program": null,
+        "recordedAtText": "22. November 2023 um 14:13 Uhr"
+      }
+    },
+    {
+      "id": "influenza-2021",
+      "date": "2021-11-17T13:43:00+01:00",
+      "page": 2,
+      "quote": "Impfstoff: VAXIGRIP TETRA FSPR 0,5ML\nCh.-Nr.: V3H731V\nPZN: 4467841\nImpfsetting: Arbeitsplatz/Betrieb\nImpfdatum: 17. November 2021 um 13:43 Uhr (UTC+1)\nEingetragen am: 17. November 2021 um 13:44 Uhr",
+      "record": {
+        "disease": "Influenza",
+        "hasDocumentedTime": true,
+        "administrationText": "17. November 2021 um 13:43 Uhr (UTC+1)",
+        "product": "VAXIGRIP TETRA FSPR 0,5ML",
+        "batch": "V3H731V",
+        "productNumber": "4467841",
+        "doseLabel": "Dosis 1",
+        "location": "Thaliastraße 88, 1160 Wien, 00",
+        "responsiblePerson": "Dr. GEORG KUBALEK",
+        "facility": "Dr. GEORG KUBALEK",
+        "setting": "Arbeitsplatz/Betrieb",
+        "program": null,
+        "recordedAtText": "17. November 2021 um 13:44 Uhr"
+      }
+    }
+  ]
+}
