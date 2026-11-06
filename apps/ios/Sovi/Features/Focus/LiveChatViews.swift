@@ -66,15 +66,74 @@ struct ChatBackgroundSheet: View {
     }
 }
 
+/// The conversation chooses a service; MapKit supplies the actual practices.
+@MainActor
+enum NearbyPracticeLookup {
+    static func results(for search: ChatNearbySearch, language: ChatLanguage) async throws -> [ChatProvider] {
+        let center: CLLocationCoordinate2D
+        switch search.area.source {
+        case "device_gps":
+            guard let point = search.area.coordinates else { return [] }
+            center = CLLocationCoordinate2D(latitude: point.latitude, longitude: point.longitude)
+        case "user_text":
+            guard let place = search.area.query, !place.isEmpty, place.count <= 160 else { return [] }
+            let areas = try await CLGeocoder().geocodeAddressString(place + ", Österreich")
+            guard let location = areas.first(where: { $0.isoCountryCode == "AT" })?.location else { return [] }
+            center = location.coordinate
+        default: return []
+        }
+        guard CLLocationCoordinate2DIsValid(center), search.query.count <= 75, !search.query.isEmpty else { return [] }
+        let origin = CLLocation(latitude: center.latitude, longitude: center.longitude)
+        for radius in [15_000.0, 45_000.0] {
+            try Task.checkCancellation()
+            let request = MKLocalSearch.Request()
+            request.naturalLanguageQuery = search.query
+            request.region = MKCoordinateRegion(center: center, latitudinalMeters: radius * 2, longitudinalMeters: radius * 2)
+            request.regionPriority = .required
+            request.resultTypes = .pointOfInterest
+            let result: MKLocalSearch.Response
+            do {
+                result = try await MKLocalSearch(request: request).start()
+            } catch let error as MKError where error.code == .placemarkNotFound { continue }
+            try Task.checkCancellation()
+            var seen = Set<String>()
+            let sorted = result.mapItems.compactMap { item -> (ChatProvider, Double)? in
+                guard let name = item.name, let point = item.placemark.location, item.placemark.isoCountryCode == "AT",
+                      let address = item.placemark.title, !address.isEmpty else { return nil }
+                let distance = point.distance(from: origin)
+                let id = name + "|" + address
+                guard distance <= radius, seen.insert(id).inserted else { return nil }
+                var directions = URLComponents(string: "https://maps.apple.com/")!
+                directions.queryItems = [URLQueryItem(name: "daddr", value: "\(point.coordinate.latitude),\(point.coordinate.longitude)")]
+                let url = directions.url!.absoluteString
+                let digits = item.phoneNumber?.filter { $0 == "+" || ($0.isASCII && $0.isNumber) }
+                let provider = ChatProvider(id: id, name: name, specialty: search.query, address: address,
+                    distance_km: search.area.source == "device_gps" ? distance / 1000 : nil, phone: digits, url: nil,
+                    map_url: url, insurance_verified: false, source_url: url, source_label: "Apple Maps",
+                    retrieved_at: Date().formatted(.iso8601), latitude: point.coordinate.latitude, longitude: point.coordinate.longitude)
+                return (provider, distance)
+            }.sorted { $0.1 < $1.1 }
+            if !sorted.isEmpty { return sorted.prefix(3).map(\.0) }
+        }
+        return []
+    }
+}
+
 struct LiveChatResultView: View {
     let result: LiveChatReply
+    let active: Bool
+    let looking: Bool
+    let mapNotice: String?
     let busy: Bool
     let send: (String) -> Void
     let openAnswer: () -> Void
     @State private var selectedProvider: String?
+    private var providers: [ChatProvider] { result.providers }
+
+    private var language: ChatLanguage { result.language.flatMap(ChatLanguage.init(rawValue:)) ?? .app }
 
     private var mappedProviders: [ChatProvider] {
-        result.providers.filter {
+        providers.filter {
             guard let lat = $0.latitude, let lon = $0.longitude else { return false }
             return lat.isFinite && lon.isFinite && (-90...90).contains(lat) && (-180...180).contains(lon)
         }
@@ -82,7 +141,7 @@ struct LiveChatResultView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            ForEach(result.choices) { choice in
+            ForEach(active ? result.choices : []) { choice in
                 Button { if choice.opens_composer == true { openAnswer() } else { send(choice.message) } } label: {
                     HStack { Text(choice.label); Spacer(); Image(systemName: "arrow.turn.down.right") }
                         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
@@ -91,6 +150,8 @@ struct LiveChatResultView: View {
                 .buttonStyle(SheetPrimaryButtonStyle(tone: choice.opens_composer == true ? .quiet : .blue))
                 .disabled(busy).accessibilityIdentifier("chat.\(choice.id)")
             }
+            if looking { ProgressView(language.text("Praxen werden gesucht …")) }
+            if let mapNotice { Text(mapNotice).font(.subheadline) }
             if !mappedProviders.isEmpty {
                 Map(initialPosition: .automatic, interactionModes: [.zoom], selection: $selectedProvider) {
                     ForEach(mappedProviders) { provider in
@@ -104,36 +165,48 @@ struct LiveChatResultView: View {
                 .accessibilityLabel("Karte der vorgeschlagenen Anlaufstellen")
                 .accessibilityIdentifier("chat.map")
             }
-            if result.providers.contains(where: { !$0.insurance_verified }) {
+            if providers.contains(where: { !$0.insurance_verified }) {
                 Text("Versicherungsvertrag und freie Termine nicht bestätigt").font(.caption).foregroundStyle(SoviTheme.secondary)
             }
-            ForEach(result.providers) { provider in
-                VStack(alignment: .leading, spacing: 10) {
-                    Text(provider.name).font(.headline)
-                    Text(provider.specialty).font(.subheadline)
-                    Text(provider.address).font(.subheadline)
-                    if let distance = provider.distance_km {
-                        Text("\(distance.formatted(.number.precision(.fractionLength(1)))) km Luftlinie")
-                            .font(.caption)
-                    }
-                    if let phone = provider.phone, let url = ChatDestination.allowedURL("tel:" + phone) {
-                        Link(destination: url) { Label("Anrufen", systemImage: "phone") }.frame(minHeight: 44)
-                    }
-                    if let url = ChatDestination.allowedURL(provider.map_url) {
-                        Link(destination: url) { Label("Wegbeschreibung", systemImage: "map") }.frame(minHeight: 44)
-                    }
-                    if let profile = provider.url, let url = ChatDestination.allowedURL(profile) {
-                        Link("Praxisprofil öffnen", destination: url).frame(minHeight: 44)
-                    }
+            if !providers.isEmpty {
+                ScrollView(.horizontal) {
+                    LazyHStack(alignment: .top, spacing: 12) {
+                        ForEach(providers) { provider in
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text(provider.name).font(.headline)
+                                Text(provider.specialty).font(.subheadline)
+                                Text(provider.address).font(.subheadline)
+                                if let distance = provider.distance_km {
+                                    Text("\(distance.formatted(.number.precision(.fractionLength(1)))) km Luftlinie")
+                                        .font(.caption)
+                                }
+                                if let phone = provider.phone, let url = ChatDestination.allowedURL("tel:" + phone) {
+                                    Link(destination: url) { Label("Anrufen", systemImage: "phone") }.frame(minHeight: 44)
+                                }
+                                if let url = ChatDestination.allowedURL(provider.map_url) {
+                                    Link(destination: url) { Label("Wegbeschreibung", systemImage: "map") }.frame(minHeight: 44)
+                                }
+                                if let profile = provider.url, let url = ChatDestination.allowedURL(profile) {
+                                    Link("Praxisprofil öffnen", destination: url).frame(minHeight: 44)
+                                }
+                            }
+                            .padding(18).frame(maxWidth: .infinity, alignment: .leading)
+                            .background(SoviTheme.softGreen.opacity(0.5), in: RoundedRectangle(cornerRadius: 20))
+                            .overlay(RoundedRectangle(cornerRadius: 20).stroke(selectedProvider == provider.id ? SoviTheme.accent : .clear, lineWidth: 2).allowsHitTesting(false))
+                            .accessibilityElement(children: .contain)
+                            .accessibilityIdentifier("chat.provider")
+                            .containerRelativeFrame(.horizontal) { width, _ in providers.count > 1 ? max(1, width - 30) : width }
+                            .id(provider.id)
+                        }
+                    }.scrollTargetLayout().padding(.bottom, 4)
                 }
-                .padding(18).frame(maxWidth: .infinity, alignment: .leading)
-                .background(SoviTheme.softGreen.opacity(0.5), in: RoundedRectangle(cornerRadius: 20))
-                .overlay(RoundedRectangle(cornerRadius: 20).stroke(selectedProvider == provider.id ? SoviTheme.accent : .clear, lineWidth: 2).allowsHitTesting(false))
-                .accessibilityElement(children: .contain)
-                .accessibilityIdentifier("chat.provider")
+                .scrollIndicators(providers.count > 1 ? .visible : .hidden)
+                .scrollTargetBehavior(.viewAligned)
+                .scrollPosition(id: $selectedProvider, anchor: .leading)
+                .accessibilityIdentifier("chat.providerCarousel")
             }
             ForEach(Array(result.actions.enumerated()), id: \.offset) { _, action in
-                if let url = action.safeURL {
+                if let url = action.safeURL, !(action.type == "map_search" && !providers.isEmpty) {
                     Link(destination: url) {
                         HStack { Text(action.label); Spacer(); Image(systemName: url.scheme == "tel" ? "phone" : "arrow.up.right") }
                             .padding(16).frame(minHeight: 44)
@@ -141,7 +214,7 @@ struct LiveChatResultView: View {
                     }
                 }
             }
-            if result.status != "needs_clarification", !result.sources.isEmpty || !result.providers.isEmpty {
+            if result.status != "needs_clarification", !result.sources.isEmpty || !providers.isEmpty {
                 DisclosureGroup("Quellen") {
                     ForEach(providerSources) { provider in
                         if let url = ChatDestination.allowedURL(provider.source_url) {
@@ -162,6 +235,6 @@ struct LiveChatResultView: View {
 
     private var providerSources: [ChatProvider] {
         var seen = Set<String>()
-        return result.providers.filter { seen.insert($0.source_url).inserted }
+        return providers.filter { seen.insert($0.source_url).inserted }
     }
 }

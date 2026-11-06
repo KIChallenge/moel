@@ -29,6 +29,8 @@ struct HomeView: View {
     @Environment(LiveChatController.self) private var chat
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
+    @State private var reportTurn: PendingReportTurn?
+    @State private var reportTask: Task<Void, Never>?
     @State private var isFocused = false
     @State private var restoredFocusTurns = 0
     @State private var contextID: UUID?
@@ -55,7 +57,7 @@ struct HomeView: View {
                 .allowsHitTesting(!isFocused)
                 .accessibilityHidden(isFocused || showsWelcome)
             if isFocused {
-                SoviFocusView(contextID: $contextID, response: response, restoredTurnCount: restoredFocusTurns, language: conversationLanguage,
+                SoviFocusView(contextID: $contextID, response: response, reportTurn: reportTurn, restoredTurnCount: restoredFocusTurns, language: conversationLanguage,
                               close: closeFocus, send: send, act: handleAction,
                               attach: { showsAttachmentPicker = true }, attachSample: attachExample,
                               importingDocument: attachmentTask != nil, cancelImport: { attachmentTask?.cancel() },
@@ -118,9 +120,10 @@ struct HomeView: View {
         }
         .onChange(of: store.state) { old, new in
             if old.fixtureEpoch != new.fixtureEpoch {
+                reportTask?.cancel(); reportTask = nil; reportTurn = nil
                 attachmentTask?.cancel()
                 requestedPathEntryID = nil
-                chat.setBackground([]); chat.reset()
+                chat.setBackground([]); chat.cancel()
                 device.stopAudio()
                 device.cleanupExports()
                 isFocused = false
@@ -160,7 +163,7 @@ struct HomeView: View {
             }
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .background { device.stopAudio(); chat.cancel() }
+            if phase == .background { device.stopAudio() }
         }
     }
 
@@ -168,7 +171,8 @@ struct HomeView: View {
         if !isFocused { restoredFocusTurns = store.state.conversation.count }
         conversationLanguage = documentLanguage
         if invitation == nil, id != nil, store.state.discussedDocumentID != nil { try? store.perform(.leaveDocumentDiscussion) }
-        if let id, let node = store.node(id: id) {
+        let resume = invitation != nil && (!store.state.conversation.isEmpty || !chat.messages.isEmpty)
+        if !resume, let id, let node = store.node(id: id) {
             let entry = DemoCompanionService.entryResponse(for: node, state: store.state, now: store.now, language: conversationLanguage)
             if entry.attendanceQuestionID != nil {
                 beginCheckIn(entry)
@@ -184,8 +188,8 @@ struct HomeView: View {
             }
         }
         guard !isFocused else { contextID = id; return }
-        let resumesLocal = invitation != nil && !store.state.conversation.isEmpty
-            && (store.state.focusContextID != nil || store.state.discussedDocumentID != nil || showsLocalCaseResponse || !chat.enabled || chat.displayMessages.isEmpty)
+        let resumesLocal = invitation != nil && !store.state.conversation.isEmpty &&
+            (!chat.enabled || chat.messages.isEmpty || (store.state.conversation.last?.date ?? .distantPast) >= (chat.dates.last ?? .distantPast))
         let resumesOnline = invitation != nil && !resumesLocal && chat.enabled && (!chat.displayMessages.isEmpty || chat.error != nil)
         showsLocalCaseResponse = resumesLocal && chat.enabled
         let resolved = resumesOnline ? nil : resumesLocal ? store.state.focusContextID : invitation == nil ? (id ?? store.state.focusContextID) : id
@@ -227,7 +231,6 @@ struct HomeView: View {
     private func closeFocus() {
         device.stopAudio()
         attachmentTask?.cancel()
-        chat.cancel()
         withAnimation(reduceMotion ? .easeInOut(duration: 0.15) : .spring(duration: 0.45, bounce: 0.05)) { isFocused = false }
     }
 
@@ -282,20 +285,51 @@ struct HomeView: View {
 
     private func documentSheet(_ id: UUID?) -> some View {
         DocumentReviewSheet(initialDocumentID: id, language: documentLanguage, onDiscuss: { document in
-            let response = DocumentDiscussion.summary(document, language: documentLanguage, state: store.state)
-            recordDocumentReply(.init(documentID: document.id, response: response), question: nil)
+            let language = documentLanguage
+            let response = DocumentDiscussion.summary(document, language: language, state: store.state)
+            var reply = DocumentDiscussion.Reply(documentID: document.id, response: response)
+            if case .report(let report) = DocumentDiscussion.read(document, language: language, calendar: store.state.pathCalendar) {
+                reply.explanationSources = DocumentDiscussion.explanationSources(report, people: store.state.formPeople ?? [])
+            }
+            let question = reply.explanationSources.isEmpty ? nil : language.text("Erklär mir diesen Befund bitte einfach.")
+            recordDocumentReply(reply, question: question)
         })
     }
 
     private func recordDocumentReply(_ reply: DocumentDiscussion.Reply, question: String?) {
+        guard let question, let documentID = reply.documentID, !reply.explanationSources.isEmpty, chat.enabled, reportTurn == nil else {
+            saveDocumentReply(reply, question: question); return
+        }
+        let pending = PendingReportTurn(user: ConversationTurn(role: "user", text: question, date: store.now))
+        let sources = reply.explanationSources
+        let language = conversationLanguage
+        do { try store.perform(.beginReportQuestion(documentID, pending.user)) }
+        catch { store.errorMessage = error.localizedDescription; return }
+        showsLocalCaseResponse = true; contextID = nil; lastMessage = nil; reportTurn = pending
+        reportTask = Task { @MainActor in
+            var result = reply
+            do {
+                let explanation = try await chat.explainReport(sources.map(\.text), language: language)
+                result.response.text = explanation.sentences.map(\.text).joined(separator: " ")
+                result.response.evidence = explanation.sentences.map { sources[$0.passage].evidence }
+            } catch {
+                guard !Task.isCancelled else { return }
+                result.response.text = language.text("Die Erklärung ist gerade nicht erreichbar.") + "\n" + sources[0].text
+            }
+            guard !Task.isCancelled, reportTurn?.user.id == pending.user.id,
+                  reply.documentID.map({ store.document(id: $0) != nil }) == true else { return }
+            saveDocumentReply(result, question: nil, pending: pending)
+            reportTurn = nil; reportTask = nil
+        }
+    }
+
+    private func saveDocumentReply(_ reply: DocumentDiscussion.Reply, question: String?, pending: PendingReportTurn? = nil) {
         do {
             let eventIDs = reply.response.entryIDs.isEmpty ? nil : reply.response.entryIDs
-            try store.perform(.discussDocument(documentID: reply.documentID, question: question, reply: reply.response.text, eventIDs: eventIDs))
-            chat.cancel()
-            showsLocalCaseResponse = true
-            contextID = nil
-            lastMessage = nil
-            response = reply.response
+            try store.perform(.discussDocument(documentID: reply.documentID, question: question, reply: reply.response.text,
+                                              eventIDs: eventIDs, questionID: pending?.user.id, replyID: pending?.replyID))
+            chat.cancel(); showsLocalCaseResponse = true
+            contextID = nil; lastMessage = nil; response = reply.response
         } catch { store.errorMessage = error.localizedDescription }
     }
 

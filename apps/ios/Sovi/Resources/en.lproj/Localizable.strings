@@ -998,3 +998,9 @@
 "Sovi schreibt …" = "Sovi is typing…";
 "%lld von %lld erledigt" = "%lld of %lld completed";
 "Danke! Jetzt können wir loslegen." = "Thanks! We’re ready to get started.";
+"OpenAI verarbeitet deine Chatnachrichten und freigegebenen Einträge. Wenn du einen Befund erklären lässt, verarbeitet OpenAI die ausgewählten Befundstellen. Die Datei bleibt auf deinem Gerät. Für die Suche in deiner Nähe verwendet Sovi Apple Karten." = "OpenAI processes your chat messages and shared entries. When you ask about a report, OpenAI receives selected findings. The file stays on your device. Sovi uses Apple Maps for nearby searches.";
+"Die Erklärung ist gerade nicht erreichbar." = "I can’t get an explanation right now.";
+"Praxen werden gesucht …" = "Looking for practices…";
+"Ich habe in dieser Gegend keine passende Praxis gefunden." = "I couldn’t find a matching practice in this area.";
+"Die Kartensuche ist gerade nicht erreichbar." = "The map search is unavailable right now.";
+"Erklär mir diesen Befund bitte einfach." = "Please explain this report in simple terms.";

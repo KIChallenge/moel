@@ -1,5 +1,18 @@
 import SwiftUI
 
+struct PendingReportTurn {
+    let user: ConversationTurn
+    let replyID = UUID()
+}
+
+private struct FocusTranscriptRow: Identifiable {
+    enum Content { case local(ConversationTurn), cloud(Int, ChatMessage), current(String), writing }
+    let key: ChatTurnKey
+    let date: Date
+    let content: Content
+    var id: String { key.id }
+}
+
 struct SoviFocusView: View {
     @Environment(SoviStore.self) private var store
     @Environment(DeviceServices.self) private var device
@@ -9,6 +22,7 @@ struct SoviFocusView: View {
     @Environment(\.scenePhase) private var scenePhase
     @Binding var contextID: UUID?
     let response: CompanionResponse
+    let reportTurn: PendingReportTurn?
     let restoredTurnCount: Int
     var language: ChatLanguage = .app
     let close: () -> Void
@@ -33,7 +47,6 @@ struct SoviFocusView: View {
     @State private var scrollRequest = 0
     @State private var openedEpoch: Date?
     @State private var composerSaveTask: Task<Void, Never>?
-    @State private var showsAttachments = false
     @State private var delivery = ChatDelivery()
     @State private var welcomePhoto: ConversationTurn?
     @State private var showsWelcomeTerms = false
@@ -41,38 +54,58 @@ struct SoviFocusView: View {
 
     private var online: Bool { chat.enabled && contextID == nil && !localCaseResponse }
     private var showStarters: Bool { online ? chat.displayMessages.isEmpty : store.state.conversation.isEmpty }
-    private var currentReply: LiveChatReply? { online && replyVisible ? chat.currentResult : nil }
     private func cloudID(_ index: Int) -> String { "cloud-\(chat.transcriptID)-\(index)" }
     private var currentID: String {
         online ? "hello-\(chat.transcriptID)" : "current-\(contextID?.uuidString ?? "")-\(response.text)"
     }
+    private var guidedTurns: [ConversationTurn] {
+        let main = store.state.conversation
+        return (store.state.demoScenarios ?? [:]).values.flatMap(\.history).filter { turn in
+            !main.contains { $0.role == turn.role && $0.text == turn.text && abs($0.date.timeIntervalSince(turn.date)) < 2 }
+        }
+    }
+
+    private var rows: [FocusTranscriptRow] {
+        var rows = (store.state.conversation + guidedTurns).map { FocusTranscriptRow(key: ChatTurnKey($0), date: $0.date, content: .local($0)) }
+        let cloud = online ? chat.displayMessages : chat.messages
+        rows += cloud.enumerated().map { index, message in
+            FocusTranscriptRow(key: ChatTurnKey(cloudID(index), isUser: message.role == "user"),
+                               date: chat.dates.indices.contains(index) ? chat.dates[index] : .distantFuture, content: .cloud(index, message))
+        }
+        rows.sort { $0.date < $1.date }
+        if let reportTurn { rows.append(.init(key: ChatTurnKey(reportTurn.replyID.uuidString, isUser: false), date: .distantFuture, content: .writing)) }
+        else if online && chat.busy {
+            rows.append(.init(key: ChatTurnKey(cloudID(cloud.count), isUser: false), date: .distantFuture, content: .writing))
+        } else if online ? cloud.isEmpty : (store.state.conversation.last?.role != "assistant" || store.state.conversation.last?.text != response.text) {
+            let welcome = online ? String(localized: "Wie kann ich dir helfen?") : response.text
+            rows.append(.init(key: ChatTurnKey(currentID, isUser: false), date: .distantFuture, content: .current(welcome)))
+        }
+        return rows
+    }
     private var timeline: ChatTimeline {
-        if online {
-            var turns = chat.displayMessages.enumerated().map { ChatTurnKey(cloudID($0.offset), isUser: $0.element.role == "user") }
-            if turns.isEmpty { turns.append(ChatTurnKey(currentID, isUser: false)) }
-            return ChatTimeline(turns: turns, awaitingNetwork: chat.busy, immediate: chat.currentResult?.status == "professional_guidance")
+        let keys = rows.compactMap { row -> ChatTurnKey? in
+            if case .writing = row.content { return nil }
+            return row.key
         }
-        var turns = store.state.conversation.map(ChatTurnKey.init)
-        if store.state.conversation.last?.role != "assistant" || store.state.conversation.last?.text != response.text {
-            turns.append(ChatTurnKey(currentID, isUser: false))
-        }
-        return ChatTimeline(turns: turns)
+        return ChatTimeline(turns: keys, awaitingNetwork: (online && chat.busy) || reportTurn != nil,
+                            immediate: online && chat.currentResult?.status == "professional_guidance")
     }
     private var writingID: String? {
+        if let reportTurn { return delivery.visible.contains(reportTurn.user.id.uuidString) ? reportTurn.replyID.uuidString : nil }
         if online && chat.busy {
             let nextIndex = chat.displayMessages.count
             return nextIndex > 0 && delivery.visible.contains(cloudID(nextIndex - 1)) ? cloudID(nextIndex) : nil
         }
         return delivery.writingID(timeline)
     }
-    private var cloudRows: [ChatMessage] {
-        // Reserve the incoming row while the request runs. The real response fills that same row.
-        chat.displayMessages + (chat.busy ? [ChatMessage(role: "assistant", content: "")] : [])
-    }
     private var awaitingReply: Bool { delivery.expanding != nil || delivery.isTyping(timeline) }
     private var replyVisible: Bool {
-        guard !awaitingReply, let last = timeline.turns.last, !last.isUser else { return false }
-        return delivery.visible.contains(last.id)
+        guard !awaitingReply else { return false }
+        if online { return delivery.visible.contains(chat.messages.isEmpty ? currentID : cloudID(chat.messages.count - 1)) }
+        if let last = store.state.conversation.last, last.role == "assistant", last.text == response.text {
+            return delivery.visible.contains(last.id.uuidString)
+        }
+        return delivery.visible.contains(currentID)
     }
     private var attendanceQuestionID: UUID? {
         guard !online, let id = response.attendanceQuestionID, contextID == id, store.state.focusContextID == id,
@@ -127,8 +160,7 @@ struct SoviFocusView: View {
             Divider()
             ScrollViewReader { reader in
                 ScrollView {
-                    // Bounded transcripts use real row bounds, so a new reply is a
-                    // stable scroll target even when buttons or the keyboard resize.
+                    // Keep a stable row for each message as answers and the keyboard resize.
                     VStack(alignment: .leading, spacing: 16) {
                         welcomeHistory
                         conversation
@@ -138,7 +170,7 @@ struct SoviFocusView: View {
                         ForEach(replyVisible ? localEntryIDs : [], id: \.self) { id in
                             CompanionEntryCard(nodeID: id, primary: id == localEntryIDs.first, act: actFromChat)
                         }
-                        if online { onlineState; attachmentHistory }
+                        if online { onlineState }
                         else if replyVisible, let action = standaloneAction {
                             Button { persistComposer(); keyboardOpen = false; act(action) } label: {
                                 HStack { Text(action.title(in: language)).font(.headline); Spacer(); Image(systemName: "arrow.up.right") }
@@ -198,7 +230,7 @@ struct SoviFocusView: View {
         .onAppear {
             let local = store.state.conversation.prefix(restoredTurnCount).map(ChatTurnKey.init)
             let cloud = chat.messages.enumerated().map { ChatTurnKey(cloudID($0.offset), isUser: $0.element.role == "user") }
-            delivery.restore(local + cloud)
+            delivery.restore(local + cloud + guidedTurns.map(ChatTurnKey.init))
             openedEpoch = store.state.fixtureEpoch; text = store.state.composerDraft
         }
         .task(id: timeline) {
@@ -246,9 +278,7 @@ struct SoviFocusView: View {
                     Button("Hintergrund teilen", systemImage: "text.badge.plus") {
                         persistComposer(); keyboardOpen = false; shareBackground()
                     }
-                    Button("Neues Gespräch", systemImage: "square.and.pencil") {
-                        chat.reset(); followsReplies = true; scrollRequest += 1
-                    }
+
                 }
                 if device.isSpeaking { Button("Vorlesen stoppen", systemImage: "stop.circle") { device.stopAudio() } }
             } label: {
@@ -277,46 +307,21 @@ struct SoviFocusView: View {
     }
 
     @ViewBuilder private var conversation: some View {
-        if online && !chat.displayMessages.isEmpty {
-            ForEach(Array(cloudRows.enumerated()), id: \.offset) { index, message in
-                if delivery.displays(cloudID(index), writingID: writingID) {
-                    bubble(message.content, user: message.role == "user", id: cloudID(index), language: chat.currentResult?.language ?? language.rawValue,
-                           identifier: message.role == "assistant" && index == chat.messages.count - 1 ? "focus.response" : "")
-                }
-            }
-        } else if !online && !store.state.conversation.isEmpty {
-            let receiptIDs = Set(DocumentDiscussion.attachments(in: store.state).map { $0.reply.id })
-            ForEach(store.state.conversation.filter { delivery.displays($0.id.uuidString, writingID: writingID) }) { turn in
-                storedBubble(turn, current: turn.role == "assistant" && turn.id == store.state.conversation.last?.id && turn.text == response.text,
-                             showSource: !receiptIDs.contains(turn.id))
-            }
-            if (store.state.conversation.last?.role != "assistant" || store.state.conversation.last?.text != response.text), delivery.displays(currentID, writingID: writingID) {
-                bubble(response.text, user: false, id: currentID, identifier: "focus.response")
-            }
-        } else if delivery.displays(currentID, writingID: writingID) {
-            bubble(online ? String(localized: "Wie kann ich dir helfen?") : response.text, user: false,
-                   id: currentID, identifier: "focus.response")
-        }
-    }
-
-    @ViewBuilder private var attachmentHistory: some View {
-        let receipts = DocumentDiscussion.attachments(in: store.state)
-        if !receipts.isEmpty {
-            Button { showsAttachments.toggle() } label: {
-                HStack {
-                    Label("Anhänge in diesem Chat", systemImage: "paperclip")
-                    Spacer()
-                    Image(systemName: showsAttachments ? "chevron.up" : "chevron.down").accessibilityHidden(true)
-                }
-                .frame(minHeight: 44).contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityValue(Text(LocalizedStringKey(showsAttachments ? "Ausgeklappt" : "Eingeklappt")))
-            .accessibilityIdentifier("focus.attachments")
-            if showsAttachments {
-                ForEach(receipts) { receipt in
-                    storedBubble(receipt.attachment)
-                    storedBubble(receipt.reply, showSource: false)
+        ForEach(rows) { row in
+            if delivery.displays(row.id, writingID: writingID) {
+                switch row.content {
+                case .local(let turn):
+                    storedBubble(turn, current: !online && turn.role == "assistant" && turn.id == store.state.conversation.last?.id && turn.text == response.text)
+                case .cloud(let index, let message):
+                    bubble(message.content, user: message.role == "user", id: row.id, language: chat.replies[index]?.language ?? language.rawValue,
+                           identifier: online && message.role == "assistant" && index == chat.messages.count - 1 ? "focus.response" : "")
+                    if let reply = chat.replies[index], delivery.visible.contains(row.id), delivery.expanding != row.id {
+                        let current = online && index == chat.messages.count - 1 && chat.currentResult != nil
+                        LiveChatResultView(result: reply, active: current, looking: chat.lookingUp.contains(index),
+                            mapNotice: chat.lookupNotices[index], busy: chat.busy, send: sendMessage, openAnswer: { keyboardOpen = true })
+                    }
+                case .current(let content): bubble(content, user: false, id: row.id, identifier: "focus.response")
+                case .writing: bubble("", user: false, id: row.id)
                 }
             }
         }
@@ -408,9 +413,7 @@ struct SoviFocusView: View {
                 .background(SoviTheme.softGreen, in: RoundedRectangle(cornerRadius: 18))
         }
         if replyVisible, let notice = chat.locationNotice { Text(notice).font(.caption) }
-        if let result = currentReply {
-            LiveChatResultView(result: result, busy: chat.busy, send: sendMessage, openAnswer: { keyboardOpen = true })
-        }
+
     }
 
     private var starters: some View {

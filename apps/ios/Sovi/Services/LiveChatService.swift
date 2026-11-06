@@ -14,7 +14,7 @@ struct ChatLocation: Codable, Equatable, Sendable {
     var accuracy_m: Double
 }
 
-struct ChatChoice: Decodable, Identifiable, Sendable {
+struct ChatChoice: Codable, Identifiable, Sendable {
     var id: String
     var label: String
     var message: String
@@ -28,18 +28,19 @@ struct ChatBackground: Codable, Identifiable, Equatable, Sendable {
     var is_synthetic: Bool
 }
 
-struct ChatLink: Decodable, Sendable {
+struct ChatLink: Codable, Sendable {
     var label: String
     var url: String
+    var type: String? = nil
     var safeURL: URL? { ChatDestination.allowedURL(url) }
 }
 
-struct ChatSource: Decodable, Sendable {
+struct ChatSource: Codable, Sendable {
     var title: String
     var url: String
 }
 
-struct ChatProvider: Decodable, Identifiable, Sendable {
+struct ChatProvider: Codable, Identifiable, Sendable {
     var id: String
     var name: String
     var specialty: String
@@ -67,7 +68,7 @@ enum ChatDestination {
     }
 }
 
-struct LiveChatReply: Decodable, Sendable {
+struct LiveChatReply: Codable, Sendable {
     var version: Int
     var status: String
     var reply: String
@@ -77,6 +78,32 @@ struct LiveChatReply: Decodable, Sendable {
     var notice: String
     var sources: [ChatSource]
     var language: String?
+    var nearby_search: ChatNearbySearch? = nil
+    var offered_service: String? = nil
+    var location_for_service: String? = nil
+}
+
+struct ChatNearbySearch: Codable, Equatable, Sendable {
+    struct Area: Codable, Equatable, Sendable {
+        var source: String
+        var query: String?
+        var coordinates: ChatLocation?
+    }
+    var service: String
+    var query: String
+    var area: Area
+}
+
+private struct LocalChatArchive: Codable {
+    var messages: [ChatMessage]
+    var replies: [Int: LiveChatReply]
+    var dates: [Date]?
+    var notices: [Int: String]?
+}
+
+struct ReportExplanation: Decodable {
+    struct Sentence: Decodable { let text: String; let passage: Int }
+    let sentences: [Sentence]
 }
 
 enum LiveChatError: LocalizedError {
@@ -112,7 +139,7 @@ struct LiveChatAPI: Sendable {
         self.session = session ?? URLSession(configuration: configuration, delegate: ChatRedirectGuard(), delegateQueue: nil)
     }
 
-    static func request(messages: [ChatMessage], location: ChatLocation?, token: String, locale: String, background: [ChatBackground] = []) throws -> URLRequest {
+    static func request(messages: [ChatMessage], location: ChatLocation?, token: String, locale: String, background: [ChatBackground] = [], offeredService: String? = nil, placeFor: String? = nil) throws -> URLRequest {
         guard !messages.isEmpty, messages.count <= 12, messages.last?.role == "user",
               messages.allSatisfy({ ["user", "assistant"].contains($0.role) && !$0.content.isEmpty && $0.content.utf8.count <= 4000 }),
               messages.reduce(0, { $0 + $1.content.utf8.count }) <= 16000 else { throw LiveChatError.tooLong }
@@ -122,6 +149,8 @@ struct LiveChatAPI: Sendable {
             var messages: [ChatMessage]
             var location: ChatLocation?
             var background: [ChatBackground]
+            var offered_service: String?
+            var location_for_service: String?
         }
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
@@ -129,12 +158,28 @@ struct LiveChatAPI: Sendable {
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         // Shared-host CGI setups can strip Authorization; PHP accepts this too.
         request.setValue(token, forHTTPHeaderField: "X-Sovi-Token")
-        request.httpBody = try JSONEncoder().encode(Payload(locale: locale, messages: messages, location: location, background: background))
+        request.httpBody = try JSONEncoder().encode(Payload(locale: locale, messages: messages, location: location, background: background, offered_service: offeredService, location_for_service: placeFor))
         return request
     }
 
-    func respond(messages: [ChatMessage], location: ChatLocation?, token: String, locale: String, background: [ChatBackground] = []) async throws -> LiveChatReply {
-        let request = try Self.request(messages: messages, location: location, token: token, locale: locale, background: background)
+    func explain(passages: [String], language: ChatLanguage, token: String) async throws -> ReportExplanation {
+        struct Body: Encodable { let locale: String; let passages: [String]; let cloud_processing_consent = true }
+        guard !passages.isEmpty, passages.count <= 3 else { throw LiveChatError.invalidReply }
+        var request = URLRequest(url: URL(string: "https://sovi.elzahaby.at/?action=report")!)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
+        request.setValue(token, forHTTPHeaderField: "X-Sovi-Token")
+        request.httpBody = try JSONEncoder().encode(Body(locale: language.rawValue, passages: passages))
+        let (data, response) = try await session.data(for: request)
+        guard (response as? HTTPURLResponse)?.statusCode == 200, data.count < 32_768,
+              let reply = try? JSONDecoder().decode(ReportExplanation.self, from: data),
+              (1...3).contains(reply.sentences.count), reply.sentences.allSatisfy({ passages.indices.contains($0.passage) && !$0.text.isEmpty }) else { throw LiveChatError.invalidReply }
+        return reply
+    }
+
+    func respond(messages: [ChatMessage], location: ChatLocation?, token: String, locale: String, background: [ChatBackground] = [], offeredService: String? = nil, placeFor: String? = nil) async throws -> LiveChatReply {
+        let request = try Self.request(messages: messages, location: location, token: token, locale: locale, background: background, offeredService: offeredService, placeFor: placeFor)
         let (data, response) = try await session.data(for: request)
         guard let response = response as? HTTPURLResponse else { throw LiveChatError.invalidReply }
         switch response.statusCode {
@@ -166,6 +211,12 @@ final class LiveChatController {
     private(set) var transcriptID = UUID()
     private(set) var messages: [ChatMessage] = []
     private(set) var result: LiveChatReply?
+    private(set) var replies: [Int: LiveChatReply] = [:]
+    private(set) var dates: [Date] = []
+    private(set) var lookingUp: Set<Int> = []
+    private(set) var lookupNotices: [Int: String] = [:]
+    @ObservationIgnored private weak var historyStore: SoviStore?
+    @ObservationIgnored private var searches: [Int: Task<Void, Never>] = [:]
     private(set) var error: String?
     private(set) var failedMessage: String?
     private(set) var locationNotice: String?
@@ -206,6 +257,77 @@ final class LiveChatController {
         return LiveChatController()
     }
 
+    func connectHistory(to store: SoviStore) {
+        guard historyStore !== store else { return }
+        historyStore = store
+        guard let data = store.state.liveChatHistory, let saved = try? JSONDecoder().decode(LocalChatArchive.self, from: data) else { return }
+        messages = saved.messages; replies = saved.replies
+        dates = saved.dates?.count == messages.count ? (saved.dates ?? []) : Array(repeating: .distantPast, count: messages.count)
+        lookupNotices = saved.notices ?? [:]
+        result = replies[messages.count - 1]
+        if messages.last?.role == "user" { failedMessage = messages.last?.content; error = LiveChatError.unavailable.localizedDescription }
+        for (index, reply) in replies where reply.nearby_search != nil && reply.providers.isEmpty && lookupNotices[index] == nil {
+            findPractices(for: reply, at: index)
+        }
+    }
+
+    private func saveHistory() {
+        guard let historyStore else { return }
+        // Practice pins are public destinations. Drop device coordinates, including map links built around them.
+        let safeReplies = replies.mapValues { reply in
+            var copy = reply
+            copy.nearby_search?.area.coordinates = nil
+            if reply.nearby_search?.area.source == "device_gps" {
+                copy.actions = copy.actions.map { original in
+                    guard original.type == "map_search", var parts = URLComponents(string: original.url) else { return original }
+                    parts.queryItems = parts.queryItems?.filter { $0.name != "ll" }
+                    var safe = original
+                    safe.url = parts.url?.absoluteString ?? "https://maps.apple.com/"
+                    return safe
+                }
+            }
+            return copy
+        }
+        do {
+            let data = messages.isEmpty ? nil : try JSONEncoder().encode(LocalChatArchive(messages: messages, replies: safeReplies, dates: dates, notices: lookupNotices))
+            try historyStore.perform(.saveLiveChatHistory(data, lastTurnAt: dates.last))
+        } catch { historyStore.errorMessage = error.localizedDescription }
+    }
+
+    func explainReport(_ passages: [String], language: ChatLanguage) async throws -> ReportExplanation {
+        guard enabled && token.utf8.count >= 32 else { throw LiveChatError.setup }
+        return try await api.explain(passages: passages, language: language, token: token)
+    }
+
+    private func findPractices(for reply: LiveChatReply, at index: Int) {
+        guard reply.providers.isEmpty, let search = reply.nearby_search,
+              search.area.source != "device_gps" || shareLocation else { return }
+        let session = transcriptID
+        let language = reply.language.flatMap(ChatLanguage.init(rawValue:)) ?? .app
+        lookingUp.insert(index)
+        searches[index] = Task { @MainActor in
+            let providers: [ChatProvider]
+            do {
+                var areaSearch = search
+                if search.area.source == "device_gps" && search.area.coordinates == nil {
+                    areaSearch.area.coordinates = await location.currentLocation()
+                }
+                providers = try await NearbyPracticeLookup.results(for: areaSearch, language: language)
+            }
+            catch {
+                guard !Task.isCancelled, transcriptID == session else { return }
+                lookupNotices[index] = language.text("Die Kartensuche ist gerade nicht erreichbar.")
+                providers = []
+            }
+            guard !Task.isCancelled, transcriptID == session, var stored = replies[index] else { return }
+            if providers.isEmpty, lookupNotices[index] == nil { lookupNotices[index] = language.text("Ich habe in dieser Gegend keine passende Praxis gefunden.") }
+            stored.providers = providers
+            replies[index] = stored
+            if index == messages.count - 1 { result = stored }
+            lookingUp.remove(index); searches[index] = nil; saveHistory()
+        }
+    }
+
     /// Previous choices belong to the answered turn, not a pending or failed request.
     var currentResult: LiveChatReply? { busy || failedMessage != nil ? nil : result }
     func enableLocationFromWelcome() async throws -> Bool {
@@ -218,7 +340,12 @@ final class LiveChatController {
         if !testing { try ChatCredentials.save(.init(token: token, enabled: true, shareLocation: allowed, responseLanguage: "auto")) }
         cancel()
         shareLocation = allowed
-        if !allowed { localServiceArea = nil; location.cancel() }
+        if !allowed {
+            localServiceArea = nil; location.cancel()
+            for index in Array(searches.keys) where replies[index]?.nearby_search?.area.source == "device_gps" {
+                searches[index]?.cancel(); searches[index] = nil; lookingUp.remove(index)
+            }
+        }
     }
     /// Only a coarse place name is returned to local demos; coordinates are not saved.
     func refreshLocalServiceArea() async -> String? {
@@ -233,10 +360,7 @@ final class LiveChatController {
         guard shareLocation else { return nil }
         return await location.currentLocation()
     }
-    var displayMessages: [ChatMessage] {
-        let pending = busy ? pendingMessage : failedMessage
-        return messages + (pending.map { [ChatMessage(role: "user", content: $0)] } ?? [])
-    }
+    var displayMessages: [ChatMessage] { messages }
 
     #if DEBUG
     /// Test-only configuration for failure and cancellation cases.
@@ -247,7 +371,6 @@ final class LiveChatController {
         cancel()
         self.token = token; self.enabled = enabled; self.shareLocation = shareLocation
         if !shareLocation { localServiceArea = nil }
-        if !enabled { reset() }
     }
     #endif
 
@@ -255,11 +378,25 @@ final class LiveChatController {
         let message = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !busy, !message.isEmpty else { return }
         guard enabled else { error = LiveChatError.setup.localizedDescription; return }
+        let retry = failedMessage == message && messages.last == ChatMessage(role: "user", content: message)
+        let pending = retry ? messages : messages + [ChatMessage(role: "user", content: message)]
+        if !retry { messages = pending; dates.append(historyStore?.nextChatDate ?? Date()); saveHistory() }
         guard token.utf8.count >= 32 else {
             error = LiveChatError.setup.localizedDescription; failedMessage = message; return
         }
-        let pending = messages + [ChatMessage(role: "user", content: message)]
-        do { _ = try LiveChatAPI.request(messages: pending, location: nil, token: token, locale: "de") }
+        var context = Array(pending.suffix(11))
+        // A locally saved message too long for a single API turn must not block every later question.
+        if let oversized = context.dropLast().lastIndex(where: { $0.content.utf8.count > 4000 }) {
+            context.removeFirst(oversized + 1)
+        }
+        while context.count > 1 && (context.first?.role != "user" || context.reduce(0, { $0 + $1.content.utf8.count }) > 16000) {
+            context.removeFirst()
+        }
+        let requestTurns = context
+        let previousReply = requestTurns.dropLast().last?.role == "assistant" ? replies[pending.count - 2] : nil
+        let offeredService = previousReply?.offered_service
+        let placeFor = previousReply?.location_for_service
+        do { _ = try LiveChatAPI.request(messages: requestTurns, location: nil, token: token, locale: "de") }
         catch { self.error = error.localizedDescription; failedMessage = message; return }
         busy = true; error = nil; failedMessage = nil; locationNotice = nil; pendingMessage = message
         let id = UUID(); generation = id
@@ -274,11 +411,13 @@ final class LiveChatController {
                 if shareLocation && coordinates == nil {
                     locationNotice = ChatLanguage.resolve(message, preference: locale).text("Ich kann deinen Standort gerade nicht verwenden.")
                 }
-                let reply = try await api.respond(messages: pending, location: coordinates, token: token, locale: locale, background: background)
+                let reply = try await api.respond(messages: requestTurns, location: coordinates, token: token, locale: locale, background: background, offeredService: offeredService, placeFor: placeFor)
                 try Task.checkCancellation()
                 guard generation == id, enabled else { return }
                 messages = pending + [ChatMessage(role: "assistant", content: reply.reply)]
-                result = reply
+                dates.append(historyStore?.nextChatDate ?? Date())
+                result = reply; replies[pending.count] = reply; saveHistory()
+                findPractices(for: reply, at: pending.count)
                 busy = false; operation = nil; pendingMessage = nil
             } catch is CancellationError {
                 if generation == id { busy = false; operation = nil }
@@ -295,9 +434,15 @@ final class LiveChatController {
         generation = UUID(); operation?.cancel(); operation = nil; location.cancel(); busy = false
         pendingMessage = nil
     }
-    func reset() { cancel(); transcriptID = UUID(); messages = []; result = nil; error = nil; failedMessage = nil; locationNotice = nil }
+    func reset() {
+        cancel()
+        for search in searches.values { search.cancel() }
+        searches = [:]; lookingUp = []; lookupNotices = [:]
+        transcriptID = UUID(); messages = []; dates = []; replies = [:]; result = nil; error = nil; failedMessage = nil; locationNotice = nil
+        saveHistory()
+    }
     func setBackground(_ entries: [ChatBackground]) {
-        if background != entries { reset(); background = Array(entries.prefix(4)) }
+        if background != entries { cancel(); background = Array(entries.prefix(4)) }
     }
     func clearLocalData() throws {
         reset()
@@ -317,6 +462,20 @@ private final class ChatUIFixtureProtocol: URLProtocol, @unchecked Sendable {
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
     override func startLoading() {
         let attempt = Self.lock.withLock { Self.requestCount += 1; return Self.requestCount }
+        if request.url?.query == "action=report" {
+            finish(["sentences": [["text": "The report recommends a rehabilitation follow-up.", "passage": 0]]], status: 200)
+            return
+        }
+        if attempt == 1 && ProcessInfo.processInfo.arguments.contains("--provider-history-fixture") {
+            let practices: [[String: Any]] = ["Praxis A", "Praxis B"].enumerated().map { index, name in
+                ["id": name, "name": name, "specialty": "Allgemeinmedizin", "address": "Wien",
+                 "map_url": "https://maps.apple.com/", "insurance_verified": false, "source_url": "https://maps.apple.com/",
+                 "source_label": "Test", "retrieved_at": "2026-11-06", "latitude": 48.208 + Double(index) * 0.002, "longitude": 16.37]
+            }
+            finish(["version": 3, "status": "destinations", "reply": "Hier sind Hausarztpraxen in deiner Nähe.", "providers": practices,
+                    "choices": [], "actions": [], "sources": [], "notice": "", "language": "de"], status: 200)
+            return
+        }
         let reply: String
         let choices: [[String: Any]]
         switch attempt {
@@ -333,7 +492,10 @@ private final class ChatUIFixtureProtocol: URLProtocol, @unchecked Sendable {
         }
         let json: [String: Any] = ["version": 3, "status": "needs_clarification", "reply": reply, "choices": choices,
                                    "actions": [], "providers": [], "sources": [], "notice": "", "language": "de"]
-        let response = HTTPURLResponse(url: request.url!, statusCode: attempt == 3 ? 503 : 200, httpVersion: nil, headerFields: nil)!
+        finish(json, status: attempt == 3 ? 503 : 200)
+    }
+    private func finish(_ json: [String: Any], status: Int) {
+        let response = HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil, headerFields: nil)!
         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
         if let data = try? JSONSerialization.data(withJSONObject: json) { client?.urlProtocol(self, didLoad: data) }
         client?.urlProtocolDidFinishLoading(self)
@@ -375,7 +537,7 @@ private enum ChatCredentials {
 @MainActor
 private final class ChatLocationService: NSObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
-    private var continuation: CheckedContinuation<ChatLocation?, Never>?
+    private var waiters: [CheckedContinuation<ChatLocation?, Never>] = []
     private var timeout: Task<Void, Never>?
     private var permissionContinuation: CheckedContinuation<Bool, Never>?
     override init() { super.init(); manager.delegate = self; manager.desiredAccuracy = kCLLocationAccuracyHundredMeters }
@@ -392,9 +554,13 @@ private final class ChatLocationService: NSObject, CLLocationManagerDelegate {
         }
     }
     func currentLocation() async -> ChatLocation? {
-        cancel()
+        let authorized = manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways
+        if authorized, let recent = manager.location, recent.horizontalAccuracy >= 0, abs(recent.timestamp.timeIntervalSinceNow) <= 30 {
+            return ChatLocation(latitude: recent.coordinate.latitude, longitude: recent.coordinate.longitude, accuracy_m: recent.horizontalAccuracy)
+        }
         return await withCheckedContinuation { continuation in
-            self.continuation = continuation
+            waiters.append(continuation)
+            guard waiters.count == 1 else { return }
             timeout = Task { @MainActor [weak self] in
                 try? await Task.sleep(for: .seconds(8))
                 guard !Task.isCancelled else { return }
@@ -410,7 +576,8 @@ private final class ChatLocationService: NSObject, CLLocationManagerDelegate {
     func cancel() { finish(nil); permissionContinuation?.resume(returning: false); permissionContinuation = nil }
     private func finish(_ value: ChatLocation?) {
         timeout?.cancel(); timeout = nil; manager.stopUpdatingLocation()
-        let pending = continuation; continuation = nil; pending?.resume(returning: value)
+        let pending = waiters; waiters.removeAll()
+        for waiter in pending { waiter.resume(returning: value) }
     }
     nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         Task { @MainActor [weak self] in
@@ -419,7 +586,7 @@ private final class ChatLocationService: NSObject, CLLocationManagerDelegate {
                 permissionContinuation?.resume(returning: self.manager.authorizationStatus == .authorizedAlways || self.manager.authorizationStatus == .authorizedWhenInUse)
                 permissionContinuation = nil
             }
-            guard continuation != nil else { return }
+            guard !waiters.isEmpty else { return }
             switch self.manager.authorizationStatus {
             case .authorizedWhenInUse, .authorizedAlways: self.manager.requestLocation()
             case .denied, .restricted: finish(nil)

@@ -490,7 +490,7 @@ struct WelcomeTermsSheet: View {
         SheetPage(title: "Nutzungsbedingungen", closeIdentifier: "welcome.terms.close", startsCompact: true) {
             Text("Sovi hilft dir, Anlaufstellen zu finden und Formulare vorzubereiten. Medizinische Fragen besprichst du mit Fachpersonal.")
             Text("Profil, e-card-Fotos und Dokumente bleiben auf deinem Gerät. Unter „Deine Daten“ kannst du sie löschen.")
-            Text("Chatnachrichten und von dir geteilte Einträge verarbeitet OpenAI über Sovi. Deine Adresssuche geht an Apple. Standort und Mitteilungen sind freiwillig.")
+            Text("OpenAI verarbeitet deine Chatnachrichten und freigegebenen Einträge. Wenn du einen Befund erklären lässt, verarbeitet OpenAI die ausgewählten Befundstellen. Die Datei bleibt auf deinem Gerät. Für die Suche in deiner Nähe verwendet Sovi Apple Karten.")
         }.accessibilityIdentifier("welcome.terms.document")
     }
 }

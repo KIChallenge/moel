@@ -228,6 +228,8 @@ struct ConversationTurn: Codable, Equatable, Identifiable, Sendable {
 
 struct AppState: Codable, Equatable, Sendable {
     var schemaVersion = 1
+    var liveChatHistory: Data?
+    var latestOnlineTurnAt: Date?
     var lifeScenario: LifeScenario?
     var lifeDrafts: [String: String]?
     var seededAt: Date?
@@ -256,7 +258,8 @@ struct AppState: Codable, Equatable, Sendable {
 enum AppCommand {
     case linkCareReport(UUID, ChatLanguage)
     case leaveDocumentDiscussion
-    case discussDocument(documentID: UUID?, question: String?, reply: String, eventIDs: [UUID]? = nil)
+    case beginReportQuestion(UUID, ConversationTurn)
+    case discussDocument(documentID: UUID?, question: String?, reply: String, eventIDs: [UUID]? = nil, questionID: UUID? = nil, replyID: UUID? = nil)
     case adoptBefundActions(documentID: UUID, selectedIDs: Set<UUID>, language: String)
     case importVaccinations(documentID: UUID, selectedIDs: Set<UUID>)
     case useCaseDocument(UUID)
@@ -287,6 +290,7 @@ enum AppCommand {
     case saveDraft(String)
     case saveLifeDraft(LifeDraftKind, String)
     case appendConversation(role: String, text: String)
+    case saveLiveChatHistory(Data?, lastTurnAt: Date? = nil)
     case saveComposer(String)
     case setFocusContext(UUID?)
     case setPreferences(notifications: Bool?, spokenReplies: Bool?, straightPath: Bool?)

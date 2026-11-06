@@ -177,6 +177,46 @@ final class PathSmokeTests: XCTestCase {
         XCTAssertTrue(app.descendants(matching: .any)["scenario.saved"].firstMatch.waitForExistence(timeout: 4))
     }
 
+    func testNearestHausarztShowsCarouselAndKeepsMapWhenContinuingOrReopening() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--uitesting", "--chat-ui-fixture", "--provider-history-fixture", "-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
+        app.launch()
+        let mascot = app.buttons["path.sovi"]
+        XCTAssertTrue(mascot.waitForExistence(timeout: 10))
+        mascot.tap()
+        let field = app.textFields["focus.composer"]
+        let editor = field.exists ? field : app.textViews["focus.composer"]
+        func send(_ text: String) {
+            XCTAssertTrue(editor.waitForExistence(timeout: 10))
+            editor.tap()
+            if !app.keyboards.firstMatch.waitForExistence(timeout: 4) { editor.tap() }
+            app.typeText(text)
+            XCTAssertEqual(editor.value as? String, text)
+            app.buttons["focus.send"].tap()
+        }
+        send("Was ist der nächste hausarzt")
+        let carousel = app.scrollViews["chat.providerCarousel"]
+        XCTAssertTrue(carousel.waitForExistence(timeout: 8))
+        let map = app.descendants(matching: .any).matching(identifier: "chat.map").firstMatch
+        XCTAssertTrue(map.exists)
+        let scroll = app.scrollViews["focus.scroll"]
+        for _ in 0..<5 where !carousel.isHittable { scroll.swipeUp() }
+        carousel.swipeLeft()
+        XCTAssertTrue(app.staticTexts["Praxis B"].waitForExistence(timeout: 5))
+        let capture = XCTAttachment(screenshot: app.screenshot())
+        capture.name = "Hausarzt map and swipeable practices"
+        capture.lifetime = .keepAlways
+        add(capture)
+        send("Ich habe noch eine Frage.")
+        XCTAssertTrue(app.buttons["chat.insurance"].waitForExistence(timeout: 8))
+        XCTAssertTrue(map.exists)
+        app.buttons["focus.close"].tap()
+        mascot.tap()
+        XCTAssertTrue(app.buttons["chat.insurance"].waitForExistence(timeout: 8))
+        XCTAssertTrue(map.exists)
+        XCTAssertTrue(carousel.exists)
+    }
+
     func testChatFollowUpButtonsRetryAndDraftResume() {
         let app = XCUIApplication()
         app.launchArguments = ["--uitesting", "--chat-ui-fixture", "-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
@@ -382,6 +422,7 @@ final class PathSmokeTests: XCTestCase {
         XCTAssertFalse(scan.exists)
         hi.tap()
         XCTAssertFalse(scan.exists)
+        XCTAssertTrue(app.buttons["welcome.accept"].waitForExistence(timeout: 6))
         app.buttons["welcome.accept"].tap()
         XCTAssertTrue(scan.waitForExistence(timeout: 5))
         scan.tap()
@@ -407,7 +448,9 @@ final class PathSmokeTests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.buttons["welcome.hi"].waitForExistence(timeout: 15))
         app.buttons["welcome.hi"].tap()
+        XCTAssertTrue(app.buttons["welcome.accept"].waitForExistence(timeout: 6))
         app.buttons["welcome.accept"].tap()
+        XCTAssertTrue(app.buttons["welcome.scanECard"].waitForExistence(timeout: 5))
         app.buttons["welcome.scanECard"].tap()
         let scroll = app.scrollViews["welcome.scroll"]
         func reveal(_ item: XCUIElement) {
@@ -465,6 +508,8 @@ final class PathSmokeTests: XCTestCase {
         reveal(name)
         name.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
         name.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 4) + "Alina")
+        expectation(for: NSPredicate(format: "value == %@", "Alina"), evaluatedWith: name)
+        waitForExpectations(timeout: 5)
         XCTAssertEqual(name.value as? String, "Alina")
         let confirm = app.buttons["welcome.ecard.confirm"]
         reveal(confirm); confirm.tap()
@@ -498,6 +543,7 @@ final class PathSmokeTests: XCTestCase {
         app.descendants(matching: .any)["welcome.terms"].firstMatch.tap()
         XCTAssertTrue(app.buttons["welcome.terms.close"].waitForExistence(timeout: 5))
         app.buttons["welcome.terms.close"].tap()
+        XCTAssertTrue(app.buttons["welcome.accept"].waitForExistence(timeout: 6))
         app.buttons["welcome.accept"].tap()
         let composer = app.textFields["welcome.composer"]
         XCTAssertTrue(composer.waitForExistence(timeout: 5))
@@ -563,6 +609,7 @@ final class PathSmokeTests: XCTestCase {
         app.launchArguments = ["--uitesting", "--welcome", "-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]
         app.launch()
         XCTAssertTrue(app.buttons["welcome.hi"].waitForExistence(timeout: 15)); app.buttons["welcome.hi"].tap()
+        XCTAssertTrue(app.buttons["welcome.accept"].waitForExistence(timeout: 6))
         app.buttons["welcome.accept"].tap()
         let skip = app.buttons["welcome.skip"]
         XCTAssertTrue(skip.waitForExistence(timeout: 5))

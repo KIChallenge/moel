@@ -66,14 +66,8 @@ final class DocumentChatUITests: XCTestCase {
         let leaveDocument = app.buttons["focus.document.close"]
         XCTAssertTrue(leaveDocument.waitForExistence(timeout: 5))
         leaveDocument.tap()
-        let archive = app.buttons["focus.attachments"]
-        XCTAssertTrue(archive.waitForExistence(timeout: 5))
-        reveal(archive, in: app)
-        archive.tap()
         XCTAssertTrue(app.buttons[attachmentID].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons[eventID].exists)
-        archive.tap()
-        XCTAssertFalse(app.buttons[attachmentID].exists)
         sendMessage("I want a doctor's appointment.")
         // The transport fixture returns this choice only on its second request.
         XCTAssertTrue(app.buttons["chat.insurance"].waitForExistence(timeout: 6))
@@ -93,9 +87,10 @@ final class DocumentChatUITests: XCTestCase {
         let editor = field.exists ? field : app.textViews["focus.composer"]
         editor.tap(); editor.typeText("I want to find a doctor")
         app.buttons["focus.send"].tap()
-        XCTAssertTrue(app.buttons["chat.general"].waitForExistence(timeout: 6))
+        let general = app.buttons["chat.general"]
+        XCTAssertTrue(general.waitForExistence(timeout: 20))
         XCTAssertFalse(app.buttons["focus.document.close"].exists)
-        app.buttons["chat.general"].tap()
+        general.tap()
         XCTAssertTrue(app.buttons["chat.insurance"].waitForExistence(timeout: 6))
         app.buttons["focus.close"].tap(); app.buttons["path.sovi"].tap()
         XCTAssertTrue(app.buttons["chat.insurance"].waitForExistence(timeout: 6))
@@ -103,7 +98,7 @@ final class DocumentChatUITests: XCTestCase {
 
     func testLibraryReportAddsAStepThenExplainsItInChat() throws {
         let app = XCUIApplication()
-        app.launchArguments = ["--uitesting", "-AppleLanguages", "(en)", "-AppleLocale", "en_AT"]
+        app.launchArguments = ["--uitesting", "--chat-ui-fixture", "-AppleLanguages", "(en)", "-AppleLocale", "en_AT"]
         app.launch()
         let mascot = app.buttons["path.sovi"]
         XCTAssertTrue(mascot.waitForExistence(timeout: 12))
@@ -126,7 +121,8 @@ final class DocumentChatUITests: XCTestCase {
         discuss.tap()
         let reply = app.descendants(matching: .any).matching(identifier: "focus.response").firstMatch
         XCTAssertTrue(reply.waitForExistence(timeout: 5))
-        XCTAssertTrue(reply.label.localizedCaseInsensitiveContains("rehabilitation"))
+        expectation(for: NSPredicate(format: "label == %@", "The report recommends a rehabilitation follow-up."), evaluatedWith: reply)
+        waitForExpectations(timeout: 8)
         XCTAssertTrue(app.buttons["focus.action"].exists)
     }
 

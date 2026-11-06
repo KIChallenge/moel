@@ -199,7 +199,7 @@ function chatInterpretation(string $goal = 'medical_question'): array
     foreach (soviChatSchema()['properties']['facts']['required'] as $key) {
         $facts[$key] = ['value' => null, 'quote' => null, 'message_index' => null];
     }
-    return ['goal' => $goal, 'facts' => $facts, 'response_language' => 'en', 'context_reference' => null];
+    return ['goal' => $goal, 'facts' => $facts, 'response_language' => 'en', 'context_reference' => null, 'turn'=>['kind'=>'clarify','message'=>'What has changed?', 'choices'=>[['label'=>'Today','message'=>'It started today']], 'service'=>null, 'consent'=>null]];
 }
 $shoulder = chatInterpretation();
 $shoulder['facts']['category'] = fact('symptoms', 'shoulder hurts');
@@ -213,55 +213,87 @@ $answer = soviChat($shoulderRequest, 'test-model', function ($payload) use ($sho
     return upstream($shoulder);
 });
 check($answer['status'] === 'needs_clarification' && $answer['route'] === null, 'Shoulder pain does not imply a specialty');
-check(count($answer['choices']) === 5, 'Short support question plus free answer');
-check($answer['choices'][4]['opens_composer'] === true, 'Other answer opens composer without sending');
-check(strlen($answer['reply']) < 100, 'Short initial response');
-
-$appointment = chatInterpretation('find_provider');
-$appointment['facts']['category'] = fact('known_service', 'doctor appointment');
-$appointmentReply = soviChatReply($appointment, 'en', null);
-check(str_contains($appointmentReply['reply'], 'appointment for'), 'Generic appointment asks what kind');
-check($appointmentReply['route'] === null, 'Generic doctor request is not defaulted to GP');
-check(count($appointmentReply['choices']) === 6, 'Doctor types plus unsure and free text');
-
-$mother = chatInterpretation();
-$mother['facts']['category'] = fact('mobility', 'difficulty moving');
-$mother['facts']['beneficiary'] = fact('other', 'mother');
-check(soviChatReply($mother, 'de', $gps)['status'] === 'needs_clarification', 'Mother mobility gets clarification');
-$mother['facts']['support_goal'] = fact('assessment', 'medical assessment');
-$motherReply = soviChatReply($mother, 'en', $gps);
-check(str_contains($motherReply['reply'], 'other person'), 'User GPS not assumed to be mother location');
-check($motherReply['providers'] === [], 'No places for wrong person location');
-$mother['facts']['support_goal'] = fact('daily_support', 'daily support');
-$care = soviChatReply($mother, 'en', $gps);
-check($care['route'] === 'care_advice' && $care['actions'][0]['url'] === 'https://pflege.gv.at/en/care-advice-centres-federal-provinces', 'Daily support uses official care advice');
-$emergency = $mother;
-$emergency['facts']['emergency_signal'] = fact('reported', 'suddenly cannot walk');
-$urgent = soviChatReply($emergency, 'en', $gps);
-check($urgent['status'] === 'professional_guidance' && $urgent['actions'][0]['url'] === 'tel:144', 'Reported emergency bypasses normal followups');
-check($urgent['providers'] === [] && $urgent['choices'] === [], 'No provider search delays emergency guidance');
-
-foreach (['de', 'en', 'ar', 'tr'] as $language) {
-    $multilingual = soviChatReply($shoulder, $language, null);
-    check($multilingual['language'] === $language, 'Response language ' . $language);
-    check(strlen($multilingual['reply']) < 180, 'Short multilingual reply ' . $language);
-    check($multilingual['choices'][0]['label'] === soviChatText('assessment', $language), 'Translated button ' . $language);
+check($answer['reply'] === 'What has changed?' && $answer['choices'][0]['message'] === 'It started today', 'Model-written question and buttons reach the app');
+check($answer['choices'][1]['opens_composer'] === true, 'An open answer is always possible');
+$offer = chatInterpretation();
+$offer['turn'] = ['kind'=>'offer_search','message'=>'Soll ich eine Zahnarztpraxis in deiner Nähe suchen?', 'choices'=>[['label'=>'Ja, bitte','message'=>'Ja, bitte']], 'service'=>'dentistry','consent'=>null];
+check(soviChatReply($offer, 'de', $gps)['providers'] === [], 'An offer does not search');
+$conversation = [['role'=>'user','content'=>'Ich habe Zahnschmerzen'], ['role'=>'assistant','content'=>$offer['turn']['message']], ['role'=>'user','content'=>'Ja']];
+$accepted = $offer; $accepted['turn'] = ['kind'=>'search','message'=>'Ich suche in deiner Nähe.', 'choices'=>[], 'service'=>'dentistry','consent'=>['user_index'=>2,'quote'=>'Ja','offer_index'=>1]];
+$found = soviChatReply($accepted,'de',$gps,[],$conversation);
+check($found['nearby_search']['query'] === 'Zahnarzt' && $found['nearby_search']['area']['coordinates'] === $gps, 'Accepted dental search uses GPS and a real map lookup');
+check(str_contains($found['sources'][0]['url'],'zahnarztsuche'), 'Dental directory instead of generic physician directory');
+check(soviChatReply($accepted, 'de', null, [], $conversation)['status'] === 'needs_clarification', 'No location asks for a town');
+$offered = soviChatReply($offer, 'de', $gps);
+check($offered['offered_service'] === 'dentistry', 'Replies carry the specific offered search');
+$grounded = soviChatReply(chatInterpretation(), 'de', $gps, [], $conversation, $offered['offered_service']);
+check($grounded['nearby_search']['service'] === 'dentistry', 'A typed yes continues the specific offer with GPS');
+$place = soviChatReply(chatInterpretation(), 'de', null, [], $conversation, $offered['offered_service']);
+check($place['location_for_service'] === 'dentistry', 'A confirmed search is kept while waiting for a town');
+$locationAnswer = chatInterpretation();
+$locationAnswer['facts']['location'] = fact('Linz', 'Linz', 4);
+$withPlace = [...$conversation, ['role'=>'assistant','content'=>$place['reply']], ['role'=>'user','content'=>'Linz']];
+$nearLinz = soviChatReply($locationAnswer, 'de', null, [], $withPlace, null, $place['location_for_service']);
+check($nearLinz['nearby_search']['area']['query'] === 'Linz', 'A typed town completes the pending search without device location');
+$declined = $conversation;
+$declined[2]['content'] = 'Nein';
+check(soviChatReply(chatInterpretation(),'de',$gps,[],$declined,'dentistry')['nearby_search'] === null, 'A declined offer cannot trigger a lookup');
+rejects(fn () => soviValidateRequest([...$shoulderRequest, 'cloud_processing_consent'=>true, 'offered_service'=>'made-up'],true), 'invalid_offer');
+rejects(fn () => soviValidateRequest([...$shoulderRequest, 'cloud_processing_consent'=>true, 'offered_service'=>'dentistry'],true), 'invalid_offer');
+$badConsent = $accepted; $badConsent['turn']['consent']['offer_index'] = 0;
+rejects(fn () => soviChatReply($badConsent,'de',$gps,[],$conversation),'invalid_evidence');
+$direct = chatInterpretation('find_provider'); $direct['facts']['service'] = fact('dentistry','Zahnarzt');
+$direct['turn'] = ['kind'=>'search','message'=>'Ich suche eine Praxis.', 'choices'=>[],'service'=>'dentistry','consent'=>['user_index'=>0,'quote'=>'Zahnarzt','offer_index'=>null]];
+$directMessages=[['role'=>'user','content'=>'Ich brauche einen Zahnarzt']];
+check(soviChatReply($direct,'de',$gps,[],$directMessages)['nearby_search'] !== null,'Explicit dentist search goes straight to results');
+$gp = chatInterpretation('find_provider');
+$gp['facts']['service'] = fact('general_practice', 'hausarzt');
+$gp['facts']['category'] = fact('known_service', 'hausarzt');
+$gpMessages = [['role' => 'user', 'content' => 'Was ist der nächste hausarzt']];
+$gpResult = soviChatReply($gp, 'de', ['latitude'=>47.074, 'longitude'=>15.44], [], $gpMessages);
+check($gpResult['status'] === 'destinations' && $gpResult['nearby_search']['service'] === 'general_practice', 'Nearest Hausarzt starts a GP search directly');
+check(soviChatReply($gp, 'de', null, [], $gpMessages)['location_for_service'] === 'general_practice', 'The nearest GP only asks for a town when needed');
+$capitalized = $gp;
+$capitalized['facts']['service'] = fact('general_practice', 'Hausarzt', 1);
+$recovered = soviParseInterpretation(upstream($capitalized), $gpMessages, soviChatSchema());
+check($recovered['facts']['service'] === fact('general_practice', 'hausarzt'), 'A capitalized exact word resolves to the unique original user wording');
+$symptom = $offer;
+$symptom['goal'] = 'find_provider';
+$symptom['facts']['category'] = fact('symptoms', 'Zahnschmerzen');
+$symptom['facts']['service'] = fact('dentistry', 'Zahnschmerzen');
+check(soviChatReply($symptom, 'de', $gps, [], [$conversation[0]])['offered_service'] === 'dentistry', 'A symptom-only message cannot promote a search offer to a lookup');
+$unrelated = chatInterpretation('unclear');
+$unrelated['turn']['kind'] = 'redirect';
+$offTopicMessages = [...array_slice($conversation,0,2), ['role'=>'user','content'=>'Wer gewinnt beim Fußball?']];
+foreach (['de','en','ar','tr'] as $lang) {
+    $redirect = soviChatReply($unrelated, $lang, $gps, [], $offTopicMessages, 'dentistry');
+    check($redirect['reply'] === soviChatText('redirect', $lang) && array_column($redirect['choices'],'id') === ['find-practice','understand-report']
+        && $redirect['providers'] === [] && $redirect['actions'] === [] && $redirect['offered_service'] === null, 'Off-topic turn redirects with localized actions in '.$lang);
 }
-$arabic = $shoulder; $arabic['response_language'] = 'ar';
-check(soviChatReply($arabic, 'auto', null)['language'] === 'ar', 'Automatic language detection output used');
-
-$background = [['id' => 'incident-1', 'title' => 'Shoulder injury', 'date' => '2026-10-30', 'is_synthetic' => true]];
-$related = $appointment;
-$related['context_reference'] = ['record_id' => 'incident-1', 'quote' => 'Shoulder injury'];
-$contextReply = soviChatReply($related, 'en', null, $background);
-check($contextReply['route'] === null && str_contains($contextReply['reply'], 'shared entry'), 'Background inference asks confirmation');
-check(str_contains($contextReply['reply'], '2026-10-30 · Shoulder injury'), 'Background confirmation identifies the shared entry');
-$related['facts']['background_confirmation'] = fact('no', 'different concern');
-check(!str_contains(soviChatReply($related, 'en', null, $background)['reply'], 'shared entry'), 'Declining background connection moves on');
-rejects(fn () => soviChatReply($related, 'en', null, []), 'invalid_evidence');
-check(soviValidateRequest([...$request, 'background' => $background], true)['background'] === $background, 'Reviewed background accepted');
-rejects(fn () => soviValidateRequest([...$request, 'background' => array_fill(0, 5, $background[0])], true), 'invalid_background');
-
+$urgentAside = $unrelated;
+$urgentAside['facts']['emergency_signal'] = fact('reported', 'breathing difficulty');
+check(soviChatReply($urgentAside, 'en', null)['actions'][0]['url'] === 'tel:144', 'Urgent health need takes priority over redirect');
+$other=$direct; $other['facts']['beneficiary']=fact('other','mother');
+check(soviChatReply($other,'en',$gps,[],$directMessages)['nearby_search'] === null,'GPS must not be assumed for another person');
+$emergency=$accepted; $emergency['facts']['emergency_signal']=fact('reported','breathing difficulty');
+$urgent = soviChatReply($emergency,'en',$gps,[],$conversation);
+check($urgent['actions'][0]['url']==='tel:144' && $urgent['nearby_search']===null,'Emergency takes precedence even over an accepted search');
+$background = [['id'=>'incident-1','title'=>'Shoulder injury','date'=>'2026-10-30','is_synthetic'=>true]];
+$related=$offer; $related['context_reference']=['record_id'=>'incident-1','quote'=>'Shoulder injury'];
+check(soviChatReply($related,'en',null,$background)['context_used']['id']==='incident-1','Background references remain grounded');
+rejects(fn () => soviChatReply($related,'en',null,[]),'invalid_evidence');
+check(soviValidateRequest([...$request, 'background'=>$background],true)['background']===$background,'Selected background accepted');
+rejects(fn () => soviValidateRequest([...$request,'background'=>array_fill(0,5,$background[0])],true),'invalid_background');
+foreach (['de','en','ar','tr'] as $lang) { check(soviChatReply($shoulder,$lang,null)['language']===$lang,'Conversation language '.$lang); }
+$report=['locale'=>'de','cloud_processing_consent'=>true,'passages'=>['Kein Hinweis auf eine frische Fraktur.']];
+$plain = soviExplainReport(soviReportExcerpts($report),'test-model', function ($payload) {
+    check($payload['store']===false && array_keys(json_decode($payload['input'],true))===['language','excerpts'],'Only excerpts and language reach the explanation model');
+    return upstream(['sentences'=>[['text'=>'Es gibt keinen Hinweis auf einen neuen Knochenbruch.','passage'=>0]]]);
+});
+check($plain['sentences'][0]['passage']===0,'Report explanation cites the selected passage');
+rejects(fn () => soviReportExcerpts([...$report,'pdf'=>'file']),'invalid_excerpts');
+rejects(fn () => soviReportExcerpts([...$report,'passages'=>['SVNR: 1234567890']]),'invalid_excerpts');
+rejects(fn () => soviExplainReport($report,'test-model',fn($payload)=>upstream(['sentences'=>[['text'=>'Test','passage'=>3]]])),'invalid_evidence');
 $features = [
     ['properties' => ['NAME' => 'Fictional far GP', 'FACH' => 'Allgemeinmedizin', 'ADRESSE' => '2., Testgasse 9'], 'geometry' => ['coordinates' => [16.44, 48.23]]],
     ['properties' => ['NAME' => 'Fictional near GP', 'FACH' => 'Allgemeinmedizin', 'ADRESSE' => '2., Testgasse 1'], 'geometry' => ['coordinates' => [16.374, 48.208]]],
@@ -270,11 +302,17 @@ $features = [
 $matches = soviProviderMatches('general_practice', ['coordinates' => $gps, 'query' => null], $features);
 check(count($matches) === 2 && $matches[0]['name'] === 'Fictional near GP', 'Deterministic specialty and distance match');
 check($matches[0]['insurance_verified'] === false, 'No fabricated insurance contract');
+check(soviProviderMatches('general_practice', ['coordinates'=>null, 'query'=>'Wollzeile, Wien'], $features) === [],
+    'A written address needs a geocoded lookup instead of alphabetically selected practices');
+$almostTied = [$features[0], $features[1]];
+$almostTied[0]['geometry']['coordinates'] = [$gps['longitude'] + 0.0015, $gps['latitude']];
+$almostTied[1]['geometry']['coordinates'] = [$gps['longitude'] + 0.0010, $gps['latitude']];
+check(soviProviderMatches('general_practice', ['coordinates'=>$gps], $almostTied)[0]['name'] === 'Fictional near GP',
+    'Nearby practices are sorted by actual distance before the UI rounds it');
 check(soviProviderMatches('general_practice', ['coordinates' => ['latitude' => 47, 'longitude' => 15]], $features) === [], 'Vienna data not used for other regions');
 check(soviProviderMatches('physiotherapy', ['coordinates' => $gps], $features) === [], 'Unsupported service does not produce guessed providers');
-$insured = $shoulder;
-$insured['facts']['support_goal'] = fact('assessment', 'medical assessment');
+$insured = $direct;
 $insured['facts']['payment_preference'] = fact('contract_only', 'insurance contract only');
-$insuredReply = soviChatReply($insured, 'en', $gps);
-check($insuredReply['providers'] === [] && str_contains($insuredReply['actions'][0]['url'], 'sozialversicherung.at'), 'Contract-only uses official verification instead of unknown provider contracts');
+$insuredReply = soviChatReply($insured, 'en', $gps, [], $directMessages);
+check($insuredReply['providers'] === [] && $insuredReply['nearby_search'] === null && str_contains($insuredReply['actions'][0]['url'], 'sozialversicherung.at'), 'Contract-only lookup does not offer unchecked map results');
 echo "Backend checks passed: {$checks}\n";

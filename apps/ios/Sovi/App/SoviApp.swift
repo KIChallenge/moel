@@ -49,6 +49,7 @@ struct SoviApp: App {
                     "firstName": "Erika", "lastName": "Musterfrau", "birthDate": "12.03.1960", "street": "Musterstraße", "house": "12", "postcode": "1010", "city": "Wien"
                 ])))
             }
+            chat.connectHistory(to: loaded)
             store = loaded
             startupError = nil
         } catch { startupError = error.localizedDescription }

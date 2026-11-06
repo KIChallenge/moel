@@ -998,3 +998,9 @@
 "Sovi schreibt …" = "Sovi schreibt …";
 "%lld von %lld erledigt" = "%lld von %lld erledigt";
 "Danke! Jetzt können wir loslegen." = "Danke! Jetzt können wir loslegen.";
+"OpenAI verarbeitet deine Chatnachrichten und freigegebenen Einträge. Wenn du einen Befund erklären lässt, verarbeitet OpenAI die ausgewählten Befundstellen. Die Datei bleibt auf deinem Gerät. Für die Suche in deiner Nähe verwendet Sovi Apple Karten." = "OpenAI verarbeitet deine Chatnachrichten und freigegebenen Einträge. Wenn du einen Befund erklären lässt, verarbeitet OpenAI die ausgewählten Befundstellen. Die Datei bleibt auf deinem Gerät. Für die Suche in deiner Nähe verwendet Sovi Apple Karten.";
+"Die Erklärung ist gerade nicht erreichbar." = "Die Erklärung ist gerade nicht erreichbar.";
+"Praxen werden gesucht …" = "Praxen werden gesucht …";
+"Ich habe in dieser Gegend keine passende Praxis gefunden." = "Ich habe in dieser Gegend keine passende Praxis gefunden.";
+"Die Kartensuche ist gerade nicht erreichbar." = "Die Kartensuche ist gerade nicht erreichbar.";
+"Erklär mir diesen Befund bitte einfach." = "Erklär mir diesen Befund bitte einfach.";

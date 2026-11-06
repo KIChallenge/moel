@@ -1,6 +1,14 @@
 # Validation status
 
-Updated 6 November 2026. The original offline checks below and the current guided-prototype runtime checks at the end are separate validation stages.
+Updated 6 November 2026.
+
+## Build 6 chat
+
+- The hosted API returned three geocoded practices for “Was ist der nächste hausarzt” at synthetic Vienna coordinates. Without GPS it requested a town, then used “Linz” for the same GP search. The iOS client decoded the real response, and a separate native MapKit lookup returned dental practices in distance order.
+- “Ich habe Zahnschmerzen” offered a dentist. A typed “Ja” started the search and “Nein, danke” declined. A new skin concern prompted a follow-up and an offer to find a skin doctor. Questions about football and programming redirected to health topics across German, English, Turkish and Arabic. A mixed English request still found a pharmacy.
+- Five supplied medical PDFs created source-linked events through the chat importer. Seven blank forms stayed attachments. A synthetic report excerpt retained negation and uncertainty in the hosted explanation. The local excerpt-selection test also verified that the personal fields were removed.
+- A disk-backed test reopened the conversation and its original provider pin using a new SwiftData container. Stored replies excluded the device coordinates. An eight-exchange test continued past the old API window and retained the full local history, including an oversized message the server could not accept.
+- All 119 iOS unit tests, 38 path checks, 120 PHP checks, 19 HTTP checks and 33 Apache access checks passed. Simulator UI checks covered returning from a document to a doctor search, discussing a report directly from the library and reopening a chat with its original map and practice carousel.
 
 ## Checks actually completed
 
@@ -157,6 +165,6 @@ Results: `artifacts/TestResults/20261106-061339.xcresult` (23 document/form chec
 
 ## Build 5
 
-The signed 0.1.0 (5) archive was accepted by App Store Connect. The Release bundle contains the leaf artwork and the managed chat configuration.
+App Store Connect reported build 0.1.0 (5) as valid and active for internal TestFlight testing. The signed Release bundle contains the leaf artwork and the managed chat configuration.
 
 The simulator build, all 113 existing unit checks, the per-entry halo regression, and all 38 path scenario checks passed. Simulator UI flows covered the retained welcome conversation, doctor follow-ups and retry, appointment attendance, and the guided care application through opening its form. A screen recording under `artifacts/Previews/build5` shows the typing bubble expanding into the next message.

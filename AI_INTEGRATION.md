@@ -8,13 +8,13 @@ A saved-case progress query is handled on-device before online submission. It us
 
 The e-card scan posts the front and back as separate photos in the local welcome history. Sovi checks the sides and reads their fields on the device, then asks for review. Only the confirmed fields fill the profile.
 
-The chat paperclip reads the selected file on the device. Labeled Austrian encounter dates and recorded vaccinations create life events with the original passage and page when available. The attachment, new events, and local chat reply share one database transaction. Reattaching a file reuses its recorded events. The cloud chat receives neither attachment content nor imported events as background.
+The paperclip reads the selected file on the device. Dated encounters and recorded vaccinations create life events with the original passage and page. The attachment, events and receipt are saved together. When someone asks Sovi to explain a report, the device selects up to three short findings or documented next steps and filters identity fields. Only these passages and the language go to the report endpoint. Each returned sentence refers to a selected passage. The original file, e-card photos and profile stay on the device.
 
 Navigation chat connects automatically through the hosted PHP endpoint. A restricted shared prototype token is supplied by the build through ignored Local.xcconfig and Info.plist; it is extractable from the app and suitable only for the controlled test group. The OpenAI key stays on the server. There is no end-user API setup, online toggle or language picker. The welcome terms explain chat processing. A short notice is shown to users who skipped them.
 
-`LiveChatAPI` calls `https://sovi.elzahaby.at/?action=chat` (requires PHP version 3). `LiveChatController` owns a separate in-memory online transcript, cancellation, explicit retry and Keychain location preference. No automatic local path/document context is sent. The user may select up to four dated summaries through More → Share context; synthetic entries retain that label, source references are validated, and inferred incident connections require confirmation. Optional CoreLocation positions are requested only in the foreground on send; GPS stays on the PHP server and explicit destinations take precedence. A relative's location is not assumed to equal the user's.
+The mascot shows welcome, document, timeline and online replies together. SwiftData keeps the full displayed conversation and practice results locally, including drafts and unsuccessful sends. The chat API receives only a bounded recent context and up to four background entries the user selected. Switching topics or background keeps history. Only the explicit local-data deletion clears it. Practice coordinates and links survive relaunch. The device location used for the search is omitted from the saved reply.
 
-OpenAI extracts intent/evidence, not medical recommendations or provider URLs. PHP selects short fixed German/English/Arabic/Turkish copy, one follow-up at a time, answer buttons and free-text entry. Sourced Vienna physician candidates are matched by service/distance and displayed with MapKit pins; official directories cover other services/regions. Insurer contracts and availability remain unverified. Broad primary-care/care-advice navigation is not diagnosis or validated triage. See `apps/backend/README.md` for source, coverage and deployment details. Local API tests use mocked responses; no paid/clinical validation is implied.
+OpenAI Responses chooses the next short question, reply buttons or search intent in German, English, Turkish or Arabic. PHP validates the action and supporting user quotes. A named service can be searched directly, and a symptom can lead to an offer that a plain yes accepts. Unrelated questions return to health navigation. The Vienna physician directory and native MapKit supply real practice records. The map and swipeable practice cards stay with their original reply. Contract-only requests lead to the official insurer search.
 
 ## Replaceable interfaces
 
@@ -28,7 +28,7 @@ Documents are untrusted text. No instructions from a document can enable permiss
 
 ## What real AI would still require
 
-- A separately configured backend/service adapter with no provider credential shipped in the iOS bundle.
+- User-specific authentication and usage limits for a wider release.
 - Explicit, granular user review of what document/chat data would leave the device, purpose, recipients and retention, including deletion and revocation behavior.
 - Schema validation, evidence integrity checks against immutable source passages/page offsets, prompt-injection defenses, input/output limits and safe failure paths.
 - An intended-purpose and privacy/security review before using real patient data; lawful consent/authority and caregiver relationships need their own product design.

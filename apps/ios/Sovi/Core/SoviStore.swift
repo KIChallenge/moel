@@ -77,6 +77,11 @@ final class SoviStore {
     }
 
     var now: Date { clock() }
+
+    var nextChatDate: Date {
+        let previous = max(state.conversation.last?.date ?? .distantPast, state.latestOnlineTurnAt ?? .distantPast)
+        return max(now, previous.addingTimeInterval(0.0001))
+    }
     /// Persistent array order never changes because a status changed.
     var nodes: [PathNode] { state.nodes }
 
@@ -171,7 +176,12 @@ final class SoviStore {
             case .leaveDocumentDiscussion:
                 guard updated.discussedDocumentID != nil else { return }
                 updated.discussedDocumentID = nil
-            case .discussDocument(let id, let question, let reply, let eventIDs):
+            case .beginReportQuestion(let id, let turn):
+                guard updated.documents.contains(where: { $0.id == id }), turn.role == "user", !turn.text.isEmpty,
+                      !updated.conversation.contains(where: { $0.id == turn.id }) else { throw SoviError.invalidAction }
+                updated.conversation.append(turn)
+                updated.discussedDocumentID = id; updated.focusContextID = nil; updated.composerDraft = ""
+            case .discussDocument(let id, let question, let reply, let eventIDs, let questionID, let replyID):
                 if let id, !updated.documents.contains(where: { $0.id == id }) { throw SoviError.missingRecord }
                 guard (question?.count ?? 0) <= 20_000, !reply.isEmpty, reply.count <= 20_000 else { throw SoviError.invalidAction }
                 if let eventIDs {
@@ -179,8 +189,8 @@ final class SoviStore {
                         updated.nodes.contains { $0.id == eventID && $0.evidence.contains { $0.documentID == id } }
                     }) else { throw SoviError.invalidAction }
                 }
-                if let question { updated.conversation.append(ConversationTurn(role: "user", text: question, date: now)) }
-                updated.conversation.append(ConversationTurn(role: "assistant", text: reply, date: now,
+                if let question { updated.conversation.append(ConversationTurn(id: questionID ?? UUID(), role: "user", text: question, date: now)) }
+                updated.conversation.append(ConversationTurn(id: replyID ?? UUID(), role: "assistant", text: reply, date: now,
                                                             attachmentEventIDs: eventIDs, replyDocumentID: id))
                 updated.discussedDocumentID = id
                 updated.focusContextID = nil
@@ -509,6 +519,10 @@ final class SoviStore {
                 let id = updated.draft?.id ?? UUID()
                 updated.draft = AdministrativeDraft(id: id, text: text, updatedAt: now)
 
+            case .saveLiveChatHistory(let data, let lastTurnAt):
+                updated.liveChatHistory = data
+                updated.latestOnlineTurnAt = lastTurnAt
+
             case .appendConversation(let role, let text):
                 guard ["user", "assistant"].contains(role), text.count <= 20_000 else { throw SoviError.invalidAction }
                 updated.conversation.append(ConversationTurn(role: role, text: text, date: now))
@@ -531,7 +545,20 @@ final class SoviStore {
                 updated = AppState(fixtureEpoch: now, fixtureTimeZoneIdentifier: calendar.timeZone.identifier)
 
             case .reloadDemo:
+                let previous = updated
                 updated = try Self.seed(now: now, calendar: calendar)
+                updated.conversation = previous.conversation
+                updated.liveChatHistory = previous.liveChatHistory
+                updated.latestOnlineTurnAt = previous.latestOnlineTurnAt
+                updated.welcome = previous.welcome
+                updated.formPeople = previous.formPeople
+                updated.formDrafts = previous.formDrafts
+                updated.demoScenarios = previous.demoScenarios
+                let previousDocuments = Set(previous.documents.map(\.id))
+                updated.documents = previous.documents + updated.documents.filter { !previousDocuments.contains($0.id) }
+                let referencedEvents = Set(previous.conversation.flatMap { $0.attachmentEventIDs ?? [] })
+                let retainedEvents = previous.nodes.filter { referencedEvents.contains($0.id) }
+                updated.nodes = retainedEvents + updated.nodes.filter { !referencedEvents.contains($0.id) }
             }
             switch command {
             case .setCaseApplicant(let scenario, _), .answerScenario(let scenario, _):
@@ -706,7 +733,16 @@ final class SoviStore {
         }
     }
 
-    private func commit(_ updated: AppState) throws {
+    private func commit(_ proposed: AppState) throws {
+        var updated = proposed
+        if updated.conversation.count > state.conversation.count {
+            // Imported receipts, path answers and live replies share one display order, even if the clock repeats.
+            var previous = max(state.conversation.last?.date ?? .distantPast, state.latestOnlineTurnAt ?? .distantPast)
+            for i in state.conversation.count..<updated.conversation.count {
+                updated.conversation[i].date = max(updated.conversation[i].date, previous.addingTimeInterval(0.0001))
+                previous = updated.conversation[i].date
+            }
+        }
         let encoded = try JSONEncoder().encode(updated)
         snapshot.payload = encoded
         do {

@@ -100,9 +100,9 @@ Today/Sections pills, the path settings button, chat header controls and selecte
 
 ## Chat interaction
 
-Messages use the full readable width, with read-aloud controls in the message header. The bottom field remains available for a free answer; attachments, forms, examples and a new online conversation are in **More / Mehr**. Initial example shortcuts disappear once a conversation begins, while the More menu remains available.
+Messages use the full readable width, with read-aloud controls in the message header. The bottom field remains available for a free answer; attachments, forms and examples are in **More / Mehr**. Initial example shortcuts disappear once a conversation begins, while the More menu remains available.
 
-Reopening Sovi resumes the conversation and draft. New replies scroll into view using their actual row; browsing older messages pauses automatic following and offers a latest-message button. Pending/failed requests hide answered choices; Retry keeps a separately typed draft. Glass is drawn behind native controls.
+Reopening Sovi resumes the locally saved conversation, draft, maps and practice cards. New replies scroll into view using their actual row; browsing older messages pauses automatic following and offers a latest-message button. Pending/failed requests hide answered choices; Retry keeps a separately typed draft. Glass is drawn behind native controls.
 
 ## Attach a document and open its life event
 
@@ -123,8 +123,11 @@ Attach the Impfpass with the paperclip to add readable administrations to their 
 
 For a multilingual walkthrough, ask about help for a parent, preparing for discharge, prevention or services for a child in German, English, Turkish or Arabic. The chat chooses the language from the request or its language setting. When a form applies, select the applicant to prepare the draft. If the selected report has labeled personal details, **Person aus diesem Befund übernehmen** opens them for review before saving a new profile.
 
-## Connected chat and website palette
+## Connected chat
 
-The app uses the [Sovi website](https://sovi-dein-weg.moel93.chatgpt.site/)’s pale green canvas, leaf-green accents, white answer cards and green Sovi replies, with adapted dark colors. Incomplete and missed path entries keep their grey/red status colors. Chat has a short Sovi header and a single More menu. Profile, permissions and local data controls live under **Deine Daten**. Reading a reply is available on that reply; language is detected automatically.
+The app uses the [Sovi website](https://sovi-dein-weg.moel93.chatgpt.site/)’s pale green background, white answer cards and green Sovi replies. The More menu holds **Deine Daten**.
 
-The connected build already contains the restricted prototype connection configuration. Users do not enter a token, enable a switch or choose a reply language. Try **Ich möchte einen Arzttermin.** → **Hausarztpraxis suchen**. With allowed GPS, the API can return three sourced Vienna contacts on a MapKit map; without GPS, it asks for a place. A new doctor search also leaves an active document discussion automatically. Documents and imported life events remain local. Share specific older path summaries through **More → Hintergrund teilen** when useful.
+- Ask **Was ist der nächste Hausarzt?**. With location enabled, Sovi finds nearby practices straight away. Without a location it asks for a town or postcode. Swipe the practice cards, ask another question, then scroll back to the same map.
+- Say **Ich habe Zahnschmerzen** and accept the offer with **Ja**. A direct request for a dentist starts the search immediately. Insurer-contract requests open the official verification directory.
+- Ask **Was bedeutet mein Befund?** after attaching a report. Sovi explains selected findings and keeps the original file on the device.
+- Try an unrelated question, then pick **Eine Praxis finden** or **Befund verstehen** to continue. A mixed request still receives help with its health-related part.

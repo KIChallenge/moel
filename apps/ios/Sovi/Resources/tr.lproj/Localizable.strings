@@ -397,3 +397,9 @@
 "Darf ich dich an deine Termine und nächsten Schritte erinnern?" = "Randevularını ve sonraki adımlarını sana hatırlatmamı ister misin?";
 "%lld von %lld erledigt" = "%lld / %lld tamamlandı";
 "Danke! Jetzt können wir loslegen." = "Teşekkürler! Artık başlayabiliriz.";
+"OpenAI verarbeitet deine Chatnachrichten und freigegebenen Einträge. Wenn du einen Befund erklären lässt, verarbeitet OpenAI die ausgewählten Befundstellen. Die Datei bleibt auf deinem Gerät. Für die Suche in deiner Nähe verwendet Sovi Apple Karten." = "OpenAI sohbet mesajlarını ve paylaştığın kayıtları işler. Bir raporu açıklatmak istediğinde yalnızca seçilen bulgular gönderilir. Dosya cihazında kalır. Sovi yakınındaki yerleri Apple Haritalar ile arar.";
+"Die Erklärung ist gerade nicht erreichbar." = "Şu anda açıklamaya ulaşamıyorum.";
+"Praxen werden gesucht …" = "Muayenehaneler aranıyor…";
+"Ich habe in dieser Gegend keine passende Praxis gefunden." = "Bu bölgede uygun bir muayenehane bulamadım.";
+"Die Kartensuche ist gerade nicht erreichbar." = "Şu anda haritada arama yapılamıyor.";
+"Erklär mir diesen Befund bitte einfach." = "Bu raporu basitçe açıklar mısın?";

@@ -2,9 +2,15 @@ import Foundation
 
 /// Every answer and action in this conversation comes from the selected local document.
 enum DocumentDiscussion {
+    struct ReportSnippet {
+        var text: String
+        var evidence: EvidenceReference
+    }
+
     struct Reply {
         var documentID: UUID?
         var response: CompanionResponse
+        var explanationSources: [ReportSnippet] = []
     }
 
     struct AttachmentReceipt: Identifiable {
@@ -29,7 +35,7 @@ enum DocumentDiscussion {
     }
 
     static func read(_ document: SourceDocument, language: ChatLanguage, calendar: Calendar) -> Reading {
-        if document.id == LifePathSeed.stableID("life-path-33-source") || !document.proposals.isEmpty { return .other }
+        if document.id == LifePathSeed.stableID("life-path-33-source") { return .other }
         if let pass = VaccinationImport.review(document, calendar: calendar) { return .vaccinations(pass) }
         if let report = BefundReader.review(document, language: language.rawValue) { return .report(report) }
         return .other
@@ -88,11 +94,13 @@ enum DocumentDiscussion {
         let wantsPass = matches(query, ["impfpass", "vaccination record", "vaccine record", "vaccination pass", "ası kart", "asi kart", "aşı kart", "سجل التطعيم", "دفتر اللقاح"])
         let wantsReport = matches(query, ["befund", "entlassungsbrief", "medical report", "discharge letter", "discharge report", "radiology report", "tıbbi rapor", "taburcu", "تقرير طبي", "تقرير الخروج"])
         let wantsNew = matches(query, ["hochladen", "importier", "hinzufügen", "neuen befund", "upload", "attach", "import", "new report", "yükle", "رفع", "أرفق"])
+        // A definition never needs the person's document, even if a report was previously open.
+        if matches(query, ["was ist ein befund", "was bedeutet das wort befund", "what is a medical report", "what does the word befund mean", "tıbbi rapor nedir", "ما هو التقرير الطبي"]) { return nil }
         let current = state.discussedDocumentID.flatMap { id in state.documents.first { $0.id == id } }
         if let current, let response = eventReply(query: query, document: current, state: state, language: language) {
             return Reply(documentID: current.id, response: response)
         }
-        let followUp = current != nil && matches(query, ["dies", "das bedeut", "erklär", "schritt", "formular", "bericht", "original", "aufgabe", "what does", "what about", "this mean", "explain", "what next", "next step", "what should", "action", "which form", "vaccin", "impfung", "letzte dosis", "last dose", "açıkla", "adım", "sonraki", "rapor", "اشرح", "الخطوة", "ماذا يعني"])
+        let followUp = current != nil && matches(query, ["was bedeutet das", "erklär mir das", "erkläre mir das", "diesen bericht", "nächste schritt", "nächsten schritt", "welches formular", "im original", "what does this mean", "what does it mean", "explain this", "explain it", "what next", "next step", "which form", "vaccin", "impfung", "letzte dosis", "last dose", "bunu açıkla", "sonraki adım", "raporum", "اشرح ذلك", "الخطوة التالية", "ماذا يعني هذا"])
         guard wantsPass || wantsReport || followUp else { return nil }
 
         // A new upload or an ambiguous reference always leads to an explicit source choice.
@@ -108,9 +116,46 @@ enum DocumentDiscussion {
             }
         }
         if !wantsNew, let selected = candidates.first(where: { $0.id == current?.id }) ?? (candidates.count == 1 ? candidates.first : nil) {
-            return Reply(documentID: selected.id, response: summary(selected, language: language, state: state, question: message))
+            let answer = summary(selected, language: language, state: state, question: message)
+            var sources: [ReportSnippet] = []
+            let actionsOnly = matches(query, ["schritt", "aufgab", "formular", "antrag", "next step", "which form", "task", "hangi form", "خطوة", "استمارة"])
+            let explaining = matches(query, ["bedeut", "erklar", "einfach", "versteh", "was steht", "zusammenfass", "mean", "explain", "understand", "summari", "in simple", "açıkla", "ne demek", "basit", "اشرح", "يعني", "ببساطة"])
+            if explaining && !actionsOnly, case .report(let report) = read(selected, language: language, calendar: state.pathCalendar) {
+                sources = explanationSources(report, people: state.formPeople ?? [])
+            }
+            return Reply(documentID: selected.id, response: answer, explanationSources: sources)
         }
+        if candidates.isEmpty && wantsReport && !wantsNew { return nil }
         return Reply(documentID: nil, response: CompanionResponse(text: language.text("Wähle das Dokument aus, das wir gemeinsam ansehen sollen."), action: .documents))
+    }
+
+    /// Start with the author's findings and conclusions, never with all PDF text or its headers.
+    static func explanationSources(_ report: BefundReview, people: [FormPerson]) -> [ReportSnippet] {
+        var personal = Set<String>()
+        for person in people {
+            for key in ["firstName","lastName","insuranceNumber","email","phone","street","iban","accountHolder"] {
+                if let value = person.values[key], value.count >= 2 { personal.insert(value) }
+            }
+        }
+        let identifier = #"(?i)@|\b\d{4}[- /]?\d{6}\b|\+\d[\d ()/-]{6,}|\b(?:SVNR|Versicherungsnummer|Geburtsdatum|Patient(?:in|enname|en.?ID)?|Name|Anschrift|Adresse|Telefon|E-Mail|Fallnummer|Auftragsnummer|Unterschrift|Geb\.)\h*[:#]|\b(?:Dr|Mag)\.\h+\p{Lu}|\b(?:Straße|Strasse|Gasse)\h+\d"#
+        var selected: [ReportSnippet] = []
+        for source in report.passages + report.actions.map(\.evidence) {
+            let lines = source.quote.components(separatedBy: .newlines).filter { $0.range(of: identifier, options: .regularExpression) == nil }
+            var text = lines.joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+            for value in personal {
+                let word = #"(?<![\p{L}\p{N}])"# + NSRegularExpression.escapedPattern(for: value) + #"(?![\p{L}\p{N}])"#
+                text = text.replacingOccurrences(of: word, with: "…", options: [.regularExpression, .caseInsensitive])
+            }
+            if text.count > 400 {
+                let prefix = text.prefix(400)
+                guard let end = prefix.lastIndex(where: { ".!?".contains($0) }) else { continue }
+                text = String(prefix[...end])
+            }
+            guard text.count > 5, text.utf8.count <= 1600, !selected.contains(where: { $0.text == text }) else { continue }
+            selected.append(ReportSnippet(text: text, evidence: source))
+            if selected.count == 3 { break }
+        }
+        return selected
     }
 
     private static func eventReply(query: String, document: SourceDocument, state: AppState, language: ChatLanguage) -> CompanionResponse? {
@@ -118,7 +163,8 @@ enum DocumentDiscussion {
                               "an welchem tag", "hinzugefugt", "events", "on my path", "did you add", "what date",
                               "which date", "what day", "when was", "when did", "what happened", "olay", "hangi tarih",
                               "ne zaman", "yoluma", "أحداث", "احداث", "مساري", "ما التاريخ", "متى كان", "في أي تاريخ"]
-        guard matches(query, eventQuestions),
+        let referencesDocument = matches(query, ["ereignis", "untersuch", "unfall", "befund", "dokument", "impf", "im pfad", "lebenspfad", "ereignete", "hinzugefugt", "events", "examination", "injury", "report", "vaccin", "on my path", "did you add", "muayene", "belge", "olay", "aşı", "yoluma", "أحداث", "احداث", "الفحص", "التقرير", "مساري"])
+        guard referencesDocument, matches(query, eventQuestions),
               let receipt = attachments(in: state).last(where: { $0.attachment.attachmentDocumentID == document.id }) else { return nil }
         let nodes = (receipt.reply.attachmentEventIDs ?? []).compactMap { id in
             state.nodes.first { $0.id == id && $0.evidence.contains { $0.documentID == document.id } }

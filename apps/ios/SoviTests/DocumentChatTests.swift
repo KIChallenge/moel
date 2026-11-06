@@ -193,6 +193,20 @@ final class DocumentChatTests: XCTestCase {
         XCTAssertTrue(next.response.text.contains(title))
         let independent = "I would like to arrange care for my mother"
         XCTAssertNil(DocumentDiscussion.reply(to: independent, state: store.state, language: .en))
+        XCTAssertNil(DocumentDiscussion.reply(to: "Was ist der nächste hausarzt", state: store.state, language: .de))
+        XCTAssertNil(DocumentDiscussion.reply(to: "Explain football rules", state: store.state, language: .en))
+        XCTAssertNil(DocumentDiscussion.reply(to: "When was the World Cup?", state: store.state, language: .en))
+        XCTAssertNil(DocumentDiscussion.reply(to: "Was ist ein Befund?", state: store.state, language: .de))
+    }
+
+    func testExplanationSharesOnlySourceFindingsAndRetainsNegationAndUncertainty() {
+        let source = EvidenceReference(documentID: UUID(), documentTitle: "Local document", locator: "Seite 2",
+            quote: "SVNR: 1234567890\nHallo@example.invalid\nFür Erika: Kein Hinweis auf eine frische Fraktur links. Eine Prellung ist möglich.", pageNumber: 2)
+        let person = FormPerson(values: ["firstName": "Erika", "insuranceNumber": "1234567890"])
+        let review = BefundReview(explanation: "Local summary", passages: [source], actions: [])
+        let snippets = DocumentDiscussion.explanationSources(review, people: [person])
+        XCTAssertEqual(snippets.map(\.text), ["Für …: Kein Hinweis auf eine frische Fraktur links. Eine Prellung ist möglich."])
+        XCTAssertEqual(snippets.first?.evidence, source)
     }
 
     func testTwoReportsRequireSelectionAndExplicitNewUploadOpensChooser() throws {

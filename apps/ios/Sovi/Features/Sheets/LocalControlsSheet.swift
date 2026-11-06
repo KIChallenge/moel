@@ -109,7 +109,7 @@ struct LocalControlsSheet: View {
             do {
                 try DraftExportFiles.clear()
                 try PrototypeForm.clearExports()
-                if !reload { try chat.clearLocalData() } else { chat.reset() }
+                if !reload { try chat.clearLocalData() } else { chat.cancel() }
                 try store.perform(reload ? .reloadDemo : .deleteLocalData)
                 resultMessage = reload ? "Pfad zurückgesetzt." : "Daten gelöscht."
             } catch { self.error = error.localizedDescription }
