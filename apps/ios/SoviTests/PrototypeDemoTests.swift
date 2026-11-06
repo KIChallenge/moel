@@ -10,12 +10,20 @@ final class PrototypeDemoTests: XCTestCase {
         let container = try SoviStore.makeContainer(inMemory: true)
         let first = try SoviStore(container: container)
         try first.perform(.startWelcome)
+        XCTAssertTrue(first.state.welcome?.isGreetingStep == true)
+        XCTAssertThrowsError(try first.perform(.answerWelcome("Erika")))
+        try first.perform(.answerWelcome(String(localized: "Hi")))
+        XCTAssertTrue(first.state.welcome?.isTermsStep == true)
+        XCTAssertThrowsError(try first.perform(.answerWelcome(nil)))
+        try first.perform(.answerWelcome(String(localized: "Akzeptieren")))
         try first.perform(.answerWelcome("Erika"))
         try first.perform(.answerWelcome("Musterfrau"))
         XCTAssertThrowsError(try first.perform(.answerWelcome("32.13.2020")))
         let second = try SoviStore(container: container)
         XCTAssertEqual(second.state.welcome?.step, 2)
-        XCTAssertEqual(second.state.welcome?.history.count, 5)
+        XCTAssertEqual(second.state.welcome?.history.count, 10)
+        XCTAssertEqual(second.state.welcome?.acceptedTermsVersion, WelcomeProgress.termsVersion)
+        XCTAssertNotNil(second.state.welcome?.termsAcceptedAt)
         XCTAssertEqual(second.state.formPeople?.first?.values["firstName"], "Erika")
         XCTAssertTrue(second.state.conversation.isEmpty)
         try second.perform(.answerWelcome(nil, finish: true))
@@ -26,6 +34,8 @@ final class PrototypeDemoTests: XCTestCase {
     func testBothPermissionQuestionsFollowOptionalProfileQuestions() throws {
         let store = try makeStore()
         try store.perform(.startWelcome)
+        try store.perform(.answerWelcome(String(localized: "Hi")))
+        try store.perform(.answerWelcome(String(localized: "Akzeptieren")))
         for _ in WelcomeProgress.fields { try store.perform(.answerWelcome(nil)) }
         XCTAssertTrue(store.state.welcome?.isLocationStep == true)
         try store.perform(.answerWelcome("Ohne Standort weiter"))
@@ -33,6 +43,51 @@ final class PrototypeDemoTests: XCTestCase {
         try store.perform(.answerWelcome("Ohne Erinnerungen weiter"))
         XCTAssertTrue(store.state.welcome?.completed == true)
         XCTAssertFalse(store.state.notificationsEnabled)
+    }
+
+    func testSingleAddressAndContactValidationPreserveFormFields() throws {
+        let store = try makeStore()
+        try store.perform(.startWelcome)
+        try store.perform(.answerWelcome(String(localized: "Hi")))
+        try store.perform(.answerWelcome(String(localized: "Akzeptieren")))
+        try store.perform(.answerWelcome("Erika"))
+        try store.perform(.answerWelcome("Musterfrau"))
+        try store.perform(.answerWelcome("12.03.1960"))
+        XCTAssertTrue(store.state.welcome?.isAddressStep == true)
+        XCTAssertThrowsError(try store.perform(.answerWelcome("Wien")))
+        try store.perform(.answerWelcome("Straße des 8. Mai 12a, 1010 Wien"))
+        XCTAssertEqual(store.state.formPeople?.first?.values["street"], "Straße des 8. Mai")
+        XCTAssertEqual(store.state.formPeople?.first?.values["house"], "12a")
+        XCTAssertEqual(store.state.formPeople?.first?.values["postcode"], "1010")
+        XCTAssertEqual(store.state.welcome?.field, .phone)
+        for bad in ["123", "call me", "+43abc6601234567", "1234567890123456"] {
+            XCTAssertThrowsError(try store.perform(.answerWelcome(bad)))
+        }
+        XCTAssertEqual(store.state.welcome?.field, .phone)
+        try store.perform(.answerWelcome("+43 660 1234567"))
+        for bad in ["erika", "erika@invalid", "erika..test@example.invalid", "erika@-example.invalid"] {
+            XCTAssertThrowsError(try store.perform(.answerWelcome(bad)))
+        }
+        try store.perform(.answerWelcome("erika+test@example.invalid"))
+        XCTAssertThrowsError(try store.perform(.answerWelcome("12345678901")))
+        XCTAssertThrowsError(try store.perform(.answerWelcome("123456789a")))
+        try store.perform(.answerWelcome("1234567890"))
+        XCTAssertEqual(store.state.welcome?.field, .insurer)
+        XCTAssertTrue(store.state.conversation.isEmpty)
+    }
+
+    func testStructuredAddressAndLegacyWelcomeResume() throws {
+        var welcome = WelcomeProgress(personID: UUID(), step: 3)
+        var person = FormPerson()
+        let address = WelcomeAddress(street: "Musterstraße", house: "12", postcode: "1010", city: "Wien", country: "Österreich")
+        try welcome.recordAnswer(address.displayText, address: address, person: &person, now: Date())
+        XCTAssertEqual(person.address, "Musterstraße 12, 1010 Wien")
+        XCTAssertEqual(person.values["country"], "Österreich")
+        XCTAssertEqual(welcome.field, .phone)
+        let legacy = WelcomeProgress(personID: person.id, step: 8, flowVersion: nil)
+        let restored = try JSONDecoder().decode(WelcomeProgress.self, from: JSONEncoder().encode(legacy))
+        XCTAssertEqual(restored.field, .email)
+        XCTAssertFalse(restored.isLocationStep)
     }
 
     func testRelativeProfileAndFormDraftSurviveRestartAndClearWithDeletion() throws {
@@ -94,7 +149,7 @@ final class PrototypeDemoTests: XCTestCase {
         let progress = DemoScenarioProgress(scenario: .hospital)
         XCTAssertThrowsError(try progress.normalizedAnswer("Meine Schulter tut weh"))
         XCTAssertNoThrow(try progress.normalizedAnswer("Eine ambulante Rehabilitation wird empfohlen."))
-        XCTAssertTrue(DemoScenarioProgress.sampleLetter.contains("Fiktiv") || DemoScenarioProgress.sampleLetter.contains("Fictional"))
+        XCTAssertEqual(try progress.normalizedAnswer(progress.choices[0]), DemoScenarioProgress.sampleLetter)
     }
 
     func testSevenFormsPrefillOnlySelectedPersonAndExportInteractivePDFs() throws {

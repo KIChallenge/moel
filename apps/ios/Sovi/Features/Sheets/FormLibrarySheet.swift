@@ -3,17 +3,21 @@ import PDFKit
 
 struct FormLibrarySheet: View {
     @Environment(SoviStore.self) private var store
+    @Environment(\.locale) private var locale
     @State private var forms: [PrototypeForm] = []
     @State private var selectedPersonID: UUID?
     @State private var editingPerson: FormPerson?
+    @State private var newlyAddedID: UUID?
     @State private var showsWelcome = false
     @State private var error: String?
     var suggestedFormID: String?
     var requiresPersonSelection = false
     var caseScenario: DemoScenario?
+    var sourceDocumentID: UUID?
+    @State private var fieldSource: ReviewedApplicantFields?
 
     var body: some View {
-        SheetPage(title: "Profile und Formulare") {
+        SheetPage(title: "Profile und Formulare", closeIdentifier: "forms.close") {
             Text("Gespeicherte Angaben werden nur auf diesem Gerät für Entwürfe verwendet. Wähle zuerst die Person, für die das Formular bestimmt ist.").font(.subheadline)
             Picker("Person im Antrag", selection: $selectedPersonID) {
                 Text("Person auswählen").tag(nil as UUID?)
@@ -21,7 +25,19 @@ struct FormLibrarySheet: View {
             }.accessibilityIdentifier("forms.person")
             HStack {
                 if let person = selectedPerson { Button("Angaben bearbeiten") { editingPerson = person }.frame(minHeight: 44) }
-                Button("Person hinzufügen") { editingPerson = FormPerson(label: String(localized: "Angehörige Person")) }.frame(minHeight: 44)
+                Button("Person hinzufügen") {
+                    let person = FormPerson(label: String(localized: "Angehörige Person"))
+                    newlyAddedID = person.id
+                    editingPerson = person
+                }.frame(minHeight: 44)
+            }
+            if let source = sourceCandidate {
+                Button("Person aus diesem Befund übernehmen") {
+                    let person = source.person
+                    newlyAddedID = person.id
+                    fieldSource = source
+                    editingPerson = person
+                }.frame(minHeight: 44).accessibilityIdentifier("forms.personFromReport")
             }
             if store.state.welcome != nil {
                 Button("Willkommensgespräch ansehen") { showsWelcome = true }.frame(minHeight: 44)
@@ -32,7 +48,7 @@ struct FormLibrarySheet: View {
                         PrototypeFormEditor(form: form, person: person, caseScenario: caseScenario)
                     } label: {
                         VStack(alignment: .leading, spacing: 5) {
-                            Label(form.displayTitle, systemImage: "doc.text")
+                            Label(ChatLanguage(rawValue: locale.language.languageCode?.identifier ?? "")?.text(form.title) ?? form.displayTitle, systemImage: "doc.text")
                             Text("Entwurf vorbereiten · \(form.pages) Seiten").font(.caption)
                         }.frame(minHeight: 56)
                     }.accessibilityIdentifier("forms.open.\(form.id)")
@@ -47,20 +63,38 @@ struct FormLibrarySheet: View {
             }
             catch { self.error = error.localizedDescription }
         }
-        .sheet(item: $editingPerson, onDismiss: { if selectedPersonID == nil { selectedPersonID = store.state.formPeople?.last?.id } }) { FormPersonEditor(person: $0) }
+        .sheet(item: $editingPerson, onDismiss: {
+            if let id = newlyAddedID, store.state.formPeople?.contains(where: { $0.id == id }) == true { selectedPersonID = id }
+            newlyAddedID = nil
+            fieldSource = nil
+        }) { FormPersonEditor(person: $0, source: fieldSource) }
         .sheet(isPresented: $showsWelcome) { WelcomeChatView() }
         .onChange(of: selectedPersonID) { _, id in
-            if let id, let caseScenario {
-                do { try store.perform(.setCaseApplicant(caseScenario, id)) } catch { self.error = error.localizedDescription }
-            }
+            guard let id else { return }
+            do {
+                if let caseScenario { try store.perform(.setCaseApplicant(caseScenario, id)) }
+                else if let form = forms.first(where: { $0.id == suggestedFormID }), let person = selectedPerson {
+                    let draft = form.prefilledDraft(for: person)
+                    if store.state.formDrafts?[draft.storageKey] == nil {
+                        try store.perform(.saveFormDraft(draft.storageKey, draft))
+                    }
+                }
+            } catch { self.error = error.localizedDescription }
         }
         .sheetError($error)
+    }
+    private var sourceCandidate: ReviewedApplicantFields? {
+        let id = sourceDocumentID ?? caseScenario.flatMap { store.state.demoScenarios?[$0.rawValue]?.preparation?.sourceDocumentID }
+        guard let id, let document = store.document(id: id) else { return nil }
+        return ReviewedApplicantFields(document)
     }
     private var selectedPerson: FormPerson? { store.state.formPeople?.first { $0.id == selectedPersonID } }
     private var orderedForms: [PrototypeForm] {
         let filtered: [PrototypeForm]
         if let caseScenario, let progress = store.state.demoScenarios?[caseScenario.rawValue] {
             filtered = forms.filter { progress.preparation?.formIDs(for: progress).contains($0.id) == true }
+        } else if let suggestedFormID {
+            filtered = forms.filter { $0.id == suggestedFormID }
         } else { filtered = forms }
         return filtered.sorted { ($0.id == suggestedFormID ? 0 : 1) < ($1.id == suggestedFormID ? 0 : 1) }
     }
@@ -68,15 +102,23 @@ struct FormLibrarySheet: View {
 
 struct FormPersonEditor: View {
     @Environment(SoviStore.self) private var store
+    @Environment(\.locale) private var locale
     @Environment(\.dismiss) private var dismiss
     @State var person: FormPerson
+    var source: ReviewedApplicantFields?
     @State private var error: String?
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    Text("Nur auf diesem Gerät. Dieses Profil wird nicht mit der fiktiven Lebensgeschichte oder dem Online-Chat zusammengeführt.").font(.caption)
+                    Text("Deine Angaben bleiben auf diesem Gerät und werden nicht an den Online-Chat gesendet.").font(.caption)
                     TextField("Profilbezeichnung (z. B. Mutter)", text: $person.label)
+                }
+                if let source {
+                    Section {
+                        Text(source.document.displayTitle).font(.headline)
+                        ForEach(source.evidence.indices, id: \.self) { index in Text(source.evidence[index]).textSelection(.enabled) }
+                    } header: { Text("Angaben aus dem Befund prüfen") }
                 }
                 Section("Häufige Angaben") { ForEach(Array(PersonField.allCases.prefix(11))) { field in personInput(field) } }
                 Section("Weitere Angaben · freiwillig") { ForEach(Array(PersonField.allCases.dropFirst(11))) { field in personInput(field) } }
@@ -90,9 +132,10 @@ struct FormPersonEditor: View {
         }
     }
     private func personInput(_ field: PersonField) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(field.title).font(.caption).foregroundStyle(SoviTheme.secondary)
-            TextField(field.title, text: Binding(get: { person.values[field.rawValue] ?? "" }, set: { person.values[field.rawValue] = $0 }))
+        let label = field.title(in: ChatLanguage(rawValue: locale.language.languageCode?.identifier ?? "") ?? .app)
+        return VStack(alignment: .leading, spacing: 4) {
+            Text(label).font(.caption).foregroundStyle(SoviTheme.secondary)
+            TextField(label, text: Binding(get: { person.values[field.rawValue] ?? "" }, set: { person.values[field.rawValue] = $0 }))
                 .autocorrectionDisabled().textInputAutocapitalization(field == .email ? .never : .sentences)
                 .accessibilityIdentifier("profile.\(field.rawValue)")
         }
@@ -150,7 +193,6 @@ struct PrototypeFormEditor: View {
                 }
                 Button("PDF prüfen") { do { preview = try form.document(values: values); showsPreview = true } catch { self.error = error.localizedDescription } }
                     .buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("form.preview")
-                Button("Entwurf speichern") { save() }.buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("form.save")
                 Button("PDF-Entwurf teilen") {
                     guard save() else { return }
                     do { shared = SharedFile(url: try form.export(values: values)) } catch { self.error = error.localizedDescription }
@@ -158,6 +200,12 @@ struct PrototypeFormEditor: View {
                 if saved { Label("Gespeichert", systemImage: "checkmark.circle") }
             }.padding(24).frame(maxWidth: 640).frame(maxWidth: .infinity)
         }.background(SoviTheme.background).foregroundStyle(SoviTheme.ink).navigationTitle(form.displayTitle).navigationBarTitleDisplayMode(.inline)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                Button(saved ? "Gespeichert" : "Entwurf speichern") { save() }
+                    .buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("form.save")
+                    .padding(.horizontal, 24).padding(.vertical, 12)
+                    .frame(maxWidth: .infinity).background(SoviTheme.background)
+            }
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button("Speichern") { save() }.accessibilityIdentifier("form.save.top")

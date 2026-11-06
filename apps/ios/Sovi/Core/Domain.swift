@@ -24,7 +24,7 @@ enum NodeKind: String, Codable, CaseIterable, Identifiable, Sendable {
 }
 
 enum TaskStatus: String, Codable, CaseIterable, Identifiable, Sendable {
-    case open, inProgress, waiting, completed, cancelled
+    case open, inProgress, waiting, completed, notDone, cancelled
     var id: String { rawValue }
     var displayTitle: String {
         switch self {
@@ -32,6 +32,7 @@ enum TaskStatus: String, Codable, CaseIterable, Identifiable, Sendable {
         case .inProgress: String(localized: "In Arbeit")
         case .waiting: String(localized: "Wartet")
         case .completed: String(localized: "Erledigt")
+        case .notDone: String(localized: "Nicht erledigt")
         case .cancelled: String(localized: "Abgebrochen")
         }
     }
@@ -41,6 +42,7 @@ enum TaskStatus: String, Codable, CaseIterable, Identifiable, Sendable {
         case .inProgress: "arrow.trianglehead.2.clockwise"
         case .waiting: "clock"
         case .completed: "checkmark"
+        case .notDone: "xmark"
         case .cancelled: "xmark"
         }
     }
@@ -136,6 +138,7 @@ struct DocumentPageSpan: Codable, Equatable, Sendable {
     var pageNumber: Int
     var utf16Start: Int
     var utf16Length: Int
+    var usedTextRecognition: Bool?
 }
 
 struct SourceDocument: Codable, Equatable, Identifiable, Sendable {
@@ -197,6 +200,7 @@ struct AppointmentRecord: Codable, Equatable, Identifiable, Sendable {
     var location: String = ""
     var status: AppointmentStatus = .requestDraft
     var attendance: Attendance = .unrecorded
+    var checkInDeferredUntil: Date?
     var provenance: String = "Von dir erfasst."
     var preparation: String = ""
     var createdAt = Date()
@@ -214,6 +218,11 @@ struct ConversationTurn: Codable, Equatable, Identifiable, Sendable {
     var role: String
     var text: String
     var date: Date
+    var attendanceQuestionID: UUID?
+    var attendanceAnswerID: UUID?
+    var attachmentDocumentID: UUID?
+    var attachmentEventIDs: [UUID]?
+    var replyDocumentID: UUID?
 }
 
 struct AppState: Codable, Equatable, Sendable {
@@ -235,6 +244,7 @@ struct AppState: Codable, Equatable, Sendable {
     var fixtureTimeZoneIdentifier: String = "Europe/Vienna"
     var processedOperationIDs: Set<UUID> = []
     var focusContextID: UUID?
+    var discussedDocumentID: UUID?
     var vaccinationPassVersion: Int?
     var formPeople: [FormPerson]?
     var welcome: WelcomeProgress?
@@ -243,17 +253,23 @@ struct AppState: Codable, Equatable, Sendable {
 }
 
 enum AppCommand {
+    case linkCareReport(UUID, ChatLanguage)
+    case leaveDocumentDiscussion
+    case discussDocument(documentID: UUID?, question: String?, reply: String, eventIDs: [UUID]? = nil)
+    case adoptBefundActions(documentID: UUID, selectedIDs: Set<UUID>, language: String)
+    case importVaccinations(documentID: UUID, selectedIDs: Set<UUID>)
     case useCaseDocument(UUID)
     case reviewCaseRecommendation(UUID, Bool)
     case answerCaseQuestion(String, String)
     case restartCaseQuestions
     case setCaseDocument(DemoScenario, String, Bool)
     case setCaseApplicant(DemoScenario, UUID)
-    case startScenario(DemoScenario)
+    case startScenario(DemoScenario, language: ChatLanguage? = nil, opening: String? = nil)
     case answerScenario(DemoScenario, String)
     case saveScenarioSteps(DemoScenario)
     case startWelcome
     case answerWelcome(String?, finish: Bool = false)
+    case answerWelcomeAddress(WelcomeAddress)
     case savePerson(FormPerson)
     case saveFormDraft(String, SavedFormDraft)
     case setTask(UUID, TaskStatus)
@@ -262,6 +278,9 @@ enum AppCommand {
     case rejectProposal(documentID: UUID, proposalID: UUID, revision: Int)
     case addNode(kind: NodeKind, title: String, detail: String, date: Date?, location: String, appointmentStatus: AppointmentStatus, operationID: UUID = UUID())
     case editAppointment(AppointmentRecord)
+    case recordAttendance(UUID, Attendance)
+    case beginAttendanceCheckIn(nodeID: UUID, question: String, userMessage: String? = nil)
+    case answerAttendanceCheckIn(nodeID: UUID, attendance: Attendance?, answer: String, confirmation: String)
     case recordMedication(scheduleID: UUID, occurrenceID: UUID, log: MedicationLog)
     case saveDraft(String)
     case saveLifeDraft(LifeDraftKind, String)
@@ -289,6 +308,29 @@ enum SoviError: LocalizedError {
 }
 
 // Presentation copy is separate from saved records and original evidence.
+
+extension ConversationTurn {
+    var displayText: String {
+        switch text {
+        case "Was wurde im Entlassungsbrief ausdrücklich empfohlen? Du kannst einen Satz abschreiben oder den fiktiven Beispielbrief verwenden.",
+             "What was explicitly recommended in the discharge letter? Copy a sentence or use the fictional sample letter.":
+            return String(localized: "Was wurde im Entlassungsbrief empfohlen? Du kannst einen Satz abschreiben oder einen Brief öffnen.")
+        case "Fiktiver Beispielbrief: Eine ambulante Rehabilitation wird empfohlen. Eine ärztliche Nachkontrolle soll vereinbart werden.",
+             "Fictional sample letter: Outpatient rehabilitation is recommended. A medical follow-up appointment should be arranged.":
+            return String(localized: "Eine ambulante Rehabilitation wird empfohlen. Eine ärztliche Nachkontrolle soll vereinbart werden.")
+        case "Für diese Demo brauche ich eine ausdrückliche Empfehlung zu Rehabilitation oder Nachkontrolle. Oder verwende den fiktiven Beispielbrief.",
+             "For this demo, use an explicit recommendation for rehabilitation or follow-up, or choose the fictional sample letter.":
+            return String(localized: "Bitte übernimm die Empfehlung zu Reha oder Nachkontrolle aus deinem Brief. Du kannst auch einen Brief öffnen.")
+        case "Wähle für diese Demo eine der Möglichkeiten. Andere Anliegen kannst du im normalen Chat stellen.",
+             "Choose one of the options for this demo. Use the main chat for other requests.":
+            return String(localized: "Bitte wähle eine der Möglichkeiten. Andere Anliegen kannst du im Chat stellen.")
+        case "Dokument ausgewählt: demo-discharge-navigation.pdf", "Document selected: demo-discharge-navigation.pdf":
+            return String(localized: "Dokument ausgewählt: \(String(localized: "Entlassungsbrief"))")
+        default: return text
+        }
+    }
+}
+
 extension SourceDocument {
     var displayTitle: String {
         switch fixtureID?.uppercased() {
@@ -382,6 +424,7 @@ private enum RecordPresentation {
         case "Demo A · vollständige Entlassungsunterlage", "Entlassungsbrief": return String(localized: "Entlassungsbrief")
         case "Demo B · unvollständige Medikationsangabe", "Medikationsangaben": return String(localized: "Medikationsangaben")
         case "Demo C · fachfremder Text", "Weitere Unterlage": return String(localized: "Weitere Unterlage")
+        case "demo-discharge-navigation.pdf": return String(localized: "Entlassungsbrief")
         case "33 Jahre · synthetische Textvorlage": return String(localized: "Lebensverlauf")
         default: return title
         }

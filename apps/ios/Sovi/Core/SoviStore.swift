@@ -3,6 +3,13 @@ import Foundation
 import Observation
 import SwiftData
 
+struct ChatDocumentImportResult {
+    let document: SourceDocument
+    let eventIDs: [UUID]
+    let addedEventIDs: [UUID]
+    let reply: String
+}
+
 @Model
 final class SoviSnapshot {
     @Attribute(.unique) var key: String
@@ -90,23 +97,111 @@ final class SoviStore {
         try importDocument(text, title: title, fixtureID: nil, pdfData: pdfData, pageSpans: pageSpans)
     }
 
+    /// Save the local attachment, its historical events, and the chat receipt in one snapshot.
+    func importChatAttachment(_ input: CaseDocumentImport.Contents, title: String, language: ChatLanguage) throws -> ChatDocumentImportResult {
+        do {
+            var updated = state
+            let document = try prepareDocument(input.text, title: title, fixtureID: nil, pdfData: input.pdf, pageSpans: input.pageSpans, in: &updated)
+            let importedAt = now
+            let recordedBefore = Set(state.nodes.map(\.id))
+            let eventIDs: [UUID]
+            var unreadableRows = 0
+            if let pass = VaccinationImport.review(document, calendar: updated.pathCalendar, asOf: importedAt) {
+                eventIDs = VaccinationImport.record(pass.entries, from: document, in: &updated, now: importedAt)
+                unreadableRows = pass.unreadableRows
+            } else {
+                let events = BefundReader.lifeEvents(in: document, calendar: updated.pathCalendar, asOf: importedAt, language: language.rawValue)
+                eventIDs = events.map(\.id)
+                for event in events {
+                    let evidence = [event.evidence] + event.modalityEvidence
+                    if let index = updated.nodes.firstIndex(where: { $0.id == event.id }) {
+                        guard updated.nodes[index].kind == .event, updated.nodes[index].evidence.contains(where: { $0.documentID == document.id })
+                        else { throw SoviError.invalidAction }
+                        // Reattaching a PDF can supply page numbers previously unavailable from text.
+                        let otherSources = updated.nodes[index].evidence.filter { $0.documentID != document.id }
+                        updated.nodes[index].evidence = evidence + otherSources
+                    } else {
+                        updated.nodes.append(PathNode(id: event.id, kind: .event, title: event.title, detail: event.evidence.quote,
+                                                      chapter: 4, evidence: evidence, createdAt: importedAt, date: event.date))
+                    }
+                }
+            }
+            let addedIDs = eventIDs.filter { !recordedBefore.contains($0) }
+            var reply: String
+            if eventIDs.isEmpty {
+                reply = language.text("Dokument gespeichert. Ich habe kein eindeutig datiertes Ereignis gefunden.")
+            } else if addedIDs.isEmpty {
+                reply = language.text("Diese Ereignisse stehen bereits auf deinem Pfad.")
+            } else if addedIDs.count == 1 {
+                reply = language.text("Ich habe ein Ereignis in deinen Pfad eingetragen.")
+            } else {
+                reply = language.localized("Ich habe \(addedIDs.count) Ereignisse in deinen Pfad eingetragen.")
+            }
+            if unreadableRows > 0 { reply += " " + language.text("Bitte prüfe unvollständige Impfzeilen im Original.") }
+            updated.conversation.append(ConversationTurn(role: "user", text: document.title, date: importedAt, attachmentDocumentID: document.id))
+            updated.conversation.append(ConversationTurn(role: "assistant", text: reply, date: importedAt,
+                                                        attachmentEventIDs: eventIDs, replyDocumentID: document.id))
+            updated.focusContextID = nil
+            updated.discussedDocumentID = document.id
+            try commit(updated)
+            return ChatDocumentImportResult(document: document, eventIDs: eventIDs, addedEventIDs: addedIDs, reply: reply)
+        } catch {
+            errorMessage = error.localizedDescription
+            throw error
+        }
+    }
+
     func perform(_ command: AppCommand) throws {
         do {
             var updated = state
             switch command {
+            case .linkCareReport(let id, let language):
+                guard let doc = updated.documents.first(where: { $0.id == id }),
+                      BefundReader.review(doc, language: language.rawValue)?.actions.contains(where: \.isCareRequest) == true else {
+                    throw SoviError.invalidAction
+                }
+                var progress = updated.demoScenarios?["care"] ?? DemoScenarioProgress(scenario: .care)
+                progress.language = language
+                var prep = progress.preparation ?? CasePreparation()
+                prep.sourceDocumentID = id
+                progress.preparation = prep
+                if progress.history.isEmpty { progress.history.append(ConversationTurn(role: "assistant", text: progress.question, date: now)) }
+                if updated.demoScenarios == nil { updated.demoScenarios = [:] }
+                updated.demoScenarios?["care"] = progress
+            case .leaveDocumentDiscussion:
+                guard updated.discussedDocumentID != nil else { return }
+                updated.discussedDocumentID = nil
+            case .discussDocument(let id, let question, let reply, let eventIDs):
+                if let id, !updated.documents.contains(where: { $0.id == id }) { throw SoviError.missingRecord }
+                guard (question?.count ?? 0) <= 20_000, !reply.isEmpty, reply.count <= 20_000 else { throw SoviError.invalidAction }
+                if let eventIDs {
+                    guard let id, Set(eventIDs).count == eventIDs.count, eventIDs.allSatisfy({ eventID in
+                        updated.nodes.contains { $0.id == eventID && $0.evidence.contains { $0.documentID == id } }
+                    }) else { throw SoviError.invalidAction }
+                }
+                if let question { updated.conversation.append(ConversationTurn(role: "user", text: question, date: now)) }
+                updated.conversation.append(ConversationTurn(role: "assistant", text: reply, date: now,
+                                                            attachmentEventIDs: eventIDs, replyDocumentID: id))
+                updated.discussedDocumentID = id
+                updated.focusContextID = nil
+                updated.composerDraft = ""
+            case .adoptBefundActions(let id, let selected, let language):
+                try BefundReader.apply(documentID: id, selectedIDs: selected, language: language, to: &updated, now: now)
+            case .importVaccinations(let id, let selected):
+                try VaccinationImport.apply(documentID: id, selectedIDs: selected, to: &updated, now: now)
             case .useCaseDocument(let id):
                 guard let document = updated.documents.first(where: { $0.id == id }) else { throw SoviError.missingRecord }
                 let recommendations = DischargeNavigationExtractor.recommendations(in: document)
                 guard !recommendations.isEmpty else { throw SoviError.invalidInput(String(localized: "Keine unterstützte ausdrückliche Empfehlung gefunden. Du kannst den Brief ansehen oder die behandelnde Stelle fragen.")) }
                 var progress = updated.demoScenarios?["hospital"] ?? DemoScenarioProgress(scenario: .hospital)
                 if progress.preparation?.sourceDocumentID == id { return }
-                var prep = CasePreparation()
+                var prep = CasePreparation(applicantID: progress.preparation?.applicantID)
                 prep.sourceDocumentID = id; prep.recommendations = recommendations
                 let time = progress.answers.dropFirst().first
                 progress.answers = [recommendations.map { $0.evidence.quote }.joined(separator: "\n")] + (time.map { [$0] } ?? [])
                 progress.preparation = prep; progress.saved = false
-                progress.history.append(ConversationTurn(role: "user", text: String(localized: "Dokument ausgewählt: \(document.title)"), date: now))
-                progress.history.append(ConversationTurn(role: "assistant", text: String(localized: "Ich habe ausdrückliche Empfehlungen gefunden. Bitte prüfe die Zitate im Original, bevor du sie übernimmst."), date: now))
+                progress.history.append(ConversationTurn(role: "user", text: progress.replyLanguage.localized("Dokument ausgewählt: \(document.displayTitle)"), date: now))
+                progress.history.append(ConversationTurn(role: "assistant", text: progress.replyLanguage.text("Ich habe ausdrückliche Empfehlungen gefunden. Bitte prüfe die Zitate im Original, bevor du sie übernimmst."), date: now))
                 if updated.demoScenarios == nil { updated.demoScenarios = [:] }
                 updated.demoScenarios?["hospital"] = progress
 
@@ -135,7 +230,7 @@ final class SoviStore {
                 prep.answers[key] = value
                 progress.history.append(ConversationTurn(role: "user", text: choice.1, date: now))
                 progress.preparation = prep
-                progress.history.append(ConversationTurn(role: "assistant", text: prep.nextQuestion(for: progress)?.text ?? String(localized: "Jetzt können wir die zuständige Stelle, Angaben und Unterlagen gemeinsam prüfen."), date: now))
+                progress.history.append(ConversationTurn(role: "assistant", text: prep.nextQuestion(for: progress)?.text ?? progress.replyLanguage.text("Jetzt können wir die zuständige Stelle, Angaben und Unterlagen gemeinsam prüfen."), date: now))
                 updated.demoScenarios?["care"] = progress
 
             case .setCaseDocument(let scenario, let key, let present):
@@ -153,16 +248,23 @@ final class SoviStore {
                 prep.applicantID = id; progress.preparation = prep
                 updated.demoScenarios?[scenario.rawValue] = progress
 
-            case .startScenario(let scenario):
-                if var existing = updated.demoScenarios?[scenario.rawValue] {
-                    guard [.care, .hospital].contains(scenario), existing.preparation == nil else { return }
-                    existing.preparation = CasePreparation(); updated.demoScenarios?[scenario.rawValue] = existing
-                    break
+            case .startScenario(let scenario, let language, let opening):
+                let existing = updated.demoScenarios?[scenario.rawValue]
+                var progress = existing ?? DemoScenarioProgress(scenario: scenario)
+                if let language { progress.language = language }
+                if [.care, .hospital].contains(scenario), progress.preparation == nil { progress.preparation = CasePreparation() }
+                if let opening, !opening.isEmpty {
+                    progress.history.append(ConversationTurn(role: "user", text: opening, date: now))
+                    if progress.answers.isEmpty, [.care, .health].contains(scenario), let choice = progress.recognizedChoice(opening) {
+                        progress.answers.append(choice)
+                    }
                 }
+                if existing == nil || opening != nil || (language != nil && language != existing?.language) {
+                    let prompt = progress.finished ? progress.preparation?.nextQuestion(for: progress)?.text ?? progress.summary : progress.question
+                    progress.history.append(ConversationTurn(role: "assistant", text: prompt, date: now))
+                }
+                guard existing != progress else { return }
                 if updated.demoScenarios == nil { updated.demoScenarios = [:] }
-                var progress = DemoScenarioProgress(scenario: scenario)
-                if [.care, .hospital].contains(scenario) { progress.preparation = CasePreparation() }
-                progress.history = [ConversationTurn(role: "assistant", text: progress.question, date: now)]
                 updated.demoScenarios?[scenario.rawValue] = progress
 
             case .answerScenario(let scenario, let answer):
@@ -182,12 +284,21 @@ final class SoviStore {
                     guard let prep = progress.preparation, prep.sourceDocumentID != nil,
                           prep.recommendations.contains(where: \.reviewed) else { throw SoviError.invalidAction }
                 }
+                let reportActions = progress.preparation?.sourceDocumentID.flatMap { id in
+                    updated.documents.first(where: { $0.id == id }).flatMap { BefundReader.review($0, language: progress.replyLanguage.rawValue)?.actions }
+                } ?? []
                 for (index, title) in progress.steps.enumerated() {
                     let id = progress.taskID(index)
-                    guard !updated.nodes.contains(where: { $0.id == id }) else { throw SoviError.invalidAction }
                     let detail = progress.history.filter { $0.role == "user" }.map(\.text).joined(separator: "\n") + "\n\n" + progress.summary + "\n\n" + progress.sources.map { $0.0 + ": " + $0.1 }.joined(separator: "\n")
                     let evidence = scenario == .hospital ? (index == 0 ? progress.preparation?.recommendations.filter(\.reviewed).map(\.evidence) : progress.preparation?.recommendations.filter(\.reviewed).dropFirst(index - 1).first.map { [$0.evidence] }) ?? [] : []
-                    updated.nodes.append(PathNode(id: id, kind: .task, title: title, detail: detail, evidence: evidence, createdAt: now))
+                    if let existing = updated.nodes.first(where: { $0.id == id }) {
+                        guard scenario == .hospital, existing.kind == .task,
+                              evidence.contains(where: { source in existing.evidence.contains { $0.documentID == source.documentID && $0.quote == source.quote } })
+                        else { throw SoviError.invalidAction }
+                        continue
+                    }
+                    let date = reportActions.first { $0.id == id }?.date
+                    updated.nodes.append(PathNode(id: id, kind: .task, title: title, detail: detail, evidence: evidence, createdAt: now, date: date))
                 }
                 progress.saved = true
                 updated.demoScenarios?[scenario.rawValue] = progress
@@ -196,20 +307,24 @@ final class SoviStore {
                 guard updated.welcome == nil else { return }
                 let person = FormPerson(isSelf: true)
                 updated.formPeople = (updated.formPeople ?? []) + [person]
-                updated.welcome = WelcomeProgress(personID: person.id, history: [ConversationTurn(role: "assistant", text: PersonField.firstName.question, date: now)])
+                var welcome = WelcomeProgress(personID: person.id)
+                welcome.history = [ConversationTurn(role: "assistant", text: welcome.question, date: now)]
+                updated.welcome = welcome
 
             case .answerWelcome(let answer, let finish):
                 guard var welcome = updated.welcome, !welcome.completed,
                       let personIndex = updated.formPeople?.firstIndex(where: { $0.id == welcome.personID }) else { throw SoviError.invalidAction }
-                let value = answer?.trimmingCharacters(in: .whitespacesAndNewlines)
-                if let field = welcome.field {
-                    if let value, let error = field.validate(value) { throw SoviError.invalidInput(error) }
-                    if let value, !value.isEmpty { updated.formPeople?[personIndex].values[field.rawValue] = value }
-                }
-                welcome.history.append(ConversationTurn(role: "user", text: value ?? String(localized: finish ? "Später ergänzen" : "Überspringen"), date: now))
-                welcome.step = finish ? WelcomeProgress.fields.count + 2 : welcome.step + 1
-                welcome.completed = welcome.step >= WelcomeProgress.fields.count + 2
-                welcome.history.append(ConversationTurn(role: "assistant", text: welcome.completed ? String(localized: "Danke! Deine Angaben bleiben auf diesem Gerät. Du kannst sie für jeden Formularentwurf prüfen und ändern. Wobei kann ich dir helfen?") : welcome.question, date: now))
+                var person = updated.formPeople![personIndex]
+                try welcome.recordAnswer(answer, finish: finish, person: &person, now: now)
+                updated.formPeople?[personIndex] = person
+                updated.welcome = welcome
+
+            case .answerWelcomeAddress(let address):
+                guard var welcome = updated.welcome, welcome.isAddressStep, !welcome.completed,
+                      let personIndex = updated.formPeople?.firstIndex(where: { $0.id == welcome.personID }) else { throw SoviError.invalidAction }
+                var person = updated.formPeople![personIndex]
+                try welcome.recordAnswer(address.displayText, address: address, person: &person, now: now)
+                updated.formPeople?[personIndex] = person
                 updated.welcome = welcome
 
             case .savePerson(let person):
@@ -300,6 +415,54 @@ final class SoviStore {
                 updated.nodes.append(node)
                 updated.processedOperationIDs.insert(operationID)
 
+            case .recordAttendance(let id, let attendance):
+                guard let index = updated.appointments.firstIndex(where: { $0.id == id }),
+                      updated.appointments[index].status != .cancelled else { throw SoviError.invalidAction }
+                let day = updated.pathCalendar.startOfDay(for: updated.appointments[index].date)
+                guard attendance == .unrecorded || day <= updated.pathCalendar.startOfDay(for: now) else {
+                    throw SoviError.invalidInput(String(localized: "Die Teilnahme kannst du ab dem Tag des Termins eintragen."))
+                }
+                updated.appointments[index].attendance = attendance
+                updated.appointments[index].checkInDeferredUntil = nil
+                updated.appointments[index].updatedAt = now
+
+            case .beginAttendanceCheckIn(let nodeID, let question, let userMessage):
+                guard let id = updated.nodes.first(where: { $0.id == nodeID })?.appointmentID,
+                      let record = updated.appointments.first(where: { $0.id == id }),
+                      record.needsAttendanceCheck(at: now), !question.isEmpty, question.count <= 20_000,
+                      (userMessage?.count ?? 0) <= 20_000 else { throw SoviError.invalidAction }
+                updated.focusContextID = nodeID
+                updated.discussedDocumentID = nil
+                if let userMessage {
+                    updated.conversation.append(ConversationTurn(role: "user", text: userMessage, date: now))
+                    updated.composerDraft = ""
+                }
+                if updated.conversation.last?.attendanceQuestionID != nodeID || updated.conversation.last?.text != question {
+                    updated.conversation.append(ConversationTurn(role: "assistant", text: question, date: now, attendanceQuestionID: nodeID))
+                }
+
+            case .answerAttendanceCheckIn(let nodeID, let attendance, let answer, let confirmation):
+                let answeredAt = now
+                guard updated.focusContextID == nodeID, updated.conversation.last?.attendanceQuestionID == nodeID,
+                      let id = updated.nodes.first(where: { $0.id == nodeID })?.appointmentID,
+                      let index = updated.appointments.firstIndex(where: { $0.id == id }),
+                      updated.appointments[index].needsAttendanceCheck(at: answeredAt),
+                      attendance != .unrecorded,
+                      !answer.isEmpty, answer.count <= 20_000, !confirmation.isEmpty, confirmation.count <= 20_000
+                else { throw SoviError.invalidAction }
+                if let attendance {
+                    updated.appointments[index].attendance = attendance
+                    updated.appointments[index].checkInDeferredUntil = nil
+                } else {
+                    let calendar = updated.pathCalendar
+                    guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: answeredAt))
+                    else { throw SoviError.invalidAction }
+                    updated.appointments[index].checkInDeferredUntil = tomorrow
+                }
+                updated.appointments[index].updatedAt = answeredAt
+                updated.conversation.append(ConversationTurn(role: "user", text: answer, date: answeredAt, attendanceAnswerID: nodeID))
+                updated.conversation.append(ConversationTurn(role: "assistant", text: confirmation, date: answeredAt))
+
             case .editAppointment(var record):
                 guard let index = updated.appointments.firstIndex(where: { $0.id == record.id }) else { throw SoviError.missingRecord }
                 record.title = try Self.validTitle(record.title)
@@ -362,6 +525,15 @@ final class SoviStore {
             case .reloadDemo:
                 updated = try Self.seed(now: now, calendar: calendar)
             }
+            switch command {
+            case .setCaseApplicant(let scenario, _), .answerScenario(let scenario, _):
+                try prepareMatchedForms(in: &updated, for: scenario)
+            case .answerCaseQuestion:
+                try prepareMatchedForms(in: &updated, for: .care)
+            case .reviewCaseRecommendation:
+                try prepareMatchedForms(in: &updated, for: .hospital)
+            default: break
+            }
             try commit(updated)
         } catch {
             errorMessage = error.localizedDescription
@@ -423,34 +595,47 @@ final class SoviStore {
 
     private func importDocument(_ text: String, title: String, fixtureID: String?, pdfData: Data? = nil, pageSpans: [DocumentPageSpan]? = nil) throws -> SourceDocument {
         do {
-            let normalized = DemoPlanExtractor.normalized(text)
-            guard !normalized.isEmpty else { throw SoviError.invalidInput(String(localized: "Kein lesbarer Text gefunden.")) }
-            guard normalized.utf8.count <= 2_000_000 else { throw SoviError.invalidInput(String(localized: "Textdatei zu groß. Maximal 2 MB.")) }
-            guard (pdfData?.count ?? 0) <= 5 * 1024 * 1024 else { throw SoviError.invalidInput(String(localized: "Leere Datei oder größer als 5 MB.")) }
-            if let pageSpans {
-                guard pdfData != nil, pageSpans.count <= 100,
-                      pageSpans.allSatisfy({ (1...100).contains($0.pageNumber) && $0.utf16Start >= 0 && $0.utf16Length >= 0 && $0.utf16Start <= (normalized as NSString).length - $0.utf16Length }) else { throw SoviError.invalidAction }
-            }
-            let fingerprint = SHA256.hash(data: Data(normalized.utf8)).map { String(format: "%02x", $0) }.joined()
-            if let index = state.documents.firstIndex(where: { $0.originalFingerprint == fingerprint }) {
-                if state.documents[index].importedPDFData == nil, let pdfData {
-                    var updated = state; updated.documents[index].importedPDFData = pdfData; updated.documents[index].pageSpans = pageSpans; try commit(updated)
-                }
-                return state.documents[index]
-            }
-            var document = SourceDocument(title: try Self.validTitle(title), text: normalized,
-                                          importedAt: now, originalFingerprint: fingerprint, fixtureID: fixtureID)
-            document.importedPDFData = pdfData
-            document.pageSpans = pageSpans
-            document.proposals = try extractor.extract(document: document, anchor: state.fixtureEpoch, calendar: calendar)
             var updated = state
-            updated.documents.append(document)
-            try commit(updated)
+            let document = try prepareDocument(text, title: title, fixtureID: fixtureID, pdfData: pdfData, pageSpans: pageSpans, in: &updated)
+            if updated.documents != state.documents { try commit(updated) }
             return document
         } catch {
             errorMessage = error.localizedDescription
             throw error
         }
+    }
+
+    private func prepareDocument(_ text: String, title: String, fixtureID: String?, pdfData: Data?, pageSpans: [DocumentPageSpan]?, in updated: inout AppState) throws -> SourceDocument {
+        let normalized = DemoPlanExtractor.normalized(text)
+        guard !normalized.isEmpty else { throw SoviError.invalidInput(String(localized: "Kein lesbarer Text gefunden.")) }
+        guard normalized.utf8.count <= 2_000_000 else { throw SoviError.invalidInput(String(localized: "Textdatei zu groß. Maximal 2 MB.")) }
+        guard (pdfData?.count ?? 0) <= 5 * 1024 * 1024 else { throw SoviError.invalidInput(String(localized: "Leere Datei oder größer als 5 MB.")) }
+        if let pageSpans {
+            let length = (normalized as NSString).length
+            guard pdfData != nil, pageSpans.count <= 100,
+                  pageSpans.allSatisfy({ (1...100).contains($0.pageNumber) && $0.utf16Start >= 0 && $0.utf16Length >= 0 && $0.utf16Start <= length - $0.utf16Length })
+            else { throw SoviError.invalidAction }
+        }
+        let fingerprint = SHA256.hash(data: Data(normalized.utf8)).map { String(format: "%02x", $0) }.joined()
+        if let index = updated.documents.firstIndex(where: { existing in
+            if let original = existing.importedPDFData, let pdfData { return original == pdfData }
+            return existing.originalFingerprint == fingerprint
+        }) {
+            if updated.documents[index].importedPDFData == nil, let pdfData {
+                updated.documents[index].importedPDFData = pdfData
+                updated.documents[index].pageSpans = pageSpans
+            } else if updated.documents[index].pageSpans == nil, let pageSpans, updated.documents[index].text == normalized {
+                updated.documents[index].pageSpans = pageSpans
+            }
+            return updated.documents[index]
+        }
+        var document = SourceDocument(title: try Self.validTitle(title), text: normalized,
+                                      importedAt: now, originalFingerprint: fingerprint, fixtureID: fixtureID)
+        document.importedPDFData = pdfData
+        document.pageSpans = pageSpans
+        document.proposals = try extractor.extract(document: document, anchor: updated.fixtureEpoch, calendar: calendar)
+        updated.documents.append(document)
+        return document
     }
 
     private func approvedNode(_ proposal: PlanProposal, title: String, state updated: inout AppState) throws -> PathNode {
@@ -495,6 +680,22 @@ final class SoviStore {
             node.scheduleID = schedule.id
         }
         return node
+    }
+
+    private func prepareMatchedForms(in state: inout AppState, for scenario: DemoScenario) throws {
+        guard let progress = state.demoScenarios?[scenario.rawValue], progress.finished,
+              let prep = progress.preparation, prep.nextQuestion(for: progress) == nil,
+              let person = state.formPeople?.first(where: { $0.id == prep.applicantID }) else { return }
+        let ids = prep.formIDs(for: progress)
+        guard !ids.isEmpty else { return }
+        let forms = try PrototypeForm.load()
+        for id in ids {
+            let key = id + ":" + person.id.uuidString
+            guard state.formDrafts?[key] == nil else { continue }
+            guard let form = forms.first(where: { $0.id == id }) else { throw SoviError.missingRecord }
+            if state.formDrafts == nil { state.formDrafts = [:] }
+            state.formDrafts?[key] = form.prefilledDraft(for: person, caseProgress: progress)
+        }
     }
 
     private func commit(_ updated: AppState) throws {

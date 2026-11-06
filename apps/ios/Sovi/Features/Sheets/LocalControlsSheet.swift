@@ -14,7 +14,7 @@ struct LocalControlsSheet: View {
     @State private var resultMessage: String?
 
     var body: some View {
-        SheetPage(title: "Einstellungen") {
+        SheetPage(title: "Einstellungen", startsCompact: true) {
             SheetSection(title: "Datenschutz") {
                 Label("Auf diesem Gerät gespeichert", systemImage: "lock.shield")
                     .font(.subheadline)

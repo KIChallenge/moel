@@ -3,8 +3,12 @@ import UIKit
 
 struct SheetPage<Content: View>: View {
     let title: String
+    var closeIdentifier = "sheet.close"
+    var startsCompact = false
     @ViewBuilder let content: Content
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var textSize
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     var body: some View {
         NavigationStack {
@@ -14,17 +18,27 @@ struct SheetPage<Content: View>: View {
                     .frame(maxWidth: 640, alignment: .leading)
                     .frame(maxWidth: .infinity)
             }
-            .background(SoviTheme.background)
+            .accessibilityIdentifier("sheet.content")
+            .background(reduceTransparency ? SoviTheme.background : .clear)
             .foregroundStyle(SoviTheme.ink)
             .navigationTitle(Text(LocalizedStringKey(title)))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Schließen", systemImage: "xmark") { dismiss() }
+                        .accessibilityIdentifier(closeIdentifier)
                 }
             }
         }
         .tint(SoviTheme.accent)
+        .presentationDetents(startsCompact && !textSize.isAccessibilitySize ? [.medium, .large] : [.large])
+        .presentationDragIndicator(.visible)
+        .presentationCornerRadius(32)
+        .presentationContentInteraction(.resizes)
+        .presentationBackground {
+            if reduceTransparency { SoviTheme.background }
+            else { Rectangle().fill(.regularMaterial) }
+        }
     }
 }
 
@@ -63,7 +77,7 @@ struct EvidenceSheet: View {
     @State private var showsPDF = false
 
     var body: some View {
-        SheetPage(title: "Quelle") {
+        SheetPage(title: "Quelle", startsCompact: true) {
             Label(evidence.displayDocumentTitle, systemImage: "doc.text")
                 .font(.headline)
             Text(evidence.locator).font(.subheadline).foregroundStyle(SoviTheme.secondary)

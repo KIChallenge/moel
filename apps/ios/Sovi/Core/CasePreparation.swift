@@ -6,11 +6,12 @@ struct CaseRecommendation: Codable, Equatable, Identifiable, Sendable {
     var kind: Kind
     var evidence: EvidenceReference
     var reviewed = false
-    var title: String {
+    var title: String { title(in: .app) }
+    func title(in language: ChatLanguage) -> String {
         switch kind {
-        case .rehabilitation: String(localized: "Reha-Antrag mit behandelnder Praxis vorbereiten")
-        case .followUp: String(localized: "Nachkontrolltermin anfragen")
-        case .physiotherapy: String(localized: "Verordnete Physiotherapie organisieren")
+        case .rehabilitation: language.text("Reha-Antrag mit behandelnder Praxis vorbereiten")
+        case .followUp: language.text("Nachkontrolltermin anfragen")
+        case .physiotherapy: language.text("Verordnete Physiotherapie organisieren")
         }
     }
 }
@@ -19,6 +20,7 @@ struct CaseRecommendation: Codable, Equatable, Identifiable, Sendable {
 /// diagnoses or derives care needs; candidates require explicit source review.
 enum DischargeNavigationExtractor {
     static func recommendations(in document: SourceDocument) -> [CaseRecommendation] {
+        let reportActions = BefundReader.caseRecommendations(in: document)
         let rules: [(CaseRecommendation.Kind, String)] = [
             (.rehabilitation, #"(?:Eine ambulante Rehabilitation wird empfohlen\.|Wir empfehlen eine ambulante Rehabilitation\.|Outpatient rehabilitation is recommended\.)"#),
             (.followUp, #"(?:Eine (?:(?:ärztliche|aerztliche) )?Nachkontrolle soll vereinbart werden\.|Eine (?:ärztliche )?Nachkontrolle wird empfohlen\.|A medical follow-up appointment should be arranged\.)"#),
@@ -37,7 +39,12 @@ enum DischargeNavigationExtractor {
                 locator: page.map { String(localized: "Seite \($0)") } ?? String(localized: "Originaltext"), quote: quote, pageNumber: page)
             found.append(CaseRecommendation(id: LifePathSeed.stableID(document.id.uuidString + kind.rawValue + quote), kind: kind, evidence: evidence))
         }
-        return found
+        // Preserve pending reviews from earlier app versions, including their
+        // persisted IDs and punctuation, and recognize additional report layouts.
+        guard let reportActions else { return found }
+        return reportActions.map { candidate in
+            found.first { $0.kind == candidate.kind && $0.evidence.quote == candidate.evidence.quote } ?? candidate
+        }
     }
 }
 
@@ -52,34 +59,57 @@ struct CasePreparation: Codable, Equatable, Sendable {
         var key: String
         var text: String
         var choices: [(String, String)]
+
+        /// Accept the button label, a stable code, or one unambiguous natural answer.
+        func answerID(_ message: String) -> String? {
+            let t = ChatLanguage.normalized(message).trimmingCharacters(in: .whitespacesAndNewlines)
+            if let exact = choices.first(where: { $0.0 == t || ChatLanguage.normalized($0.1) == t }) { return exact.0 }
+            let aliases: [String: [String]]
+            switch key {
+            case "purpose": aliases = ["first": ["erst", "first", "ilk", "أول"], "increase": ["erhoh", "increase", "artis", "زياد"]]
+            case "payer": aliases = ["pv": ["pensionsversicherung", "pva", "pv"], "svs": ["svs"], "bvaeb": ["bvaeb"], "none": ["keine pension", "no pension", "emekli degil", "لا يوجد معاش"]]
+            case "role": aliases = ["applicant": ["selbst", "herself", "kendisi", "بنفسها"], "representative": ["vertretungsbefugt", "authorized representative", "yetkili temsilci", "ممثل مفوض"], "helper": ["helfe nur", "only helping", "just helping", "sadece yardim", "اساعد فقط"]]
+            case "reports": aliases = ["yes": ["ja", "yes", "evet", "نعم"], "no": ["nein", "no", "hayir", "لا"]]
+            default: aliases = [:]
+            }
+            let uncertain = ["weiß nicht", "weiss nicht", "nicht sicher", "don't know", "not sure", "bilmiyorum", "emin degil", "لا اعرف", "لا أعرف"]
+            if uncertain.contains(where: t.contains) { return choices.contains(where: { $0.0 == "unknown" }) ? "unknown" : nil }
+            let matches = choices.filter { choice in
+                (aliases[choice.0] ?? []).contains { phrase in
+                    let pattern = #"(?<![\p{L}\p{N}])"# + NSRegularExpression.escapedPattern(for: ChatLanguage.normalized(phrase))
+                    return t.range(of: pattern, options: .regularExpression) != nil
+                }
+            }
+            return matches.count == 1 ? matches[0].0 : nil
+        }
     }
     func nextQuestion(for progress: DemoScenarioProgress) -> Question? {
         guard progress.scenario == .care, progress.finished else { return nil }
         if progress.answers.first != "home" {
             if answers["purpose"] == nil {
-                return Question(key: "purpose", text: String(localized: "Geht es um einen ersten Pflegegeldantrag oder eine Erhöhung?"), choices: [
-                    ("first", String(localized: "Erster Antrag")), ("increase", String(localized: "Erhöhung")), ("unknown", String(localized: "Noch unklar"))])
+                return Question(key: "purpose", text: progress.replyLanguage.text("Geht es um einen ersten Pflegegeldantrag oder eine Erhöhung?"), choices: [
+                    ("first", progress.replyLanguage.text("Erster Antrag")), ("increase", progress.replyLanguage.text("Erhöhung")), ("unknown", progress.replyLanguage.text("Noch unklar"))])
             }
             if answers["payer"] == nil {
-                let prompt = answers["purpose"] == "increase" ? String(localized: "Welche Stelle zahlt ihr bisheriges Pflegegeld? Schau auf den letzten Bescheid.") : String(localized: "Wer zahlt ihre Pension? Gemeint ist der Pensionsträger, nicht die Krankenkasse.")
+                let prompt = answers["purpose"] == "increase" ? progress.replyLanguage.text("Welche Stelle zahlt ihr bisheriges Pflegegeld? Schau auf den letzten Bescheid.") : progress.replyLanguage.text("Wer zahlt ihre Pension? Gemeint ist der Pensionsträger, nicht die Krankenkasse.")
                 return Question(key: "payer", text: prompt, choices: [
                     ("pv", "PV"), ("svs", "SVS"), ("bvaeb", "BVAEB"),
-                    ("none", String(localized: "Keine Pension oder kein bisheriger Bezug")),
-                    ("unknown", String(localized: "Andere Stelle oder Sonderfall"))])
+                    ("none", progress.replyLanguage.text("Keine Pension oder kein bisheriger Bezug")),
+                    ("unknown", progress.replyLanguage.text("Andere Stelle oder Sonderfall"))])
             }
         }
         if answers["role"] == nil {
-            return Question(key: "role", text: String(localized: "Wer wird den Antrag prüfen und unterschreiben?"), choices: [
-                ("applicant", String(localized: "Meine Mutter selbst")),
-                ("representative", String(localized: "Eine vertretungsbefugte Person")),
-                ("helper", String(localized: "Ich helfe nur beim Vorbereiten")),
-                ("unknown", String(localized: "Das müssen wir noch klären"))])
+            return Question(key: "role", text: progress.replyLanguage.text("Wer wird den Antrag prüfen und unterschreiben?"), choices: [
+                ("applicant", progress.replyLanguage.text("Meine Mutter selbst")),
+                ("representative", progress.replyLanguage.text("Eine vertretungsbefugte Person")),
+                ("helper", progress.replyLanguage.text("Ich helfe nur beim Vorbereiten")),
+                ("unknown", progress.replyLanguage.text("Das müssen wir noch klären"))])
         }
         if answers["reports"] == nil {
-            return Question(key: "reports", text: String(localized: "Sind aktuelle ärztliche Befunde oder ein Entlassungsbrief vorhanden?"), choices: [
-                ("yes", String(localized: "Ja, Unterlagen sind vorhanden")),
-                ("no", String(localized: "Nein, derzeit nicht")),
-                ("unknown", String(localized: "Ich muss nachsehen"))])
+            return Question(key: "reports", text: progress.replyLanguage.text("Sind aktuelle ärztliche Befunde oder ein Entlassungsbrief vorhanden?"), choices: [
+                ("yes", progress.replyLanguage.text("Ja, Unterlagen sind vorhanden")),
+                ("no", progress.replyLanguage.text("Nein, derzeit nicht")),
+                ("unknown", progress.replyLanguage.text("Ich muss nachsehen"))])
         }
         return nil
     }
@@ -103,7 +133,7 @@ struct CasePreparation: Codable, Equatable, Sendable {
         guard progress.scenario == .care else { return [] }
         var forms: [String] = []
         if progress.answers.first != "home", careAuthority == "Pensionsversicherung (PV)" { forms.append("pflegegeld") }
-        if progress.answers.first != "money", ["wien", "vienna"].contains(progress.answers.dropFirst().first?.lowercased() ?? "") { forms.append("fsw-foerderung") }
+        if progress.answers.first != "money", progress.careInVienna { forms.append("fsw-foerderung") }
         return forms
     }
     struct DocumentItem: Identifiable {
@@ -114,61 +144,62 @@ struct CasePreparation: Codable, Equatable, Sendable {
     func documentItems(for progress: DemoScenarioProgress) -> [DocumentItem] {
         var items: [DocumentItem] = []
         if progress.scenario == .hospital {
-            items.append(.init(id: "source-reviewed", title: String(localized: "Originalbrief und Empfehlungen geprüft"), detail: String(localized: "Die Quelle bleibt mit den nächsten Schritten verbunden.")))
+            items.append(.init(id: "source-reviewed", title: progress.replyLanguage.text("Originalbrief und Empfehlungen geprüft"), detail: progress.replyLanguage.text("Die Quelle bleibt mit den nächsten Schritten verbunden.")))
             if recommendations.contains(where: { $0.reviewed && $0.kind == .rehabilitation }) {
-                items.append(.init(id: "practice", title: String(localized: "Ärztlichen Antragsteil mit der Praxis klären"), detail: String(localized: "Medizinische Angaben und Unterschrift werden nicht von Sovi erstellt.")))
-                items.append(.init(id: "carrier", title: String(localized: "Zuständigen Reha-Träger mit der Praxis klären"), detail: String(localized: "Die gespeicherte Krankenkasse wird nicht als zuständiger Reha-Träger übernommen.")))
+                items.append(.init(id: "practice", title: progress.replyLanguage.text("Ärztlichen Antragsteil mit der Praxis klären"), detail: progress.replyLanguage.text("Medizinische Angaben und Unterschrift werden nicht von Sovi erstellt.")))
+                items.append(.init(id: "carrier", title: progress.replyLanguage.text("Zuständigen Reha-Träger mit der Praxis klären"), detail: progress.replyLanguage.text("Die gespeicherte Krankenkasse wird nicht als zuständiger Reha-Träger übernommen.")))
             }
         } else {
             if answers["reports"] != "no" {
-                items.append(.init(id: "reports", title: String(localized: "Vorhandene aktuelle Befunde bereitlegen"), detail: String(localized: "Falls vorhanden: Kopien beilegen. Fehlende Befunde werden nicht erfunden.")))
+                items.append(.init(id: "reports", title: progress.replyLanguage.text("Vorhandene aktuelle Befunde bereitlegen"), detail: progress.replyLanguage.text("Falls vorhanden: Kopien beilegen. Fehlende Befunde werden nicht erfunden.")))
             }
             if answers["purpose"] == "increase" {
-                items.append(.init(id: "decision", title: String(localized: "Letzten Pflegegeldbescheid bereitlegen"), detail: String(localized: "Daraus die bisher zuständige Stelle übernehmen.")))
+                items.append(.init(id: "decision", title: progress.replyLanguage.text("Letzten Pflegegeldbescheid bereitlegen"), detail: progress.replyLanguage.text("Daraus die bisher zuständige Stelle übernehmen.")))
             }
             if ["svs", "bvaeb"].contains(answers["payer"] ?? "") {
-                items.append(.init(id: "external-form", title: String(localized: "Passenden Antrag des zuständigen Trägers vorbereiten"), detail: String(localized: "Das offizielle Formular verwenden; die beigefügte PV-Vorlage ist dafür nicht bestimmt.")))
+                items.append(.init(id: "external-form", title: progress.replyLanguage.text("Passenden Antrag des zuständigen Trägers vorbereiten"), detail: progress.replyLanguage.text("Das offizielle Formular verwenden; die beigefügte PV-Vorlage ist dafür nicht bestimmt.")))
             }
             if answers["role"] == "representative" {
-                items.append(.init(id: "representation", title: String(localized: "Vertretungsnachweis prüfen"), detail: String(localized: "Falls die Vertretung noch nicht bekannt ist: den passenden Nachweis beilegen.")))
+                items.append(.init(id: "representation", title: progress.replyLanguage.text("Vertretungsnachweis prüfen"), detail: progress.replyLanguage.text("Falls die Vertretung noch nicht bekannt ist: den passenden Nachweis beilegen.")))
             }
-            if progress.answers.first != "money", ["wien", "vienna"].contains(progress.answers.dropFirst().first?.lowercased() ?? "") {
-                items += [.init(id: "identity", title: String(localized: "Ausweis und Staatsbürgerschafts- oder Aufenthaltsnachweis"), detail: String(localized: "Für den FSW-Antrag laut Abschnitt Nötige Unterlagen.")),
-                          .init(id: "income", title: String(localized: "Einkommens- und gegebenenfalls Wohnkostennachweise"), detail: String(localized: "Für Pflege und Betreuung: die im FSW-Formular genannten Nachweise prüfen."))]
+            if progress.answers.first != "money", progress.careInVienna {
+                items += [.init(id: "identity", title: progress.replyLanguage.text("Ausweis und Staatsbürgerschafts- oder Aufenthaltsnachweis"), detail: progress.replyLanguage.text("Für den FSW-Antrag laut Abschnitt Nötige Unterlagen.")),
+                          .init(id: "income", title: progress.replyLanguage.text("Einkommens- und gegebenenfalls Wohnkostennachweise"), detail: progress.replyLanguage.text("Für Pflege und Betreuung: die im FSW-Formular genannten Nachweise prüfen."))]
             }
         }
-        items.append(.init(id: "signatures", title: String(localized: "Offene Auswahlfelder, Erklärungen und Unterschrift prüfen"), detail: String(localized: "Persönliche Prüfung außerhalb der automatischen Vorbefüllung; keine Einreichung durch Sovi.")))
+        items.append(.init(id: "signatures", title: progress.replyLanguage.text("Offene Auswahlfelder, Erklärungen und Unterschrift prüfen"), detail: progress.replyLanguage.text("Persönliche Prüfung außerhalb der automatischen Vorbefüllung; keine Einreichung durch Sovi.")))
         return items
     }
-    static func missingProfileFields(_ person: FormPerson?) -> [String] {
+    static func missingProfileFields(_ person: FormPerson?, language: ChatLanguage = .app) -> [String] {
         let required: [PersonField] = [.firstName, .lastName, .birthDate, .street, .house, .postcode, .city]
-        return required.filter { person?.values[$0.rawValue]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty != false }.map(\.title)
+        return required.filter { person?.values[$0.rawValue]?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty != false }.map { $0.title(in: language) }
     }
 }
 
 extension AppState {
-    func missingCaseItems(_ scenario: DemoScenario) -> [String] {
-        guard let progress = demoScenarios?[scenario.rawValue] else { return [] }
+    func missingCaseItems(_ scenario: DemoScenario, language: ChatLanguage? = nil) -> [String] {
+        guard var progress = demoScenarios?[scenario.rawValue] else { return [] }
+        if let language { progress.language = language }
         guard progress.finished else { return [progress.question] }
         let prep = progress.preparation ?? CasePreparation()
         var items: [String] = []
         if let question = prep.nextQuestion(for: progress) { items.append(question.text) }
-        if scenario == .care, progress.answers.first != "home", prep.careAuthority == nil { items.append(String(localized: "Zuständige Stelle klären")) }
-        if scenario == .care, prep.answers["purpose"] == "unknown" { items.append(String(localized: "Antragsart mit der zuständigen Stelle klären")) }
-        if scenario == .care, prep.answers["role"] == "unknown" { items.append(String(localized: "Unterschrift und Vertretung klären")) }
-        if scenario == .hospital, !prep.recommendations.contains(where: \.reviewed) { items.append(String(localized: "Empfehlung im Original prüfen und bestätigen")) }
+        if scenario == .care, progress.answers.first != "home", prep.careAuthority == nil { items.append(progress.replyLanguage.localized("Zuständige Stelle klären")) }
+        if scenario == .care, prep.answers["purpose"] == "unknown" { items.append(progress.replyLanguage.localized("Antragsart mit der zuständigen Stelle klären")) }
+        if scenario == .care, prep.answers["role"] == "unknown" { items.append(progress.replyLanguage.localized("Unterschrift und Vertretung klären")) }
+        if scenario == .hospital, !prep.recommendations.contains(where: \.reviewed) { items.append(progress.replyLanguage.localized("Empfehlung im Original prüfen und bestätigen")) }
         let person = formPeople?.first { $0.id == prep.applicantID }
-        if !CasePreparation.missingProfileFields(person).isEmpty { items.append(String(localized: "Angaben der Person im Antrag ergänzen")) }
+        if !CasePreparation.missingProfileFields(person).isEmpty { items.append(progress.replyLanguage.localized("Angaben der Person im Antrag ergänzen")) }
         for doc in prep.documentItems(for: progress) where !prep.checkedDocuments.contains(doc.id) { items.append(doc.title) }
         for formID in prep.formIDs(for: progress) {
             let key = prep.applicantID.map { formID + ":" + $0.uuidString }
             let draft = key.flatMap { formDrafts?[$0] }
-            if draft?.caseScenario != scenario.rawValue { items.append(String(localized: "Formularentwurf speichern: \(formID)")) }
+            if draft?.caseScenario != scenario.rawValue { items.append(progress.replyLanguage.localized("Formularentwurf speichern: \(formID)")) }
             else if formID == "pflegegeld", let kind = prep.answers["purpose"], ["first", "increase"].contains(kind), draft?.selections?["Antrag Pflg"] != (kind == "first" ? "01" : "02") {
-                items.append(String(localized: "Antragsart im gespeicherten Entwurf prüfen"))
+                items.append(progress.replyLanguage.localized("Antragsart im gespeicherten Entwurf prüfen"))
             }
         }
-        if !progress.saved { items.append(String(localized: "Nächste Schritte auf dem Pfad speichern")) }
+        if !progress.saved { items.append(progress.replyLanguage.localized("Nächste Schritte auf dem Pfad speichern")) }
         else {
             for index in progress.steps.indices {
                 if let node = nodes.first(where: { $0.id == progress.taskID(index) }), ![TaskStatus.completed, .cancelled].contains(node.taskStatus) { items.append(node.title) }

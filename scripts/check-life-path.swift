@@ -75,7 +75,12 @@ for attendance in [Attendance.attended, .notAttended] {
 }
 quiet.appointments[0].attendance = .unrecorded
 quiet.appointments[0].date = testDate.addingTimeInterval(-1)
-verify(excluded && PathCompanionPrompt.make(state: quiet, now: testDate).contextID == nil, "Cancelled/draft, recorded-attendance and past appointments are not upcoming prompts")
+verify(excluded, "Cancelled, draft and already answered appointments are skipped")
+let unanswered = quiet
+let pastPrompt = PathCompanionPrompt.make(state: quiet, now: testDate)
+let pastResponse = DemoCompanionService.entryResponse(for: upcomingNode, state: quiet, now: testDate)
+verify(pastPrompt.contextID == upcomingNode.id && pastResponse.attendanceQuestionID == upcomingNode.id && quiet == unanswered,
+       "A recent confirmed visit opens a question for that visit without recording attendance")
 var datedTask = PathNode(kind: .task, title: "Unterlagen vorbereiten", date: today.date)
 quiet.nodes = [datedTask]; quiet.appointments = []
 verify(PathCompanionPrompt.make(state: quiet, now: testDate).contextID == datedTask.id, "An open date-only task remains eligible throughout its calendar day")

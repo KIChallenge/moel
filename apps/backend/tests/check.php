@@ -255,7 +255,7 @@ $related = $appointment;
 $related['context_reference'] = ['record_id' => 'incident-1', 'quote' => 'Shoulder injury'];
 $contextReply = soviChatReply($related, 'en', null, $background);
 check($contextReply['route'] === null && str_contains($contextReply['reply'], 'shared entry'), 'Background inference asks confirmation');
-check(str_contains($contextReply['reply'], 'Fictional example'), 'Demo background is labeled fictional');
+check(str_contains($contextReply['reply'], '2026-10-30 · Shoulder injury'), 'Background confirmation identifies the shared entry');
 $related['facts']['background_confirmation'] = fact('no', 'different concern');
 check(!str_contains(soviChatReply($related, 'en', null, $background)['reply'], 'shared entry'), 'Declining background connection moves on');
 rejects(fn () => soviChatReply($related, 'en', null, []), 'invalid_evidence');

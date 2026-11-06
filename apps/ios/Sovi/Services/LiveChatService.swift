@@ -187,7 +187,23 @@ final class LiveChatController {
         }
     }
 
+    static func forApp() -> LiveChatController {
+        #if DEBUG
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("--uitesting") && arguments.contains("--chat-ui-fixture") {
+            let configuration = URLSessionConfiguration.ephemeral
+            configuration.protocolClasses = [ChatUIFixtureProtocol.self]
+            let controller = LiveChatController(api: LiveChatAPI(session: URLSession(configuration: configuration)), testing: true)
+            try? controller.configure(token: String(repeating: "ui-fixture-", count: 4), enabled: true, shareLocation: false)
+            return controller
+        }
+        #endif
+        return LiveChatController()
+    }
+
     var editableToken: String { token }
+    /// Previous choices belong to the answered turn, not a pending or failed request.
+    var currentResult: LiveChatReply? { busy || failedMessage != nil ? nil : result }
     func enableLocationFromWelcome() async throws -> Bool {
         let allowed = await location.requestPermission()
         try configure(token: token, enabled: enabled, shareLocation: allowed, responseLanguage: responseLanguage)
@@ -275,6 +291,40 @@ final class LiveChatController {
         localServiceArea = nil
     }
 }
+
+#if DEBUG
+/// Deterministic transport for the explicit UI-test launch flag. No request leaves the device.
+private final class ChatUIFixtureProtocol: URLProtocol, @unchecked Sendable {
+    private static let lock = NSLock()
+    nonisolated(unsafe) private static var requestCount = 0
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override func startLoading() {
+        let attempt = Self.lock.withLock { Self.requestCount += 1; return Self.requestCount }
+        let reply: String
+        let choices: [[String: Any]]
+        switch attempt {
+        case 1:
+            reply = "Welchen Arzt suchst du?"
+            choices = [["id": "general", "label": "Allgemeinmedizin", "message": "Allgemeinmedizin"],
+                       ["id": "own", "label": "Etwas anderes", "message": "", "opens_composer": true]]
+        case 2:
+            reply = "Was ist dir für den Termin wichtig?"
+            choices = [["id": "insurance", "label": "Mit Versicherung", "message": "Mit Versicherung"]]
+        default:
+            reply = "Danke. Du kannst jetzt weiterschreiben."
+            choices = []
+        }
+        let json: [String: Any] = ["version": 3, "status": "needs_clarification", "reply": reply, "choices": choices,
+                                   "actions": [], "providers": [], "sources": [], "notice": "", "language": "de"]
+        let response = HTTPURLResponse(url: request.url!, statusCode: attempt == 3 ? 503 : 200, httpVersion: nil, headerFields: nil)!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        if let data = try? JSONSerialization.data(withJSONObject: json) { client?.urlProtocol(self, didLoad: data) }
+        client?.urlProtocolDidFinishLoading(self)
+    }
+    override func stopLoading() {}
+}
+#endif
 
 private enum ChatCredentials {
     struct Settings: Codable { var token: String; var enabled: Bool; var shareLocation: Bool; var responseLanguage: String? }

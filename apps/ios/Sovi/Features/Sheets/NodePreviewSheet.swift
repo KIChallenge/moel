@@ -7,17 +7,15 @@ struct NodePreviewSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showsDocuments = false
     @State private var showsEditor = false
-    @State private var showsDraft = false
     @State private var showsReminderControls = false
     @State private var selectedEvidence: EvidenceReference?
     @State private var appointmentToEdit: AppointmentRecord?
     @State private var occurrenceToEdit: OccurrenceSelection?
     @State private var error: String?
-    @State private var preparationKind: LifeDraftKind?
     @State private var scenario: DemoScenario?
 
     var body: some View {
-        SheetPage(title: "Eintrag") {
+        SheetPage(title: "Eintrag", startsCompact: true) {
             if let node = store.node(id: nodeID) {
                 VStack(alignment: .leading, spacing: 14) {
                     Label(node.vaccination == nil ? node.history.map { NSLocalizedString($0.category.rawValue, comment: "Entry category") } ?? node.kind.displayTitle : String(localized: "Impfung"),
@@ -91,14 +89,12 @@ struct NodePreviewSheet: View {
         }
         .sheet(isPresented: $showsDocuments) { DocumentReviewSheet() }
         .sheet(isPresented: $showsEditor) { NodeEditorSheet(kind: .task) }
-        .sheet(isPresented: $showsDraft) { AdministrativeDraftSheet() }
         .sheet(isPresented: $showsReminderControls) { LocalControlsSheet() }
         .sheet(item: $selectedEvidence) { evidence in EvidenceSheet(evidence: evidence) }
         .sheet(item: $appointmentToEdit) { appointment in AppointmentEditorSheet(appointment: appointment) }
         .sheet(item: $occurrenceToEdit) { selection in
             MedicationLogSheet(scheduleID: selection.scheduleID, occurrenceID: selection.occurrenceID)
         }
-        .sheet(item: $preparationKind) { kind in LifePreparationSheet(kind: kind) }
         .sheet(item: $scenario) { DemoScenarioChat(scenario: $0) }
         .sheetError($error)
     }
@@ -120,12 +116,7 @@ struct NodePreviewSheet: View {
                 }
                 .frame(minHeight: 44)
             }
-            if let kind = node.history?.draftKind {
-                Button { preparationKind = kind } label: {
-                    Label(kind == .questionnaire ? "Anamnesebogen öffnen" : "Medikamentenliste öffnen", systemImage: "square.and.pencil")
-                        .frame(minHeight: 44)
-                }
-            }
+            TaskDraftButtons(node: node)
             if node.history == nil && (node.title.localizedCaseInsensitiveContains("Unterlagen") || node.detail.localizedCaseInsensitiveContains("Dokument")) {
                 Button { showsDocuments = true } label: {
                     Label("Unterlage prüfen", systemImage: "doc.text.magnifyingglass")
@@ -134,12 +125,6 @@ struct NodePreviewSheet: View {
             }
             if node.title.localizedCaseInsensitiveContains("Physio") || node.title.localizedCaseInsensitiveContains("Termin") || node.title.localizedCaseInsensitiveContains("Nachkontrolle") {
                 AppointmentCreationButton()
-            }
-            if store.state.demoScenarios?.values.contains(where: { p in p.steps.indices.contains(where: { p.taskID($0) == node.id }) }) != true && (node.title.localizedCaseInsensitiveContains("Kostenerstattung") || node.title.localizedCaseInsensitiveContains("Antrag") || node.title.localizedCaseInsensitiveContains("Entwurf") || node.title.localizedCaseInsensitiveContains("Verwaltung") || node.title.localizedCaseInsensitiveContains("Unterlagen")) {
-                Button { showsDraft = true } label: {
-                    Label("Entwurf öffnen", systemImage: "square.and.pencil")
-                        .frame(minHeight: 44)
-                }
             }
         }
     }
@@ -242,6 +227,40 @@ struct NodePreviewSheet: View {
     private func perform(_ command: AppCommand) {
         do { try store.perform(command) }
         catch { self.error = error.localizedDescription }
+    }
+}
+
+struct TaskDraftButtons: View {
+    let node: PathNode
+    @Environment(SoviStore.self) private var store
+    @State private var showsPreparation = false
+    @State private var showsDraft = false
+
+    private var hasAdministrativeDraft: Bool {
+        let titles = ["Kostenerstattung", "Antrag", "Entwurf", "Verwaltung", "Unterlagen"]
+        guard titles.contains(where: node.title.localizedCaseInsensitiveContains) else { return false }
+        let belongsToScenario = store.state.demoScenarios?.values.contains { progress in
+            progress.steps.indices.contains { progress.taskID($0) == node.id }
+        }
+        return belongsToScenario != true
+    }
+
+    var body: some View {
+        if let kind = node.history?.draftKind {
+            Button { showsPreparation = true } label: {
+                Label(kind == .questionnaire ? "Anamnesebogen öffnen" : "Medikamentenliste öffnen", systemImage: "square.and.pencil")
+                    .frame(minHeight: 44)
+            }
+            .accessibilityIdentifier("preview.preparation")
+            .sheet(isPresented: $showsPreparation) { LifePreparationSheet(kind: kind).buttonStyle(.automatic) }
+        }
+        if hasAdministrativeDraft {
+            Button { showsDraft = true } label: {
+                Label("Entwurf öffnen", systemImage: "square.and.pencil").frame(minHeight: 44)
+            }
+            .accessibilityIdentifier("preview.draft")
+            .sheet(isPresented: $showsDraft) { AdministrativeDraftSheet().buttonStyle(.automatic) }
+        }
     }
 }
 

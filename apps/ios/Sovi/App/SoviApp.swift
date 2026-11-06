@@ -5,7 +5,7 @@ import SwiftData
 struct SoviApp: App {
     @State private var store: SoviStore?
     @State private var device = DeviceServices()
-    @State private var chat = LiveChatController()
+    @State private var chat = LiveChatController.forApp()
     @State private var startupError: String?
 
     var body: some Scene {
@@ -34,10 +34,18 @@ struct SoviApp: App {
 
     private func load() {
         do {
-            let inMemory = ProcessInfo.processInfo.arguments.contains("--uitesting")
-            let loaded = try SoviStore(container: SoviStore.makeContainer(inMemory: inMemory))
+            let arguments = ProcessInfo.processInfo.arguments
+            let inMemory = arguments.contains("--uitesting")
+            let loaded: SoviStore
+            if inMemory {
+                let instant = arguments.contains("--past-appointment-fixture") ? "2026-11-05T17:00:00Z" : "2026-11-05T08:00:00Z"
+                let fixtureClock = ISO8601DateFormatter().date(from: instant)!
+                loaded = try SoviStore(container: SoviStore.makeContainer(inMemory: true), clock: { fixtureClock })
+            } else {
+                loaded = try SoviStore(container: SoviStore.makeContainer())
+            }
             if inMemory && ProcessInfo.processInfo.arguments.contains("--case-demo-person") {
-                try loaded.perform(.savePerson(FormPerson(label: "Fiktive Testperson", isSelf: true, values: [
+                try loaded.perform(.savePerson(FormPerson(label: "Person", isSelf: true, values: [
                     "firstName": "Erika", "lastName": "Musterfrau", "birthDate": "12.03.1960", "street": "Musterstraße", "house": "12", "postcode": "1010", "city": "Wien"
                 ])))
             }

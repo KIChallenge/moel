@@ -82,13 +82,21 @@ fileprivate enum PathSymbolTone {
     }
 }
 
-private struct PathSymbolPalette {
-    var surface: Color
-    var ink: Color
-    var base: Color
+struct PathSymbolPalette {
+    let surface: Color
+    let ink: Color
+    let base: Color
 
-    init(topic: PathTopic, scheme: ColorScheme) {
-        let values = scheme == .dark ? topic.tone.dark : topic.tone.light
+    init(topic: PathTopic, progress: PathProgress = .neutral, scheme: ColorScheme) {
+        let values: (surface: UInt32, ink: UInt32, base: UInt32)
+        switch progress {
+        case .pending, .inactive:
+            values = scheme == .dark ? (0x343B38, 0xBEC5C1, 0x202722) : (0xE6E6E6, 0x686E6B, 0xB9B9B9)
+        case .missed:
+            values = scheme == .dark ? (0x542C31, 0xFFD0D5, 0x351B20) : (0xFBE3E5, 0xA42A3A, 0xDFA0A8)
+        case .neutral, .done:
+            values = scheme == .dark ? topic.tone.dark : topic.tone.light
+        }
         surface = Color(hex: values.surface)
         ink = Color(hex: values.ink)
         base = Color(hex: values.base)
@@ -121,11 +129,16 @@ struct PathNodeSymbol: View {
 struct PathNodeButton: View {
     let node: PathNode
     let statusText: String
+    let actionTitle: String
     var entryCount = 1
     var dateIncludesTime = true
-    var isCurrent = false
+    var currentMarker: String?
     var compact = true
+    var progress: PathProgress = .neutral
     var buttonIdentifier: String?
+    var labelTitle: String?
+    var selectionAnchor = false
+    var activeEntryIndex: Int?
     var action: () -> Void
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.colorSchemeContrast) private var contrast
@@ -139,79 +152,107 @@ struct PathNodeButton: View {
     @ScaledMetric(relativeTo: .body) private var expandedIcon = 32.0
 
     private var usesCompactLayout: Bool { compact && !textSize.isAccessibilitySize }
-    private var faceWidth: CGFloat { usesCompactLayout ? 70 : expandedWidth }
-    private var faceHeight: CGFloat { usesCompactLayout ? 60 : expandedHeight }
-    private var face: Color {
-        if isCurrent { return Color(hex: contrast == .increased ? 0x008E5C : 0x00A76B) }
-        return Color(hex: colorScheme == .dark ? 0x343B38 : 0xE6E6E6)
-    }
-    private var base: Color {
-        if isCurrent { return Color(hex: 0x00794E) }
-        return Color(hex: colorScheme == .dark ? 0x202722 : 0xB9B9B9)
-    }
+    private var isCurrent: Bool { currentMarker != nil }
+    private var faceWidth: CGFloat { textSize.isAccessibilitySize ? 76 : usesCompactLayout ? 70 : expandedWidth }
+    private var faceHeight: CGFloat { textSize.isAccessibilitySize ? 66 : usesCompactLayout ? 60 : expandedHeight }
+    private var palette: PathSymbolPalette { .init(topic: node.routeTopic, progress: progress, scheme: colorScheme) }
     private var icon: Color {
-        if isCurrent { return .white }
-        return Color(hex: colorScheme == .dark ? 0xB5BDB9 : contrast == .increased ? 0x6D6D6D : 0x828282)
+        contrast == .increased && (progress == .neutral || progress == .done) ? SoviTheme.ink : palette.ink
     }
     private var halo: Color {
-        isCurrent ? Color(hex: 0x008E5C) : Color(hex: colorScheme == .dark ? 0x68726D : 0xB5B5B5)
+        progress == .missed ? icon : isCurrent ? SoviTheme.accent : icon
     }
 
     var body: some View {
-        VStack(spacing: usesCompactLayout ? 4 : 8) {
-            Button(action: action) {
-                PathNodeSymbol(topic: node.routeTopic, size: usesCompactLayout ? 30 : expandedIcon,
-                               tintColor: icon)
-                    .frame(width: faceWidth, height: faceHeight)
-                    .background(face, in: Ellipse())
-                    .overlay {
-                        if entryCount > 1 {
-                            DayEntryHalo(count: entryCount, color: halo)
-                                .frame(width: faceWidth + 16, height: faceHeight + 24)
-                        }
-                    }
-                    .overlay(alignment: .bottomTrailing) {
-                        if node.kind == .task && node.taskStatus == .completed || node.kind == .information && node.informationRead {
-                            Image(systemName: node.kind == .task ? "checkmark.circle.fill" : "eye.circle.fill")
-                                .font(.system(size: 18, weight: .bold))
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(SoviTheme.accent, SoviTheme.background)
-                                .background(SoviTheme.background, in: Circle())
-                                .offset(x: 3, y: 4)
-                        }
-                    }
+        if textSize.isAccessibilitySize {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 18) {
+                    controlColumn.fixedSize(horizontal: true, vertical: false)
+                    caption.frame(minWidth: 130, maxWidth: .infinity, alignment: .leading)
+                }
+                VStack(spacing: 8) { controlColumn; caption }
             }
-            .buttonStyle(PathNodePressStyle(base: base))
-            .padding(.vertical, 12)
-            .accessibilityLabel(Text(node.displayTitle))
-            .accessibilityValue(Text(accessibilitySummary))
-            .accessibilityHint("Eintrag öffnen")
-            .accessibilityIdentifier(buttonIdentifier ?? "path.node.\(node.kind.rawValue).\(node.id)")
-
-            if !usesCompactLayout {
-                Text(node.displayTitle)
-                    .font(.system(.subheadline, design: .rounded, weight: .bold))
-                    .foregroundStyle(SoviTheme.ink)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityHidden(true)
+            .padding(.horizontal, 20).padding(.vertical, 8)
+        } else {
+            VStack(spacing: usesCompactLayout ? 4 : 8) {
+                controlColumn
+                caption
             }
-            if let date = node.date {
-                Text(formattedDate(date, abbreviated: usesCompactLayout))
-                    .font(usesCompactLayout ? .system(size: dateSize, weight: .bold, design: .rounded) : .caption.weight(.medium))
-                    .foregroundStyle(isCurrent ? SoviTheme.accent : SoviTheme.secondary)
-                    .accessibilityHidden(true)
-            }
-            if !usesCompactLayout && !statusText.isEmpty {
-                Text(statusText)
-                    .font(.caption2)
-                    .foregroundStyle(SoviTheme.secondary)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityHidden(true)
-            }
+            .frame(width: usesCompactLayout ? 160 : 200)
+            .padding(.vertical, 6)
         }
-        .frame(width: usesCompactLayout ? 106 : 200)
+    }
+
+    private var controlColumn: some View {
+        VStack(spacing: 2) {
+            Button(action: action) {
+                PathActionBubble(title: actionTitle, tint: isCurrent ? SoviTheme.accent : icon)
+            }
+            .buttonStyle(.plain)
+            .opacity(selectionAnchor ? 0 : 1)
+            .allowsHitTesting(!selectionAnchor)
+            .accessibilityHidden(true)
+            diskButton
+        }
+    }
+
+    private var caption: some View {
+        VStack(alignment: textSize.isAccessibilitySize ? .leading : .center, spacing: usesCompactLayout ? 4 : 8) { labels }
+            .opacity(selectionAnchor ? 0 : 1)
+    }
+
+    private var diskButton: some View {
+        Button(action: action) {
+            PathNodeSymbol(topic: node.routeTopic, size: textSize.isAccessibilitySize ? 32 : usesCompactLayout ? 30 : expandedIcon,
+                           tintColor: icon)
+                .frame(width: faceWidth, height: faceHeight)
+                .background(palette.surface, in: Ellipse())
+                .overlay(alignment: .bottomTrailing) {
+                    if progress == .done || progress == .missed || node.kind == .information && node.informationRead {
+                        Image(systemName: progress == .missed ? "xmark.circle.fill" : progress == .done ? "checkmark.circle.fill" : "eye.circle.fill")
+                            .font(.system(size: 18, weight: .bold))
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(progress == .missed ? icon : SoviTheme.accent, SoviTheme.background)
+                            .background(SoviTheme.background, in: Circle())
+                            .offset(x: 3, y: 4)
+                    }
+                }
+        }
+        .buttonStyle(PathNodePressStyle(base: palette.base, diameter: max(faceWidth, faceHeight + 8) + 24,
+                                        count: entryCount, haloColor: halo, emphasized: isCurrent || selectionAnchor,
+                                        activeEntryIndex: activeEntryIndex))
+        .anchorPreference(key: PathSelectedButtonBounds.self, value: .bounds) { selectionAnchor ? $0 : nil }
+        .accessibilityLabel(Text(labelTitle ?? node.displayTitle))
+        .accessibilityValue(Text(accessibilitySummary))
+        .accessibilityHint(Text(actionTitle))
+        .accessibilityIdentifier(buttonIdentifier ?? "path.node.\(node.kind.rawValue).\(node.id)")
+    }
+
+    @ViewBuilder private var labels: some View {
+        Text(labelTitle ?? node.displayTitle)
+            .font(.system(usesCompactLayout ? .caption : .subheadline, design: .rounded, weight: .bold))
+            .foregroundStyle(SoviTheme.ink)
+            .multilineTextAlignment(textSize.isAccessibilitySize ? .leading : .center)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityHidden(true)
+        if node.date != nil || isCurrent {
+            let date = node.date.map { formattedDate($0, abbreviated: usesCompactLayout) }
+            Text([currentMarker, date].compactMap { $0 }.joined(separator: " · "))
+                .font(usesCompactLayout ? .system(size: dateSize, weight: .bold, design: .rounded) : .caption.weight(.medium))
+                .foregroundStyle(isCurrent ? SoviTheme.accent : SoviTheme.secondary)
+                .accessibilityHidden(true)
+        }
+        if !statusText.isEmpty && (!usesCompactLayout || entryCount > 1) {
+            Text(statusText)
+                .font(.caption2)
+                .foregroundStyle(SoviTheme.secondary)
+                .multilineTextAlignment(textSize.isAccessibilitySize ? .leading : .center)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityHidden(true)
+        }
+        if progress == .missed {
+            Text("Verpasst").font(.caption2.weight(.semibold)).foregroundStyle(icon).accessibilityHidden(true)
+        }
     }
 
     private func formattedDate(_ date: Date, abbreviated: Bool = false) -> String {
@@ -227,7 +268,8 @@ struct PathNodeButton: View {
 
     private var accessibilitySummary: String {
         var parts: [String] = []
-        if isCurrent { parts.append(String(localized: "Hier")) }
+        if !progress.title.isEmpty { parts.append(progress.title) }
+        if let currentMarker { parts.append(currentMarker) }
         if let date = node.date { parts.append(formattedDate(date)) }
         if entryCount > 1 && !statusText.contains(String(entryCount)) {
             parts.append(String(localized: "\(entryCount) Einträge"))
@@ -237,22 +279,33 @@ struct PathNodeButton: View {
     }
 }
 
-/// Each segment is one listed entry, independent from task or medical status.
+/// The accented segment locates an entry in its day; it never implies that a visit was attended.
 private struct DayEntryHalo: View {
     let count: Int
     let color: Color
+    let diameter: CGFloat
+    let activeEntryIndex: Int?
+    @Environment(\.colorSchemeContrast) private var contrast
 
     var body: some View {
-        let gap = min(0.018, 0.25 / Double(count))
+        let thickness = min(7, diameter * .pi / CGFloat(count) * 0.38)
+        let ring = Circle().inset(by: thickness / 2)
+        let neutral = contrast == .increased ? SoviTheme.secondary : SoviTheme.border
+        let halfGap = min(0.23 / CGFloat(count), (thickness + 3) / (2 * .pi * (diameter - thickness)))
         ZStack {
-            ForEach(0..<count, id: \.self) { index in
-                Circle()
-                    .trim(from: Double(index) / Double(count) + gap,
-                          to: Double(index + 1) / Double(count) - gap)
-                    .stroke(color, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
+            ring.stroke(neutral.opacity(0.25), lineWidth: thickness)
+            if count == 1 {
+                ring.stroke(color, lineWidth: thickness)
+            } else {
+                ForEach(0..<count, id: \.self) { index in
+                    ring.trim(from: CGFloat(index) / CGFloat(count) + halfGap,
+                              to: CGFloat(index + 1) / CGFloat(count) - halfGap)
+                        .stroke(index == activeEntryIndex ? color : neutral, style: StrokeStyle(lineWidth: thickness, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                }
             }
         }
+        .frame(width: diameter, height: diameter)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }
@@ -260,13 +313,27 @@ private struct DayEntryHalo: View {
 
 private struct PathNodePressStyle: ButtonStyle {
     let base: Color
+    let diameter: CGFloat
+    let count: Int
+    let haloColor: Color
+    let emphasized: Bool
+    let activeEntryIndex: Int?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .offset(y: configuration.isPressed ? 6 : 0)
-            .background(base, in: Ellipse().offset(y: 8))
-            .animation(reduceMotion ? nil : .easeOut(duration: 0.10), value: configuration.isPressed)
+        ZStack {
+            if count > 1 || emphasized {
+                DayEntryHalo(count: max(1, count), color: haloColor, diameter: diameter,
+                             activeEntryIndex: activeEntryIndex ?? (emphasized ? 0 : nil))
+            }
+            configuration.label
+                .offset(y: configuration.isPressed ? 6 : 0)
+                .background(base, in: Ellipse().offset(y: 8))
+                .offset(y: -4)
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.10), value: configuration.isPressed)
+        }
+        .frame(width: diameter, height: diameter)
+        .contentShape(Circle())
     }
 }
 

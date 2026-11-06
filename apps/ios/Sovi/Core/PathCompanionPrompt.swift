@@ -1,5 +1,34 @@
 import Foundation
 
+extension AppointmentRecord {
+    func needsAttendanceCheck(at now: Date) -> Bool {
+        status == .confirmed && attendance == .unrecorded && date < now &&
+            (checkInDeferredUntil.map { $0 <= now } ?? true)
+    }
+
+    func attendanceQuestion(calendar: Calendar, language: ChatLanguage, locale: Locale) -> String {
+        var style = Date.FormatStyle().day().month(.abbreviated).hour().minute()
+        style.calendar = calendar; style.timeZone = calendar.timeZone; style.locale = locale
+        return language.localized("Warst du am \(date.formatted(style)) beim Termin „\(title)“?")
+    }
+}
+
+extension AppState {
+    /// Proactive questions concern the most recent month. A user can still open an older entry directly.
+    func pastAppointmentToCheckIn(now: Date) -> PathNode? {
+        guard let since = pathCalendar.date(byAdding: .day, value: -30, to: now) else { return nil }
+        let eligible = appointments.filter { $0.needsAttendanceCheck(at: now) && $0.date >= since }
+        return nodes.compactMap { node -> (node: PathNode, date: Date)? in
+            guard let id = node.appointmentID,
+                  let record = eligible.first(where: { $0.id == id }) else { return nil }
+            return (node, record.date)
+        }.sorted {
+            if $0.date != $1.date { return $0.date > $1.date }
+            return $0.node.id.uuidString < $1.node.id.uuidString
+        }.first?.node
+    }
+}
+
 /// A read-only invitation, based only on dated local entries. It never records
 /// attendance, completes a task or schedules a notification.
 struct PathCompanionPrompt: Equatable {
@@ -8,6 +37,11 @@ struct PathCompanionPrompt: Equatable {
 
     static func make(state: AppState, now: Date, locale: Locale = .current) -> Self {
         let calendar = state.pathCalendar
+        if let node = state.pastAppointmentToCheckIn(now: now),
+           let record = state.appointments.first(where: { $0.id == node.appointmentID }) {
+            let language = locale.language.languageCode.flatMap { ChatLanguage(rawValue: $0.identifier) } ?? .app
+            return Self(text: record.attendanceQuestion(calendar: calendar, language: language, locale: locale), contextID: node.id)
+        }
         let today = calendar.startOfDay(for: now)
         let end = calendar.date(byAdding: .day, value: 30, to: now) ?? now
         let endDay = calendar.startOfDay(for: end)

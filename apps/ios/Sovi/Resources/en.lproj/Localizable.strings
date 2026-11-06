@@ -448,7 +448,7 @@
 "Online-Chat verwenden" = "Use online chat";
 "Aktuellen Standort mitsenden" = "Share current location";
 "Was wird übermittelt?" = "What is sent?";
-"Der Prototyp-Zugangscode wird im Schlüsselbund dieses Geräts gespeichert. Trage hier nicht deinen OpenAI-Schlüssel ein." = "The prototype access code is saved in this device’s Keychain. Do not enter your OpenAI key here.";
+"Der Prototyp-Zugangscode wird im Schlüsselbund dieses Geräts gespeichert. Trage hier nicht deinen OpenAI-Schlüssel ein." = "The access code is saved in this device’s Keychain. Do not enter your OpenAI key here.";
 "Nachrichten dieses Online-Gesprächs und nur die unten von dir angekreuzten Hintergrund-Einträge gehen an den Sovi-Server und OpenAI. Dokumente und der übrige Pfad bleiben auf dem Gerät. Freiwillige GPS-Daten gehen nur an den Sovi-Server." = "Messages in this online conversation and only the background entries you select below are sent to the Sovi server and OpenAI. Documents and the rest of your path stay on your device. Optional GPS data goes only to the Sovi server.";
 "Nenne für andere Personen keine Namen oder vertraulichen Dokumentdetails. Der Online-Verlauf bleibt nur bis zum neuen Gespräch oder App-Neustart im Arbeitsspeicher. Bereits übermittelte Daten können nicht zurückgerufen werden; Server- und OpenAI-Aufbewahrung sind davon getrennt." = "For other people, omit names and private document details. Online conversation history stays in memory until a new conversation or app restart. Sent data cannot be recalled; server and OpenAI retention are separate.";
 "Ich stimme dieser Übermittlung für den Online-Chat zu" = "I agree to this data transfer for online chat";
@@ -527,10 +527,10 @@
 "Familienberatungsstelle auswählen" = "Choose a family advice centre";
 "Familienstand" = "Marital status";
 "Fertig" = "Done";
-"Fiktiven Beispielbrief verwenden" = "Use a fictional sample letter";
-"Fiktiver Beispielbrief: Eine ambulante Rehabilitation wird empfohlen. Eine ärztliche Nachkontrolle soll vereinbart werden." = "Fictional sample letter: Outpatient rehabilitation is recommended. A medical follow-up appointment should be arranged.";
+"Fiktiven Beispielbrief verwenden" = "Open saved letter";
+"Fiktiver Beispielbrief: Eine ambulante Rehabilitation wird empfohlen. Eine ärztliche Nachkontrolle soll vereinbart werden." = "Outpatient rehabilitation is recommended. A medical follow-up appointment should be arranged.";
 "Fragen für eine Ernährungsberatung sammeln" = "Prepare questions for nutrition advice";
-"Für diese Demo brauche ich eine ausdrückliche Empfehlung zu Rehabilitation oder Nachkontrolle. Oder verwende den fiktiven Beispielbrief." = "For this demo, use an explicit recommendation for rehabilitation or follow-up, or choose the fictional sample letter.";
+"Für diese Demo brauche ich eine ausdrückliche Empfehlung zu Rehabilitation oder Nachkontrolle. Oder verwende den fiktiven Beispielbrief." = "Please copy the recommendation for rehabilitation or follow-up from your letter. You can also open a letter.";
 "Für sie an meinem aktuellen Standort suchen" = "Search for her near my current location";
 "Geburtsdatum (TT.MM.JJJJ)" = "Birth date (DD.MM.YYYY)";
 "Geburtsland" = "Country of birth";
@@ -561,7 +561,7 @@
 "Nachmittags" = "Afternoons";
 "Nachname" = "Last name";
 "Nur auf diesem Gerät" = "Only on this device";
-"Nur auf diesem Gerät. Dieses Profil wird nicht mit der fiktiven Lebensgeschichte oder dem Online-Chat zusammengeführt." = "Only on this device. This profile is kept separate from the fictional life history and online chat.";
+"Nur auf diesem Gerät. Dieses Profil wird nicht mit der fiktiven Lebensgeschichte oder dem Online-Chat zusammengeführt." = "Your details stay on this device and are not sent to the online chat.";
 "Ohne Erinnerungen weiter" = "Continue without reminders";
 "Ohne Standort weiter" = "Continue without location";
 "PDF prüfen" = "Review PDF";
@@ -607,7 +607,7 @@
 "Wann hättest du am liebsten einen Termin? Das ist ein Wunsch, noch keine Buchung." = "When would you prefer an appointment? This is a preference, not a booking.";
 "Was braucht deine Mutter gerade: Hilfe zu Hause, finanzielle Unterstützung oder beides?" = "What does your mother need: help at home, financial support, or both?";
 "Was interessiert dich: Vorsorge, Bewegung oder Ernährung?" = "What interests you: preventive care, exercise or nutrition?";
-"Was wurde im Entlassungsbrief ausdrücklich empfohlen? Du kannst einen Satz abschreiben oder den fiktiven Beispielbrief verwenden." = "What was explicitly recommended in the discharge letter? Copy a sentence or use the fictional sample letter.";
+"Was wurde im Entlassungsbrief ausdrücklich empfohlen? Du kannst einen Satz abschreiben oder den fiktiven Beispielbrief verwenden." = "What was recommended in the discharge letter? Copy a sentence or open a letter.";
 "Weitere Angaben · freiwillig" = "Additional details · optional";
 "Welche Angebote suchst du für dein Kind?" = "Which services are you looking for for your child?";
 "Welche E-Mail-Adresse möchtest du verwenden?" = "Which email address would you like to use?";
@@ -621,7 +621,7 @@
 "Wir können Beratung und einen passenden Antragsentwurf vorbereiten. Ein Anspruch oder eine Pflegestufe wird hier nicht festgestellt." = "We can prepare advice and a relevant application draft. This does not determine entitlement or a care level.";
 "Wir organisieren nur die ausdrücklich genannte Empfehlung. Die ärztlichen Teile des Reha-Antrags bleiben offen." = "We only organise the explicit recommendation. The medical sections of the rehabilitation application remain blank.";
 "Wir sammeln Angebote und bereiten deine Fragen vor. Es wird kein Untersuchungs- oder Impfbedarf aus dem Alter abgeleitet." = "We can collect services and prepare your questions. Age alone does not establish a need for examinations or vaccinations.";
-"Wähle für diese Demo eine der Möglichkeiten. Andere Anliegen kannst du im normalen Chat stellen." = "Choose one of the options for this demo. Use the main chat for other requests.";
+"Wähle für diese Demo eine der Möglichkeiten. Andere Anliegen kannst du im normalen Chat stellen." = "Please choose one of the options. You can use the chat for other requests.";
 "Zeiten und Teilnahmebedingungen klären" = "Check times and participation requirements";
 "Zeitlich flexibel" = "Flexible";
 "Zuständige Stelle für Pflegegeld klären" = "Identify the responsible care allowance institution";
@@ -753,3 +753,179 @@
 "Abschnitte" = "Sections";
 
 "Zur neuesten Nachricht" = "Latest message";
+
+"Mehr" = "More";
+
+"Du kannst auswählen oder selbst antworten." = "Choose an option or write your own answer.";
+
+"Der Zugangscode wird im Schlüsselbund dieses Geräts gespeichert. Trage hier nicht deinen OpenAI-Schlüssel ein." = "The access code is saved in this device’s Keychain. Do not enter your OpenAI key here.";
+
+"Deine Angaben bleiben auf diesem Gerät und werden nicht an den Online-Chat gesendet." = "Your details stay on this device and are not sent to the online chat.";
+
+"Was wurde im Entlassungsbrief empfohlen? Du kannst einen Satz abschreiben oder einen Brief öffnen." = "What was recommended in the discharge letter? Copy a sentence or open a letter.";
+
+"Hinterlegten Brief öffnen" = "Open saved letter";
+
+"Eine ambulante Rehabilitation wird empfohlen. Eine ärztliche Nachkontrolle soll vereinbart werden." = "Outpatient rehabilitation is recommended. A medical follow-up appointment should be arranged.";
+
+"Bitte übernimm die Empfehlung zu Reha oder Nachkontrolle aus deinem Brief. Du kannst auch einen Brief öffnen." = "Please copy the recommendation for rehabilitation or follow-up from your letter. You can also open a letter.";
+
+"Bitte wähle eine der Möglichkeiten. Andere Anliegen kannst du im Chat stellen." = "Please choose one of the options. You can use the chat for other requests.";
+
+"Der Lebensverlauf konnte nicht geladen werden." = "The life history could not be loaded.";
+
+"Der Lebensverlauf ist nicht vollständig lesbar." = "The life history could not be read completely.";
+
+/* Conversational onboarding */
+"Hi" = "Hi";
+"Hi, ich bin Sovi, dein persönlicher Gesundheitsbegleiter." = "Hi, I’m Sovi, your personal health companion.";
+"Damit ich dir wirklich helfen kann, würde ich dich gern besser kennenlernen." = "To really help you, I’d like to get to know you a little better.";
+"Hier findest du die Nutzungsbedingungen. Bitte lies sie kurz durch, bevor wir starten." = "Here are the terms. Please take a moment to read them before we start.";
+"Nutzungsbedingungen" = "Terms";
+"Akzeptieren" = "Accept";
+"Wie heißt du mit Vornamen?" = "What’s your first name?";
+"Wie ist dein Nachname?" = "What’s your last name?";
+"Wann bist du geboren?" = "When were you born?";
+"Wo wohnst du?" = "Where do you live?";
+"Unter welcher Telefonnummer kann man dich erreichen?" = "What’s your phone number?";
+"Wie lautet deine E-Mail-Adresse?" = "What’s your email address?";
+"Wie lautet deine Sozialversicherungsnummer? Du findest die 10 Ziffern auf deiner e-card." = "What’s your social insurance number? You’ll find the 10 digits on your e-card.";
+"Bei welcher Versicherung bist du?" = "Who are you insured with?";
+"Darf ich deinen Standort nutzen, um Angebote in deiner Nähe zu finden?" = "May I use your location to find services near you?";
+"Darf ich dich an deine Termine und nächsten Schritte erinnern?" = "Would you like reminders about your appointments and next steps?";
+"Danke! Jetzt können wir loslegen. Du kannst deine Angaben jederzeit ändern." = "Thanks! We’re ready to get started. You can change your details anytime.";
+"Bitte eine gültige Telefonnummer eingeben, zum Beispiel +43 660 1234567." = "Please enter a valid phone number, such as +43 660 1234567.";
+"Bitte Straße und Hausnummer, dann PLZ und Ort eingeben. Oder wähle einen Adressvorschlag." = "Enter the street and house number, followed by a comma, postcode and town. Or choose an address suggestion.";
+"Bitte ergänze Straße, Hausnummer, PLZ und Ort." = "Please add the street, house number, postcode and town.";
+"Geburtsdatum auswählen" = "Choose date of birth";
+"Geburtsdatum" = "Date of birth";
+"Deine Antwort" = "Your answer";
+"10 Ziffern" = "10 digits";
+"%lld von 10 Ziffern" = "%lld of 10 digits";
+"Adresse wird gesucht" = "Looking up address";
+"Straße Hausnummer, PLZ Ort" = "Street and house number, postcode and town";
+"Die Adresssuche ist gerade nicht verfügbar. Du kannst deine Adresse selbst eingeben: Straße Hausnummer, PLZ Ort." = "Address search is unavailable. You can enter your address: street and house number, postcode and town.";
+"Adressvorschläge von Apple Karten. Du kannst auch Straße Hausnummer, PLZ Ort eingeben." = "Suggestions from Apple Maps. You can also enter the street and house number, postcode and town.";
+"Dein Standort wird für jede Suche neu abgefragt. Apple kann daraus einen Ortsnamen bestimmen. Im Online-Chat geht er an den Sovi-Server, nicht an OpenAI." = "Your location is requested for each search. Apple may use it to find a place name. In online chat it goes to the Sovi server, not to OpenAI.";
+"Mitteilungen enthalten keine Gesundheitsdetails. Du kannst sie jederzeit ausschalten." = "Notifications contain no health details. You can turn them off anytime.";
+"Sovi hilft dir, passende Anlaufstellen zu finden, nächste Schritte zu planen und Formulare vorzubereiten." = "Sovi helps you find services, plan next steps and prepare forms.";
+"Sovi stellt keine Diagnosen. Medizinische Fragen klärst du mit Fachpersonal. Termine, Anträge und Kostenübernahmen sind erst bestätigt, wenn die zuständige Stelle sie bestätigt." = "Sovi does not diagnose conditions. Discuss medical questions with a professional. Appointments, applications and coverage are only confirmed by the responsible provider or authority.";
+"Deine Profilangaben und dieses Gespräch bleiben auf deinem Gerät. Du kannst die Angaben ändern oder alle lokalen Daten in den Einstellungen löschen." = "Your profile details and this conversation stay on your device. You can edit your details or delete all local data in Settings.";
+"Wenn du den Online-Chat aktivierst, werden deine Chatnachrichten an den Sovi-Server und zur Verarbeitung an OpenAI gesendet. Einträge aus deinem Verlauf teilst du nur nach Auswahl. Deine Profilangaben werden nicht automatisch mitgesendet." = "If you enable online chat, your messages are sent to the Sovi server and to OpenAI for processing. You choose which history entries to share. Your profile details are not included automatically.";
+"Für Adressvorschläge wird deine Suche an Apple Karten gesendet. Standort und Mitteilungen sind freiwillig; Sovi fragt dich gesondert um Erlaubnis." = "Address searches are sent to Apple Maps. Location and notifications are optional; Sovi asks for permission separately.";
+"Bitte prüfe Vorschläge und vorausgefüllte Formulare, bevor du sie verwendest. Mit „Akzeptieren“ stimmst du diesen Nutzungsbedingungen zu." = "Please review suggestions and prefilled forms before using them. By choosing “Accept”, you agree to these terms.";
+
+"Ohne Suche: Straße Hausnummer, PLZ Ort" = "Without search: street and house number, postcode and town";
+
+"Vorschläge von Apple Karten · oder Adresse selbst eingeben" = "Apple Maps suggestions · or enter your address";
+
+
+"Alle Einträge anzeigen" = "Show all entries";
+
+"Kompakter Verlauf" = "Compact history";
+
+"Nicht erledigt" = "Not done";
+
+"Verpasst" = "Missed";
+
+"Die Teilnahme kannst du ab dem Tag des Termins eintragen." = "You can record attendance on or after the appointment day.";
+
+"Hast du „%@“ schon erledigt?" = "Have you done “%@” yet?";
+
+"Wie ist es mit „%@“ gelaufen?" = "How did “%@” go?";
+
+"Hier ist dein Termin." = "Here’s your appointment.";
+
+"Was steht als Nächstes an?" = "What’s next?";
+
+"Hier sind deine Termine und Aufgaben. Was hast du schon erledigt?" = "Here are your appointments and tasks. What have you done so far?";
+
+"Du hast gerade keine offenen Termine oder Aufgaben." = "You have no outstanding appointments or tasks right now.";
+
+"Als erledigt gespeichert." = "Marked as done.";
+
+"Als nicht erledigt gespeichert." = "Marked as not done.";
+
+"Wieder offen." = "Marked as open again.";
+
+"Als teilgenommen gespeichert." = "Marked as attended.";
+
+"Als nicht teilgenommen gespeichert." = "Marked as not attended.";
+
+"Die Teilnahme ist wieder offen." = "Attendance is unrecorded again.";
+
+"Ausgewählt" = "Selected";
+
+"Nicht ausgewählt" = "Not selected";
+"Seite" = "Page";
+"Für diese Schritte ist kein eindeutiger Formularvorschlag verfügbar." = "I couldn’t identify a specific form for these steps.";
+"Passendes Formular" = "Suggested form";
+"Schritte aus dem Befund" = "Steps in the report";
+"Ich finde keinen ausdrücklichen organisatorischen Auftrag in diesem Befund." = "I found no explicit administrative next step in this report.";
+"Dokumentierte Impfungen" = "Recorded vaccinations";
+"Bitte unvollständige Zeilen im Original prüfen." = "Check incomplete rows against the original.";
+"Im Dokument kannst du die Impfungen für deinen Pfad auswählen." = "Open the document to choose which vaccinations to add to your path.";
+"Öffne das Dokument, um den Originaltext zu lesen." = "Open the document to read the original text.";
+"Wähle das Dokument aus, das wir gemeinsam ansehen sollen." = "Choose the document you’d like to discuss.";
+"Dokument prüfen" = "Review document";
+"Beispielbefund öffnen" = "Open sample report";
+"Im Chat besprechen" = "Discuss in chat";
+"Text aus einem Scan. Bitte mit dem Original vergleichen." = "Text recognized from a scan. Check it against the original.";
+"Im Pfad gespeichert" = "Saved to path";
+"Ausgewählte Schritte hinzufügen" = "Add selected steps";
+"Prüfe Person und Impfdatum, bevor du Einträge zu diesem Pfad hinzufügst." = "Check the person and vaccination dates before adding entries to this path.";
+"Auswahl aufheben" = "Clear selection";
+"Alle auswählen" = "Select all";
+"Impfungen zum Pfad hinzufügen" = "Add vaccinations to path";
+"Originaltext öffnen" = "Open original text";
+"Keine lesbare Datei." = "The file could not be read.";
+"Bitte ein einzelnes Bild oder ein PDF auswählen." = "Choose a single image or a PDF.";
+"Auszug aus meinem Brief" = "Excerpt from my letter";
+"Benötigte Unterlagen mit der zuständigen Stelle klären" = "Ask the responsible office which documents are required";
+"Familienleistungen" = "Family benefits";
+"Fragen für die Impfberatung sammeln" = "Prepare questions for vaccination counselling";
+"Gesundheitskurse" = "Health courses";
+"Impfangebote" = "Vaccination services";
+"Impfpass bereitlegen" = "Have the vaccination record ready";
+"Informationen zur Familienbeihilfe ansehen" = "Read about the family allowance";
+"Welches Gesundheitsangebot interessiert dich?" = "Which health service interests you?";
+"Wähle die Person für den Entwurf. Ich übernehme ihre gespeicherten Angaben." = "Choose the applicant. I’ll fill in the draft using their saved details.";
+"Wähle eine Person und ein Formular." = "Choose a person and a form.";
+"Person aus diesem Befund übernehmen" = "Use applicant details from this report";
+"Angaben aus dem Befund prüfen" = "Review details from the report";
+"Pflegeantrag vorbereiten" = "Prepare care application";
+"Für Wien gibt es den Entwurf „%@“. Passt Wien zu deinem Antrag?" = "The “%@” draft is for Vienna. Does your application concern Vienna?";
+"Formularentwurf vorbereiten" = "Prepare form draft";
+
+"Warst du am %@ beim Termin „%@“?" = "Did you go to your “%2$@” appointment on %1$@?";
+"Ja, ich war dort" = "Yes, I went";
+"Nein, ich war nicht dort" = "No, I didn’t go";
+"Später antworten" = "Answer later";
+"Danke, ich habe deine Teilnahme eingetragen." = "Thanks. I’ve marked that you went.";
+"Danke, ich habe eingetragen, dass du nicht dort warst." = "Thanks. I’ve marked that you didn’t go.";
+"Okay, ich lasse den Termin offen. Ich frage frühestens morgen wieder." = "Okay, I’ll leave it open. I won’t ask again today.";
+"Ich finde keinen vergangenen Termin mit offener Teilnahme." = "There are no past appointments waiting for an attendance update.";
+"Die Teilnahme kannst du nach dem Termin eintragen." = "You can record attendance after the appointment.";
+
+"Auswählen" = "Choose";
+"Lesen" = "Read";
+"Ansehen" = "View";
+"Vorbereiten" = "Prepare";
+"Starten" = "Start";
+"Fortsetzen" = "Continue";
+
+"Dokumentkontext schließen" = "Leave document";
+"Beispielbefund anhängen" = "Attach sample report";
+"Ereignisse im Pfad" = "Events on your path";
+"Im Pfad öffnen" = "Open on the path";
+"Dokument wird auf diesem Gerät gelesen …" = "Reading the document on this device…";
+"Ich kann dir den Originaltext und die dokumentierten Ereignisse zeigen." = "I can show you the original text and the events recorded in it.";
+
+"Dokument gespeichert. Ich habe kein eindeutig datiertes Ereignis gefunden." = "Document saved. I couldn’t find an event with a clear date.";
+"Diese Ereignisse stehen bereits auf deinem Pfad." = "These events are already on your path.";
+"Ich habe ein Ereignis in deinen Pfad eingetragen." = "I added one event to your path.";
+"Ich habe %lld Ereignisse in deinen Pfad eingetragen." = "I added %lld events to your path.";
+"Bitte prüfe unvollständige Impfzeilen im Original." = "Check the original for incomplete vaccination entries.";
+"Anhänge in diesem Chat" = "Attachments in this chat";
+"Ausgeklappt" = "Expanded";
+"Eingeklappt" = "Collapsed";

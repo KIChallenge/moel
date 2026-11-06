@@ -8,19 +8,21 @@ struct VaccinationDetails: View {
         SheetSection(title: "Impfung") {
             LabeledContent("Impfdatum", value: record.administrationText)
             LabeledContent("Impfstoff", value: record.product)
-            LabeledContent("Dosis", value: record.doseLabel)
-            LabeledContent("Charge", value: record.batch)
-            LabeledContent("PZN", value: record.productNumber)
-            LabeledContent("Ort", value: record.location)
-            DisclosureGroup("Weitere Angaben") {
-                VStack(alignment: .leading, spacing: 14) {
-                    LabeledContent("Impfende Stelle", value: record.facility)
-                    LabeledContent("Verantwortlich", value: record.responsiblePerson)
-                    if let setting = record.setting { LabeledContent("Impfsetting", value: setting) }
-                    if let program = record.program { LabeledContent("Impfprogramm", value: program) }
-                    LabeledContent("Eingetragen am", value: record.recordedAtText)
+            if !record.doseLabel.isEmpty { LabeledContent("Dosis", value: record.doseLabel) }
+            if !record.batch.isEmpty { LabeledContent("Charge", value: record.batch) }
+            if !record.productNumber.isEmpty { LabeledContent("PZN", value: record.productNumber) }
+            if !record.location.isEmpty { LabeledContent("Ort", value: record.location) }
+            if [record.facility, record.responsiblePerson, record.recordedAtText, record.setting ?? "", record.program ?? ""].contains(where: { !$0.isEmpty }) {
+                DisclosureGroup("Weitere Angaben") {
+                    VStack(alignment: .leading, spacing: 14) {
+                        if !record.facility.isEmpty { LabeledContent("Impfende Stelle", value: record.facility) }
+                        if !record.responsiblePerson.isEmpty { LabeledContent("Verantwortlich", value: record.responsiblePerson) }
+                        if let setting = record.setting { LabeledContent("Impfsetting", value: setting) }
+                        if let program = record.program { LabeledContent("Impfprogramm", value: program) }
+                        if !record.recordedAtText.isEmpty { LabeledContent("Eingetragen am", value: record.recordedAtText) }
+                    }
+                    .padding(.top, 8)
                 }
-                .padding(.top, 8)
             }
         }
         .accessibilityIdentifier("vaccination.details")

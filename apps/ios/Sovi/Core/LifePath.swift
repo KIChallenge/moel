@@ -1,6 +1,50 @@
 import CryptoKit
 import Foundation
 
+enum PathProgress: Equatable, Sendable {
+    case neutral, pending, done, missed, inactive
+    var title: String {
+        switch self {
+        case .neutral, .inactive: ""
+        case .pending: String(localized: "Noch offen")
+        case .done: String(localized: "Erledigt")
+        case .missed: String(localized: "Verpasst")
+        }
+    }
+}
+
+extension PathNode {
+    func progress(in state: AppState, now: Date) -> PathProgress {
+        if let id = appointmentID, let appointment = state.appointments.first(where: { $0.id == id }) {
+            guard appointment.status != .cancelled else { return .inactive }
+            switch appointment.attendance {
+            case .attended: return .done
+            case .notAttended: return appointment.date < now ? .missed : .pending
+            case .unrecorded: return .pending
+            }
+        }
+        guard kind == .task else { return .neutral }
+        switch taskStatus {
+        case .completed: return .done
+        case .notDone:
+            // Date-only tasks become past due after their calendar day ends.
+            return date.map { $0 < state.pathCalendar.startOfDay(for: now) } == true ? .missed : .pending
+        case .open, .inProgress, .waiting: return .pending
+        case .cancelled: return .inactive
+        }
+    }
+}
+
+extension PathDayGroup {
+    func progress(in state: AppState, now: Date) -> PathProgress {
+        let values = entries.map { $0.progress(in: state, now: now) }
+        if values.contains(.missed) { return .missed }
+        if values.contains(.pending) { return .pending }
+        if values.contains(.done) { return .done }
+        return values.contains(.inactive) ? .inactive : .neutral
+    }
+}
+
 struct LifeContextSource: Codable, Equatable, Identifiable, Sendable {
     var id: String
     var text: String
@@ -69,6 +113,22 @@ struct PathDayGroup: Identifiable, Equatable {
 
     var entryCount: Int { entries.count }
     var haloSegmentCount: Int { entryCount > 1 ? entryCount : 0 }
+    var actionBubbleTitle: String {
+        guard entryCount == 1, let entry = entries.first else { return String(localized: "Auswählen") }
+        switch entry.kind {
+        case .event, .information, .medication:
+            return String(localized: "Lesen")
+        case .appointment:
+            return String(localized: "Ansehen")
+        case .task:
+            switch entry.taskStatus {
+            case .open where entry.history?.draftKind != nil: return String(localized: "Vorbereiten")
+            case .open: return String(localized: "Starten")
+            case .inProgress: return String(localized: "Fortsetzen")
+            case .waiting, .completed, .notDone, .cancelled: return String(localized: "Ansehen")
+            }
+        }
+    }
     var displayNode: PathNode {
         var node = entries[0]
         node.title = title
@@ -78,7 +138,17 @@ struct PathDayGroup: Identifiable, Equatable {
     }
 }
 
+extension PathNode {
+    func dateOnPath(in calendar: Calendar) -> Date? {
+        vaccination?.administrationDay.flatMap { calendar.date(from: $0) } ?? date
+    }
+}
+
 extension AppState {
+    var chatAttachmentEventIDs: Set<UUID> {
+        Set(conversation.flatMap { $0.attachmentEventIDs ?? [] })
+    }
+
     var pathCalendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: lifeScenario?.timeZone ?? fixtureTimeZoneIdentifier) ?? .current
@@ -87,10 +157,11 @@ extension AppState {
 
     var pathDays: [PathDayGroup] {
         let calendar = pathCalendar
+        let importedEvents = chatAttachmentEventIDs
         var groups: [String: [PathNode]] = [:]
         for node in nodes {
             let key: String
-            if let date = node.date {
+            if let date = node.dateOnPath(in: calendar) {
                 let c = calendar.dateComponents([.year, .month, .day], from: date)
                 key = String(format: "day-%04d-%02d-%02d", c.year!, c.month!, c.day!)
             } else { key = "entry-\(node.id.uuidString)" }
@@ -107,11 +178,12 @@ extension AppState {
             let titles = Set(ordered.map { $0.history?.dayTitle ?? $0.title })
             let title = ordered.count > 1 && ordered.allSatisfy { $0.vaccination != nil }
                 ? String(localized: "Impfungen") : titles.count == 1 ? titles.first! : String(localized: "Mein Tag")
-            let date = first.date.map { calendar.startOfDay(for: $0) }
+            let date = first.dateOnPath(in: calendar).map { calendar.startOfDay(for: $0) }
             let snapshot = lifeScenario?.snapshot
             return PathDayGroup(id: key, date: date, year: date.map { calendar.component(.year, from: $0) },
                                 title: title, stage: first.history?.stage ?? String(localized: first.vaccination == nil ? "Eigene Schritte" : "Mein Leben heute"), entries: ordered,
-                                isPlanned: date.map { d in snapshot.map { d > calendar.startOfDay(for: $0) } ?? false } ?? false)
+                                isPlanned: (date.map { d in snapshot.map { d > calendar.startOfDay(for: $0) } ?? false } ?? false)
+                                    && !ordered.contains { importedEvents.contains($0.id) })
         }.sorted {
             switch ($0.date, $1.date) {
             case let (a?, b?): a == b ? $0.id < $1.id : a < b
@@ -124,6 +196,29 @@ extension AppState {
 
     var uniqueOpenTasks: [PathNode] {
         nodes.filter { $0.kind == .task && $0.history?.linkedTaskID == nil && $0.taskStatus != .completed && $0.taskStatus != .cancelled }
+    }
+
+    /// A short presentation of the supplied history. Saved records stay intact.
+    var compactPathDays: [PathDayGroup] {
+        guard lifeScenario != nil else { return pathDays }
+        let milestones: Set<String> = [
+            "day-1993-03-12", "day-1999-09-06", "day-2011-09-01", "day-2025-11-03",
+            "day-2026-08-20", "day-2026-08-21", "day-2026-10-01", "day-2026-10-29",
+            "day-2026-10-30", "day-2026-11-05"
+        ]
+        let latest = latestPathDayID
+        return pathDays.filter { day in
+            milestones.contains(day.id) || day.id == latest || day.isPlanned || day.entries.contains { node in
+                // Always include personal additions and unfinished tasks.
+                (node.history == nil && (node.vaccination == nil || node.vaccination?.importedFromPass == true)) ||
+                (node.kind == .task && node.history?.linkedTaskID == nil && node.taskStatus != .completed && node.taskStatus != .cancelled)
+            }
+        }
+    }
+
+    var latestPathDayID: String? {
+        let today = pathCalendar.startOfDay(for: lifeScenario?.snapshot ?? Date())
+        return pathDays.last(where: { $0.date.map { $0 <= today } ?? true })?.id ?? pathDays.first?.id
     }
 
     var documentedTherapySessions: Int {
@@ -163,14 +258,14 @@ enum LifePathSeed {
     static func state(now: Date, calendar fixtureCalendar: Calendar, bundle: Bundle = .main, includingVaccinationPass: Bool = true) throws -> AppState {
         guard let dataURL = resource("life-path-33", extension: "json", bundle: bundle),
               let textURL = resource("life-path-33", extension: "txt", bundle: bundle) else {
-            throw SoviError.invalidInput("Der synthetische 33-Jahre-Beispielpfad fehlt im App-Bundle.")
+            throw SoviError.invalidInput(String(localized: "Der Lebensverlauf konnte nicht geladen werden."))
         }
         let fixture = try JSONDecoder().decode(LifePathFixture.self, from: Data(contentsOf: dataURL))
         guard fixture.version == 1, fixture.days.count == 222,
               fixture.days.reduce(0, { $0 + $1.entries.count }) == 328,
               let zone = TimeZone(identifier: fixture.timeZone),
               let snapshot = ISO8601DateFormatter().date(from: fixture.snapshot) else {
-            throw SoviError.invalidInput("Der synthetische Beispielpfad ist nicht vollständig lesbar.")
+            throw SoviError.invalidInput(String(localized: "Der Lebensverlauf ist nicht vollständig lesbar."))
         }
         var calendar = Calendar(identifier: .gregorian); calendar.timeZone = zone
         let formatter = DateFormatter(); formatter.calendar = calendar

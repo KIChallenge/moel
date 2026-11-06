@@ -4,6 +4,11 @@ import UniformTypeIdentifiers
 
 struct DocumentReviewSheet: View {
     var onChooseForCase: ((UUID) -> Void)?
+    var initialDocumentID: UUID?
+    var language: ChatLanguage = ChatLanguage.resolve("")
+    var onDiscuss: ((SourceDocument) -> Void)?
+    @Environment(\.dismiss) private var dismiss
+    @State private var isImporting = false
     @Environment(SoviStore.self) private var store
     @State private var selectedID: UUID?
     @State private var showsImporter = false
@@ -24,12 +29,16 @@ struct DocumentReviewSheet: View {
                 chooser
             }
         }
-        .fileImporter(isPresented: $showsImporter, allowedContentTypes: [.plainText, .pdf],
+        .onAppear { if selectedID == nil { selectedID = initialDocumentID } }
+        .overlay { if isImporting { ProgressView().padding().background(.regularMaterial, in: Capsule()) } }
+        .disabled(isImporting)
+        .fileImporter(isPresented: $showsImporter, allowedContentTypes: [.plainText, .pdf, .image],
                       allowsMultipleSelection: false) { result in
             do {
                 guard let url = try result.get().first else { return }
-                try importFile(url)
-            } catch { self.error = error.localizedDescription }
+                importFile(url)
+            } catch let error as CocoaError where error.code == .userCancelled { return }
+            catch { self.error = error.localizedDescription }
         }
         .sheet(isPresented: $showsManualEntry) { NodeEditorSheet(kind: .task) }
         .sheet(isPresented: $showsPDF) {
@@ -55,6 +64,10 @@ struct DocumentReviewSheet: View {
                 }
             }
 
+            Button("Beispielbefund öffnen") {
+                    do { importFile(try CaseDocumentImport.sampleURL()) }
+                    catch { self.error = error.localizedDescription }
+            }.frame(minHeight: 44).accessibilityIdentifier("documents.report.sample")
             DisclosureGroup("Weitere Dokumente") {
                 ForEach(["A", "B", "C"], id: \.self) { identifier in
                     Button {
@@ -81,6 +94,16 @@ struct DocumentReviewSheet: View {
                 Button("PDF öffnen") { showsPDF = true }.frame(minHeight: 44)
             }
 
+            if let onDiscuss {
+                Button {
+                    onDiscuss(document)
+                    dismiss()
+                } label: { Label(language.text("Im Chat besprechen"), systemImage: "bubble.left") }
+                    .buttonStyle(SheetPrimaryButtonStyle())
+                    .accessibilityIdentifier("documents.discuss")
+            }
+            DocumentInsights(document: document, language: language)
+                .id(document.id)
             if !DischargeNavigationExtractor.recommendations(in: document).isEmpty {
                 Button("Empfehlungen für meine Nachsorge prüfen") {
                     if let onChooseForCase { onChooseForCase(document.id) }
@@ -98,7 +121,8 @@ struct DocumentReviewSheet: View {
                     .padding(.top, 14)
             }
 
-            if document.proposals.isEmpty && document.bundledPDFName == nil {
+            if document.proposals.isEmpty && document.bundledPDFName == nil &&
+                !hasInsights(document) {
                 SheetSection(title: "Keine Vorschläge") {
                     Button("Schritt hinzufügen") { showsManualEntry = true }
                         .frame(minHeight: 44)
@@ -120,13 +144,24 @@ struct DocumentReviewSheet: View {
         }
     }
 
-    private func importFile(_ url: URL) throws {
-        let input = try CaseDocumentImport.read(url)
-        selectedID = try store.importText(input.text, title: url.lastPathComponent, pdfData: input.pdf, pageSpans: input.pageSpans).id
+    private func hasInsights(_ document: SourceDocument) -> Bool {
+        switch DocumentDiscussion.read(document, language: language, calendar: store.state.pathCalendar) {
+        case .other: false
+        default: true
+        }
     }
 
-    private func importError(_ message: String) -> NSError {
-        NSError(domain: "Sovi.DocumentImport", code: 1, userInfo: [NSLocalizedDescriptionKey: message])
+    private func importFile(_ url: URL) {
+        guard !isImporting else { return }
+        isImporting = true
+        Task {
+            defer { isImporting = false }
+            do {
+                let input = try await Task.detached(priority: .userInitiated) { try CaseDocumentImport.read(url) }.value
+                let imported = try store.importText(input.text, title: url.lastPathComponent, pdfData: input.pdf, pageSpans: input.pageSpans)
+                selectedID = imported.id
+            } catch { self.error = error.localizedDescription }
+        }
     }
 }
 

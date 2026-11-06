@@ -1,45 +1,5 @@
 import SwiftUI
-
-struct PathSectionBanner: View {
-    var caption: String = ""
-    let title: String
-    var openControls: (() -> Void)?
-
-    var body: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 5) {
-                if !caption.isEmpty {
-                    Text(caption.uppercased())
-                        .font(.system(.caption, design: .rounded, weight: .heavy))
-                }
-                Text(LocalizedStringKey(title))
-                    .font(.system(.title3, design: .rounded, weight: .heavy))
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityElement(children: .combine)
-            .accessibilityAddTraits(.isHeader)
-            if let openControls {
-                Button(action: openControls) {
-                    Image(systemName: "ellipsis")
-                        .font(.system(.title3, design: .rounded, weight: .heavy))
-                        .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                }
-                .buttonStyle(.plain)
-                .fixedSize()
-                .accessibilityLabel("Einstellungen")
-                .accessibilityIdentifier("path.controls")
-            }
-        }
-        .foregroundStyle(.white)
-        .padding(.horizontal, 16).padding(.vertical, 12)
-        .frame(maxWidth: .infinity, minHeight: 72, alignment: .leading)
-        .background(SoviTheme.bannerGreen, in: RoundedRectangle(cornerRadius: 13))
-        .background(Color(hex: 0x00623E), in: RoundedRectangle(cornerRadius: 13).offset(y: 5))
-        .padding(.bottom, 5)
-    }
-}
+import UIKit
 
 /// Counts of stored records; no score or inferred medical status.
 struct PathOverviewStrip: View {
@@ -50,19 +10,16 @@ struct PathOverviewStrip: View {
     @Environment(\.dynamicTypeSize) private var textSize
 
     var body: some View {
-        Group {
-            if textSize.isAccessibilitySize {
-                VStack(spacing: 8) {
-                    HStack { appointmentCount; Spacer(); documentCount }
-                    HStack { vaccinationCount; Spacer(); taskCount }
-                }
-            } else {
-                HStack {
-                    appointmentCount; Spacer(minLength: 8)
-                    documentCount; Spacer(minLength: 8)
-                    vaccinationCount; Spacer(minLength: 8)
-                    taskCount
-                }
+        ViewThatFits(in: .horizontal) {
+            HStack {
+                appointmentCount; Spacer(minLength: 8)
+                documentCount; Spacer(minLength: 8)
+                vaccinationCount; Spacer(minLength: 8)
+                taskCount
+            }
+            VStack(spacing: 8) {
+                HStack { appointmentCount; Spacer(); documentCount }
+                HStack { vaccinationCount; Spacer(); taskCount }
             }
         }
         .padding(.horizontal, 18).padding(.vertical, 6)
@@ -75,8 +32,8 @@ struct PathOverviewStrip: View {
 
     private func count(_ value: Int, symbol: String, color: Color, label: LocalizedStringKey) -> some View {
         HStack(spacing: 6) {
-            Image(systemName: symbol).font(.system(.title3, design: .rounded, weight: .heavy))
-            Text(value, format: .number).font(.system(.title3, design: .rounded, weight: .heavy))
+            Image(systemName: symbol).font(textSize.isAccessibilitySize ? .system(size: 20, weight: .heavy) : .system(.title3, design: .rounded, weight: .heavy))
+            Text(value, format: .number).font(.system(textSize.isAccessibilitySize ? .caption2 : .title3, design: .rounded, weight: .heavy))
         }
         .foregroundStyle(color)
         .accessibilityElement(children: .ignore)
@@ -85,32 +42,114 @@ struct PathOverviewStrip: View {
     }
 }
 
-struct PathTodayMarker: View {
-    var title: String = String(localized: "Heute")
+struct PathActionBubble: View {
+    let title: String
+    let tint: Color
+    @Environment(\.locale) private var locale
+    @Environment(\.colorSchemeContrast) private var contrast
 
     var body: some View {
-        Text(title.uppercased())
+        Text(title.uppercased(with: locale))
             .font(.system(.subheadline, design: .rounded, weight: .heavy))
-            .foregroundStyle(SoviTheme.accent)
-            .padding(.horizontal, 14).padding(.vertical, 9)
-            .background(SoviTheme.bubble, in: RoundedRectangle(cornerRadius: 10))
-            .overlay { RoundedRectangle(cornerRadius: 10).strokeBorder(SoviTheme.border, lineWidth: 2) }
-            .overlay(alignment: .bottom) {
-                MarkerTail().fill(SoviTheme.bubble)
-                    .overlay { MarkerTail().stroke(SoviTheme.border, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round)) }
-                    .overlay(alignment: .top) { Rectangle().fill(SoviTheme.bubble).frame(width: 14, height: 3).offset(y: -1) }
-                    .frame(width: 18, height: 10).offset(y: 8)
-            }
-            .accessibilityHidden(true)
+            .foregroundStyle(contrast == .increased ? SoviTheme.ink : tint)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 13).padding(.top, 7).padding(.bottom, 15)
+            .background { ActionBubbleOutline().fill(SoviTheme.bubble) }
+            .overlay { ActionBubbleOutline().stroke(contrast == .increased ? SoviTheme.secondary : SoviTheme.border, lineWidth: 2) }
+            .frame(minWidth: 44, minHeight: 44, alignment: .bottom)
+            .contentShape(Rectangle())
     }
 }
 
-private struct MarkerTail: Shape {
+private struct ActionBubbleOutline: Shape {
     func path(in rect: CGRect) -> Path {
-        Path { path in
-            path.move(to: .zero)
-            path.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
-            path.addLine(to: CGPoint(x: rect.maxX, y: 0))
+        let bounds = rect.insetBy(dx: 1, dy: 1)
+        let bottom = bounds.maxY - 7
+        let left = bounds.minX, right = bounds.maxX, top = bounds.minY, middle = bounds.midX
+        return Path { path in
+            path.move(to: CGPoint(x: left + 9, y: top))
+            path.addArc(tangent1End: CGPoint(x: right, y: top), tangent2End: CGPoint(x: right, y: bottom), radius: 9)
+            path.addArc(tangent1End: CGPoint(x: right, y: bottom), tangent2End: CGPoint(x: middle + 8, y: bottom), radius: 9)
+            path.addLine(to: CGPoint(x: middle + 8, y: bottom))
+            path.addLine(to: CGPoint(x: middle + 1.5, y: bounds.maxY - 1))
+            path.addQuadCurve(to: CGPoint(x: middle - 1.5, y: bounds.maxY - 1), control: CGPoint(x: middle, y: bounds.maxY + 0.5))
+            path.addLine(to: CGPoint(x: middle - 8, y: bottom))
+            path.addArc(tangent1End: CGPoint(x: left, y: bottom), tangent2End: CGPoint(x: left, y: top), radius: 9)
+            path.addArc(tangent1End: CGPoint(x: left, y: top), tangent2End: CGPoint(x: right, y: top), radius: 9)
+            path.closeSubpath()
         }
+    }
+}
+
+/// Intercepts the system status-bar shortcut while preserving SwiftUI's scroll delegate.
+struct PathStatusBarScroll: UIViewRepresentable {
+    var enabled = true
+    var goToLatest: () -> Void
+    func makeCoordinator() -> Coordinator { Coordinator(goToLatest) }
+    func makeUIView(context: Context) -> Probe {
+        let view = Probe()
+        view.isUserInteractionEnabled = false
+        view.isAccessibilityElement = false
+        view.coordinator = context.coordinator
+        return view
+    }
+    func updateUIView(_ view: Probe, context: Context) {
+        context.coordinator.goToLatest = goToLatest
+        context.coordinator.enabled = enabled
+        view.install()
+    }
+    static func dismantleUIView(_ view: Probe, coordinator: Coordinator) { coordinator.detach() }
+
+    final class Probe: UIView {
+        weak var coordinator: Coordinator?
+        override func didMoveToWindow() { super.didMoveToWindow(); install() }
+        func install() {
+            guard window != nil else { return }
+            // The hosting hierarchy is completed after the representable update.
+            DispatchQueue.main.async { [weak self] in
+                guard let self, self.window != nil else { return }
+                var ancestor = self.superview
+                while let view = ancestor {
+                    if let scroll = view as? UIScrollView { self.coordinator?.attach(scroll); return }
+                    ancestor = view.superview
+                }
+            }
+        }
+    }
+    @MainActor final class Coordinator: NSObject, UIScrollViewDelegate {
+        var goToLatest: () -> Void
+        var enabled = true
+        private weak var scroll: UIScrollView?
+        private weak var original: (any UIScrollViewDelegate)?
+        private var originalScrollsToTop = true
+        init(_ action: @escaping () -> Void) { goToLatest = action }
+        func attach(_ view: UIScrollView) {
+            guard view.delegate !== self else { view.scrollsToTop = enabled; return }
+            detach()
+            scroll = view; original = view.delegate
+            originalScrollsToTop = view.scrollsToTop
+            view.scrollsToTop = enabled
+            view.delegate = self
+        }
+        func detach() {
+            if scroll?.delegate === self { scroll?.delegate = original; scroll?.scrollsToTop = originalScrollsToTop }
+            scroll = nil; original = nil
+        }
+        func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
+            goToLatest()
+            return false
+        }
+        // UIKit inspects and invokes its scroll delegate on the main thread.
+        override nonisolated func responds(to selector: Selector!) -> Bool {
+            if super.responds(to: selector) { return true }
+            return MainActor.assumeIsolated { original?.responds(to: selector) == true }
+        }
+        override nonisolated func forwardingTarget(for selector: Selector!) -> Any? {
+            let fallback = super.forwardingTarget(for: selector)
+            // This synchronous Objective-C callback never transfers the target off the UI thread.
+            let target = MainActor.assumeIsolated { ForwardTarget(value: original?.responds(to: selector) == true ? original : nil) }
+            return target.value ?? fallback
+        }
+        private struct ForwardTarget: @unchecked Sendable { let value: Any? }
     }
 }

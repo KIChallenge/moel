@@ -5,7 +5,7 @@ ROOT = File.expand_path('..', __dir__)
 Dir.chdir(File.join(ROOT, 'apps/ios'))
 project = Xcodeproj::Project.new('Sovi.xcodeproj')
 project.root_object.development_region = 'de'
-project.root_object.known_regions = ['de', 'en', 'Base']
+project.root_object.known_regions = ['de', 'en', 'ar', 'tr', 'Base']
 app = project.new_target(:application, 'Sovi', :ios, '18.0', nil, :swift)
 source_group = project.main_group.new_group('Sovi', 'Sovi')
 
@@ -32,7 +32,7 @@ resources = source_group.new_group('Resources', 'Resources')
   app.resources_build_phase.add_file_reference(ref)
 end
 strings = resources.new_variant_group('Localizable.strings')
-['de', 'en'].each { |language| strings.new_file("#{language}.lproj/Localizable.strings").name = language }
+['de', 'en', 'ar', 'tr'].each { |language| strings.new_file("#{language}.lproj/Localizable.strings").name = language }
 app.resources_build_phase.add_file_reference(strings)
 info_strings = resources.new_variant_group('InfoPlist.strings')
 ['de', 'en'].each { |language| info_strings.new_file("#{language}.lproj/InfoPlist.strings").name = language }

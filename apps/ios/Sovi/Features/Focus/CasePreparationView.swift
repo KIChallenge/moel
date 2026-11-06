@@ -42,7 +42,7 @@ struct CasePreparationView: View {
                     Button("Fallbezogenen Formularentwurf öffnen", action: openForms).buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("case.forms")
                 }
                 let missing = store.state.missingCaseItems(progress.scenario)
-                Text(missing.isEmpty ? String(localized: "Vorbereitungsschritte geprüft. Unterschrift und Einreichung erfolgen durch die zuständige Person.") : String(localized: "Noch offen: \(missing.count) Punkte"))
+                Text(missing.isEmpty ? progress.replyLanguage.localized("Vorbereitungsschritte geprüft. Unterschrift und Einreichung erfolgen durch die zuständige Person.") : progress.replyLanguage.localized("Noch offen: \(missing.count) Punkte"))
                     .font(.subheadline.weight(.semibold)).accessibilityIdentifier("case.missing")
                 DisclosureGroup("Was fehlt noch?") { ForEach(Array(missing.enumerated()), id: \.offset) { _, item in Text("• " + item).font(.subheadline).padding(.vertical, 3) } }
             }
@@ -71,7 +71,7 @@ struct CasePreparationView: View {
                     Button { perform(.reviewCaseRecommendation(recommendation.id, !recommendation.reviewed)) } label: {
                         Label("Quelle geprüft · diesen Schritt vorbereiten", systemImage: recommendation.reviewed ? "checkmark.square.fill" : "square")
                             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                    }.accessibilityValue(recommendation.reviewed ? String(localized: "Geprüft") : String(localized: "Noch nicht geprüft"))
+                    }.accessibilityValue(recommendation.reviewed ? progress.replyLanguage.localized("Geprüft") : progress.replyLanguage.localized("Noch nicht geprüft"))
                         .disabled(progress.saved).accessibilityIdentifier("case.review.\(recommendation.kind.rawValue)")
                 }.padding(16).background(SoviTheme.softGreen, in: RoundedRectangle(cornerRadius: 18))
             }
@@ -80,7 +80,7 @@ struct CasePreparationView: View {
     @ViewBuilder private var authority: some View {
         if progress.scenario == .care {
             if progress.answers.first != "home" {
-                Text(prep.careAuthority.map { String(localized: "Pflegegeld: \($0)") } ?? String(localized: "Pflegegeld: zuständige Stelle noch offen")).font(.headline)
+                Text(prep.careAuthority.map { progress.replyLanguage.localized("Pflegegeld: \($0)") } ?? progress.replyLanguage.localized("Pflegegeld: zuständige Stelle noch offen")).font(.headline)
                 Text("Diese Zuordnung folgt deinen Angaben zum üblichen Fall. Bei Sonderfällen die Zuständigkeit direkt prüfen. Es wird kein Anspruch festgestellt.").font(.caption)
                 if ["svs", "bvaeb"].contains(prep.answers["payer"] ?? "") {
                     Text("Das mitgelieferte Pflegegeldformular gehört zur PV. Für diesen Träger bitte das passende offizielle Formular verwenden.").font(.subheadline)
@@ -89,7 +89,7 @@ struct CasePreparationView: View {
                 Link("Quelle zur Zuständigkeit", destination: URL(string: CasePreparation.authoritySource)!).frame(minHeight: 44)
             }
             if progress.answers.first != "money" {
-                Text(["wien", "vienna"].contains(progress.answers.dropFirst().first?.lowercased() ?? "") ? String(localized: "Pflege und Betreuung: Fonds Soziales Wien") : String(localized: "Pflege und Betreuung: regionale Pflegeberatung")).font(.subheadline)
+                Text(progress.careInVienna ? progress.replyLanguage.localized("Pflege und Betreuung: Fonds Soziales Wien") : progress.replyLanguage.localized("Pflege und Betreuung: regionale Pflegeberatung")).font(.subheadline)
             }
             Link("Informationen zum Antrag", destination: URL(string: CasePreparation.applicationSource)!).frame(minHeight: 44)
         }
@@ -101,12 +101,12 @@ struct CasePreparationView: View {
                 ForEach(store.state.formPeople ?? []) { p in Text(p.displayName).tag(Optional(p.id)) }
             }.accessibilityIdentifier("case.applicant")
             Button(person == nil ? "Person hinzufügen" : "Angaben bearbeiten") {
-                let value = person ?? FormPerson(label: progress.scenario == .care ? String(localized: "Mutter") : "")
+                let value = person ?? FormPerson(label: progress.scenario == .care ? progress.replyLanguage.localized("Mutter") : "")
                 editedPersonID = value.id; editingPerson = value
             }.frame(minHeight: 44)
             if let person {
-                let missing = CasePreparation.missingProfileFields(person)
-                Text(missing.isEmpty ? String(localized: "Allgemeine Personendaten vorhanden. Bitte im Formular prüfen.") : String(localized: "Noch ergänzen: \(missing.joined(separator: ", "))")).font(.caption)
+                let missing = CasePreparation.missingProfileFields(person, language: progress.replyLanguage)
+                Text(missing.isEmpty ? progress.replyLanguage.localized("Allgemeine Personendaten vorhanden. Bitte im Formular prüfen.") : progress.replyLanguage.localized("Noch ergänzen: \(missing.joined(separator: ", "))")).font(.caption)
             }
         }
     }

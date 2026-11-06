@@ -16,6 +16,10 @@ struct VaccinationRecord: Codable, Equatable, Sendable {
     var setting: String?
     var program: String?
     var recordedAtText: String
+    /// Set after the user has selected this record for the visible path.
+    var importedFromPass: Bool?
+    /// The printed civil date may differ from the instant shown in the device time zone.
+    var administrationDay: DateComponents?
 }
 
 private struct VaccinationPassFixture: Decodable {

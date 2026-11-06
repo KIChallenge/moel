@@ -21,6 +21,32 @@ struct PrototypeForm: Decodable, Identifiable {
         guard let url = Bundle.main.url(forResource: "catalog", withExtension: "json", subdirectory: "Fixtures/Forms") else { throw SoviError.missingRecord }
         return try JSONDecoder().decode([PrototypeForm].self, from: Data(contentsOf: url))
     }
+    /// A specifically requested template can open directly. Generic care applications
+    /// go through the guided case so the payer and responsible authority are checked.
+    static func requestedID(in message: String) -> String? {
+        let t = ChatLanguage.normalized(message)
+        let named: [(String, [String])] = [
+            ("reha-unfall", ["reha nach unfall", "rehabilitation nach unfall", "accident rehabilitation", "rehab after an accident", "kaza sonrasi rehabilitasyon", "تأهيل بعد حادث"]),
+            ("einrichtungswunsch", ["einrichtungswunsch", "preferred facility", "facility preference", "kurum tercihi", "تفضيل المؤسسة"]),
+            ("senioren-wg", ["seniorinnen-wohngemeinschaft", "senior:innen-wohngemeinschaft", "senioren-wg", "seniorenwohngemeinschaft", "senior shared housing", "shared senior housing", "yasli ortak konut", "سكن مشترك للمسنين"]),
+            ("fahrtkosten", ["fahrtkosten", "travel cost", "transport cost", "ulasim masraf", "تكاليف النقل", "تكاليف السفر"]),
+            ("kur-reha", ["reha-antrag", "rehaantrag", "rehabilitation application", "rehab form", "rehabilitasyon basvuru", "طلب اعاده التأهيل", "طلب إعادة التأهيل"]),
+            ("fsw-foerderung", ["fsw-antrag", "fsw antrag", "fsw application", "fsw funding", "fsw basvuru", "طلب fsw"]),
+            ("pflegegeld", ["pv-pflegegeldantrag", "pv care allowance form"])
+        ]
+        let matches = named.filter { $0.1.contains { phrase in t.contains(ChatLanguage.normalized(phrase)) } }
+        guard matches.count == 1 else { return nil }
+        return matches[0].0
+    }
+
+    func prefilledDraft(for person: FormPerson, caseProgress: DemoScenarioProgress? = nil) -> SavedFormDraft {
+        let purpose = caseProgress?.preparation?.answers["purpose"]
+        let selections: [String: String]? = id == "pflegegeld" && ["first", "increase"].contains(purpose ?? "")
+            ? ["Antrag Pflg": purpose == "first" ? "01" : "02"] : nil
+        return SavedFormDraft(formID: id, personID: person.id, values: prefill(person),
+                              caseScenario: caseProgress?.scenario.rawValue, selections: selections)
+    }
+
     func prefill(_ person: FormPerson) -> [String: String] {
         var values = person.values
         values["fullName"] = person.name

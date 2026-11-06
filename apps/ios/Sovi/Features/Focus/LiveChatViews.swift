@@ -14,10 +14,15 @@ struct LiveChatSettingsSheet: View {
     @State private var selectedBackground: Set<String> = []
     @State private var backgroundFilter = ""
 
+    private var shareableNodes: [PathNode] {
+        let localIDs = store.state.chatAttachmentEventIDs
+        return store.nodes.filter { !localIDs.contains($0.id) }
+    }
+
     private var recentBackground: [ChatBackground] {
         let anchor = store.state.lifeScenario?.snapshot ?? store.now
         let formatter = DateFormatter(); formatter.dateFormat = "yyyy-MM-dd"; formatter.timeZone = store.state.pathCalendar.timeZone
-        return store.nodes.filter { $0.date != nil && $0.date! <= anchor
+        return shareableNodes.filter { $0.date != nil && $0.date! <= anchor
             && (backgroundFilter.isEmpty || $0.displayTitle.localizedCaseInsensitiveContains(backgroundFilter)) }
             .sorted { $0.date! > $1.date! }.prefix(backgroundFilter.isEmpty ? 8 : 30).map {
                 ChatBackground(id: $0.id.uuidString, title: String($0.displayTitle.prefix(140)), date: formatter.string(from: $0.date!), is_synthetic: store.state.lifeScenario != nil)
@@ -31,7 +36,7 @@ struct LiveChatSettingsSheet: View {
                 SecureField("API-Zugangscode", text: $token)
                     .textInputAutocapitalization(.never).autocorrectionDisabled()
                     .accessibilityIdentifier("chat.token")
-                Text("Der Prototyp-Zugangscode wird im Schlüsselbund dieses Geräts gespeichert. Trage hier nicht deinen OpenAI-Schlüssel ein.")
+                Text("Der Zugangscode wird im Schlüsselbund dieses Geräts gespeichert. Trage hier nicht deinen OpenAI-Schlüssel ein.")
                     .font(.footnote).foregroundStyle(SoviTheme.secondary)
                 Toggle("Online-Chat verwenden", isOn: $enabled).accessibilityIdentifier("chat.enabled")
                 Toggle("Aktuellen Standort mitsenden", isOn: $gps)
@@ -59,7 +64,7 @@ struct LiveChatSettingsSheet: View {
                     })) {
                         VStack(alignment: .leading) {
                             Text(record.title)
-                            Text(record.date + (record.is_synthetic ? " · " + String(localized: "Fiktiver Beispieleintrag") : "")).font(.caption)
+                            Text(record.date).font(.caption)
                         }
                     }.disabled(!selectedBackground.contains(record.id) && selectedBackground.count >= 4)
                 }
@@ -70,7 +75,7 @@ struct LiveChatSettingsSheet: View {
                 Button("Speichern") {
                     do {
                         try chat.configure(token: token, enabled: enabled, shareLocation: gps, responseLanguage: responseLanguage)
-                        let chosen = store.nodes.filter { selectedBackground.contains($0.id.uuidString) }.compactMap { node -> ChatBackground? in
+                        let chosen = shareableNodes.filter { selectedBackground.contains($0.id.uuidString) }.compactMap { node -> ChatBackground? in
                             guard let date = node.date else { return nil }
                             let formatter = DateFormatter(); formatter.dateFormat = "yyyy-MM-dd"; formatter.timeZone = store.state.pathCalendar.timeZone
                             return ChatBackground(id: node.id.uuidString, title: String(node.displayTitle.prefix(140)), date: formatter.string(from: date), is_synthetic: store.state.lifeScenario != nil)
@@ -110,18 +115,22 @@ struct LiveChatResultView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
+            if !result.choices.isEmpty {
+                Text("Du kannst auswählen oder selbst antworten.").font(.caption).foregroundStyle(SoviTheme.secondary)
+            }
             ForEach(result.choices) { choice in
                 Button { if choice.opens_composer == true { openAnswer() } else { send(choice.message) } } label: {
                     HStack { Text(choice.label); Spacer(); Image(systemName: "arrow.turn.down.right") }
                         .font(.body.weight(.medium)).padding(16)
                         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         .background(SoviTheme.softGreen, in: RoundedRectangle(cornerRadius: 18))
+                        .contentShape(Rectangle())
                 }
-                .disabled(busy).accessibilityIdentifier("chat.\(choice.id)")
+                .buttonStyle(.plain).disabled(busy).accessibilityIdentifier("chat.\(choice.id)")
             }
             if !mappedProviders.isEmpty {
                 Text("Anlaufstellen auf der Karte").font(.headline)
-                Map(initialPosition: .automatic, selection: $selectedProvider) {
+                Map(initialPosition: .automatic, interactionModes: [.zoom], selection: $selectedProvider) {
                     ForEach(mappedProviders) { provider in
                         Marker(provider.name, coordinate: CLLocationCoordinate2D(latitude: provider.latitude!, longitude: provider.longitude!))
                             .tint(SoviTheme.accent).tag(provider.id)
@@ -163,7 +172,7 @@ struct LiveChatResultView: View {
                 }
                 .padding(18).frame(maxWidth: .infinity, alignment: .leading)
                 .background(SoviTheme.softGreen.opacity(0.5), in: RoundedRectangle(cornerRadius: 20))
-                .overlay(RoundedRectangle(cornerRadius: 20).stroke(selectedProvider == provider.id ? SoviTheme.accent : .clear, lineWidth: 2))
+                .overlay(RoundedRectangle(cornerRadius: 20).stroke(selectedProvider == provider.id ? SoviTheme.accent : .clear, lineWidth: 2).allowsHitTesting(false))
                 .accessibilityElement(children: .contain)
                 .accessibilityIdentifier("chat.provider")
             }

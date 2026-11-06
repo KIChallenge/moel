@@ -20,6 +20,82 @@ final class CaseJourneyTests: XCTestCase {
         return doc
     }
 
+    func testNaturalRequestsEnterEachCaseInTheWritersLanguage() throws {
+        let samples: [(ChatLanguage, DemoScenario, String)] = [
+            (.de, .care, "Meine Mutter ist chronisch krank und kommt allein nicht mehr zurecht. Was kann ich tun?"),
+            (.en, .hospital, "I was discharged from hospital. How do I organise the next steps?"),
+            (.en, .health, "I want to do something for my health."),
+            (.de, .child, "Ich habe ein Kind und möchte wissen, welche Angebote es gibt."),
+            (.tr, .care, "Annemin bakıma ihtiyacı var, nasıl yardım edebilirim?"),
+            (.ar, .child, "أريد معرفة الخدمات المتاحة لطفلي")
+        ]
+        for (language, scenario, utterance) in samples {
+            XCTAssertEqual(DemoScenario.matching(utterance), scenario, utterance)
+            XCTAssertEqual(ChatLanguage.resolve(utterance), language, utterance)
+            let store = try makeStore()
+            try store.perform(.startScenario(scenario, language: language, opening: utterance))
+            let progress = try XCTUnwrap(store.state.demoScenarios?[scenario.rawValue])
+            XCTAssertEqual(progress.history.first?.text, utterance)
+            XCTAssertEqual(progress.history.last?.text, progress.question)
+            if language != .de {
+                var german = progress
+                german.language = .de
+                XCTAssertNotEqual(progress.question, german.question)
+            }
+        }
+        XCTAssertEqual(ChatLanguage.resolve(samples[0].2, preference: "en"), .en)
+    }
+
+    func testEnglishCareConversationPreparesOnlyMatchedApplicantsDraft() throws {
+        let store = try makeStore()
+        try store.perform(.startScenario(.care, language: .en, opening: "I want home help for my mother."))
+        try store.perform(.answerScenario(.care, "Vienna"))
+        let mother = FormPerson(label: "Mother", values: ["firstName": "Mara", "lastName": "Example"])
+        let me = FormPerson(label: "Me", isSelf: true, values: ["firstName": "Separate"])
+        try store.perform(.savePerson(me))
+        try store.perform(.savePerson(mother))
+        try store.perform(.setCaseApplicant(.care, mother.id))
+        for (key, answer) in [("role", "My mother will sign herself"), ("reports", "Yes, we have her reports")] {
+            let progress = try XCTUnwrap(store.state.demoScenarios?["care"])
+            let q = try XCTUnwrap(progress.preparation?.nextQuestion(for: progress))
+            XCTAssertEqual(q.key, key)
+            try store.perform(.answerCaseQuestion(key, XCTUnwrap(q.answerID(answer))))
+        }
+        let key = "fsw-foerderung:" + mother.id.uuidString
+        var draft = try XCTUnwrap(store.state.formDrafts?[key])
+        XCTAssertTrue(draft.values.values.contains("Mara"))
+        XCTAssertEqual(draft.caseScenario, "care")
+        XCTAssertFalse(draft.values.values.contains("Separate"))
+        XCTAssertNil(store.state.formDrafts?["pflegegeld:" + mother.id.uuidString])
+        draft.values[draft.values.keys.sorted().first!] = "Edited"
+        try store.perform(.saveFormDraft(key, draft))
+        try store.perform(.setCaseApplicant(.care, mother.id))
+        XCTAssertEqual(store.state.formDrafts?[key], draft)
+        XCTAssertNil(store.state.formDrafts?["fsw-foerderung:" + me.id.uuidString])
+    }
+
+    func testExplicitTemplatesAndFreeTextChoicesAcrossLanguages() throws {
+        let pairs = [
+            ("How do I get the travel cost subsidy in Vienna?", "fahrtkosten"),
+            ("PV-Pflegegeldantrag", "pflegegeld"),
+            ("FSW-Antrag", "fsw-foerderung"),
+            ("Rehabilitation application", "kur-reha"),
+            ("Kaza sonrası rehabilitasyon", "reha-unfall"),
+            ("تفضيل المؤسسة", "einrichtungswunsch"),
+            ("Senior shared housing", "senioren-wg")
+        ]
+        for (message, expected) in pairs { XCTAssertEqual(PrototypeForm.requestedID(in: message), expected, message) }
+        XCTAssertNil(PrototypeForm.requestedID(in: "What forms are there?"))
+        XCTAssertNil(PrototypeForm.requestedID(in: "FSW-Antrag oder Einrichtungswunsch?"))
+        var child = DemoScenarioProgress(scenario: .child, language: .tr)
+        XCTAssertEqual(try child.normalizedAnswer("Çocuğum 8 yaşında"), "8")
+        XCTAssertThrowsError(try child.normalizedAnswer("-1"))
+        child.answers = ["8"]
+        XCTAssertEqual(try child.normalizedAnswer("Aile danışmanlığı arıyorum"), "family")
+        child.language = .ar
+        XCTAssertEqual(try child.normalizedAnswer("أسأل عن التغذية"), "nutrition")
+    }
+
     func testPDFImportRetainsOriginalAndExactPageEvidence() throws {
         let store = try makeStore()
         let doc = try hospital(store)

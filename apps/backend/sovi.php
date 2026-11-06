@@ -54,13 +54,13 @@ function soviJson(int $status, array $body): never
 function soviAuthorize(array $server, string $token): void
 {
     if (strlen($token) < 32) {
-        soviFail(503, 'not_configured', 'Configure a prototype API token of at least 32 characters.');
+        soviFail(503, 'not_configured', 'Configure an API token of at least 32 characters.');
     }
     $header = $server['HTTP_AUTHORIZATION'] ?? $server['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
     $provided = preg_match('/^Bearer (\S+)$/i', $header, $matches)
         ? $matches[1] : ($server['HTTP_X_SOVI_TOKEN'] ?? '');
     if (!hash_equals($token, $provided)) {
-        soviFail(401, 'unauthorized', 'A valid prototype API token is required.');
+        soviFail(401, 'unauthorized', 'A valid API token is required.');
     }
 }
 
@@ -244,7 +244,7 @@ function soviRateLimit(string $path, array $config, int $now): void
             $count = ($previous['bucket'] ?? null) === $bucket ? ($previous['count'] ?? 0) : 0;
             if ($count >= $limit) {
                 header('Retry-After: ' . (($bucket + 1) * $seconds - $now));
-                soviFail(429, 'rate_limited', 'Prototype request limit reached. Try again later.');
+                soviFail(429, 'rate_limited', 'Request limit reached. Try again later.');
             }
             $state[$key] = ['bucket' => $bucket, 'count' => $count + 1];
         }
@@ -436,8 +436,8 @@ function soviBuildReply(array $interpretation, string $locale, ?array $deviceLoc
             $reply = $en ? 'Which insurer is your question about?' : 'Um welche Versicherung geht es?';
         } else {
             $status = 'understood';
-            $reply = $en ? 'Your insurance request is captured below for review. This prototype has not checked eligibility or coverage.'
-                : 'Deine Versicherungsanfrage steht unten zur Prüfung. Dieser Prototyp hat weder Anspruch noch Kostenübernahme geprüft.';
+            $reply = $en ? 'Your insurance request is ready for review below. Eligibility and coverage have not been confirmed.'
+                : 'Deine Versicherungsanfrage steht unten zur Prüfung. Anspruch und Kostenübernahme sind noch nicht bestätigt.';
         }
     } else {
         $missing = ['goal'];
@@ -588,7 +588,6 @@ function soviChatText(string $key, string $language): string
         'context' => ['Geht es bei deinem Termin um diesen geteilten Eintrag?', 'Is your appointment about this shared entry?', 'هل موعدك متعلق بهذا السجل الذي شاركته؟', 'Randevun paylaştığın bu kayıtla mı ilgili?'],
         'context_yes' => ['Ja, wegen diesem Eintrag', 'Yes, about this entry', 'نعم، بخصوص هذا السجل', 'Evet, bu kayıtla ilgili'],
         'context_no' => ['Nein, anderes Anliegen', 'No, a different concern', 'لا، موضوع آخر', 'Hayır, farklı bir konu'],
-        'demo' => ['Fiktiver Beispieleintrag', 'Fictional example entry', 'سجل تجريبي خيالي', 'Kurgusal örnek kayıt'],
     ];
     $index = array_search($language, ['de', 'en', 'ar', 'tr'], true);
     return $copy[$key][$index === false ? 1 : $index];
@@ -625,7 +624,7 @@ function soviChatReply(array $interpretation, string $locale, ?array $gps, array
         $status = 'professional_guidance'; $reply = $t('emergency');
         $actions = [$call('144', $t('emergency_call')), $healthAdvice];
     } elseif ($context !== null && $facts['background_confirmation'] === null && $interpretation['goal'] === 'find_provider') {
-        $reply = $t('context') . '\n' . ($context['is_synthetic'] ? $t('demo') . ': ' : '') . $context['date'] . ' · ' . $context['title'];
+        $reply = $t('context') . '\n' . $context['date'] . ' · ' . $context['title'];
         $addChoice('context_yes'); $addChoice('context_no');
     } elseif ($interpretation['goal'] === 'find_provider' && $facts['service'] === null && $facts['support_goal'] === null && !in_array($facts['category'], ['symptoms', 'mobility', 'daily_support'], true)) {
         $reply = $t('doctor');

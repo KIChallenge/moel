@@ -79,6 +79,21 @@ final class LiveChatTests: XCTestCase {
         catch { XCTAssertEqual(error as? LiveChatError, .outdated) }
     }
 
+    func testAnsweredChoicesStayHiddenDuringPendingAndFailedRequests() async throws {
+        let chat = LiveChatController(api: api(), testing: true)
+        try chat.configure(token: String(repeating: "good", count: 10), enabled: true, shareLocation: false)
+        chat.submit("I need an appointment")
+        for _ in 0..<100 { if !chat.busy { break }; try await Task.sleep(for: .milliseconds(10)) }
+        XCTAssertNotNil(chat.currentResult)
+        try chat.configure(token: String(repeating: "unauthorized", count: 4), enabled: true, shareLocation: false)
+        chat.submit("An appointment with insurance")
+        XCTAssertNil(chat.currentResult)
+        for _ in 0..<100 { if !chat.busy { break }; try await Task.sleep(for: .milliseconds(10)) }
+        XCTAssertNotNil(chat.result)
+        XCTAssertNil(chat.currentResult)
+        XCTAssertNotNil(chat.failedMessage)
+    }
+
     func testControllerKeepsFailuresAndCancelsWithoutAddingAResponse() async throws {
         let chat = LiveChatController(api: api(), testing: true)
         try chat.configure(token: String(repeating: "unauthorized", count: 4), enabled: true, shareLocation: false)

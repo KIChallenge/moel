@@ -448,7 +448,7 @@
 "Online-Chat verwenden" = "Online-Chat verwenden";
 "Aktuellen Standort mitsenden" = "Aktuellen Standort mitsenden";
 "Was wird übermittelt?" = "Was wird übermittelt?";
-"Der Prototyp-Zugangscode wird im Schlüsselbund dieses Geräts gespeichert. Trage hier nicht deinen OpenAI-Schlüssel ein." = "Der Prototyp-Zugangscode wird im Schlüsselbund dieses Geräts gespeichert. Trage hier nicht deinen OpenAI-Schlüssel ein.";
+"Der Prototyp-Zugangscode wird im Schlüsselbund dieses Geräts gespeichert. Trage hier nicht deinen OpenAI-Schlüssel ein." = "Der Zugangscode wird im Schlüsselbund dieses Geräts gespeichert. Trage hier nicht deinen OpenAI-Schlüssel ein.";
 "Nachrichten dieses Online-Gesprächs und nur die unten von dir angekreuzten Hintergrund-Einträge gehen an den Sovi-Server und OpenAI. Dokumente und der übrige Pfad bleiben auf dem Gerät. Freiwillige GPS-Daten gehen nur an den Sovi-Server." = "Nachrichten dieses Online-Gesprächs und nur die unten von dir angekreuzten Hintergrund-Einträge gehen an den Sovi-Server und OpenAI. Dokumente und der übrige Pfad bleiben auf dem Gerät. Freiwillige GPS-Daten gehen nur an den Sovi-Server.";
 "Nenne für andere Personen keine Namen oder vertraulichen Dokumentdetails. Der Online-Verlauf bleibt nur bis zum neuen Gespräch oder App-Neustart im Arbeitsspeicher. Bereits übermittelte Daten können nicht zurückgerufen werden; Server- und OpenAI-Aufbewahrung sind davon getrennt." = "Nenne für andere Personen keine Namen oder vertraulichen Dokumentdetails. Der Online-Verlauf bleibt nur bis zum neuen Gespräch oder App-Neustart im Arbeitsspeicher. Bereits übermittelte Daten können nicht zurückgerufen werden; Server- und OpenAI-Aufbewahrung sind davon getrennt.";
 "Ich stimme dieser Übermittlung für den Online-Chat zu" = "Ich stimme dieser Übermittlung für den Online-Chat zu";
@@ -527,10 +527,10 @@
 "Familienberatungsstelle auswählen" = "Familienberatungsstelle auswählen";
 "Familienstand" = "Familienstand";
 "Fertig" = "Fertig";
-"Fiktiven Beispielbrief verwenden" = "Fiktiven Beispielbrief verwenden";
-"Fiktiver Beispielbrief: Eine ambulante Rehabilitation wird empfohlen. Eine ärztliche Nachkontrolle soll vereinbart werden." = "Fiktiver Beispielbrief: Eine ambulante Rehabilitation wird empfohlen. Eine ärztliche Nachkontrolle soll vereinbart werden.";
+"Fiktiven Beispielbrief verwenden" = "Hinterlegten Brief öffnen";
+"Fiktiver Beispielbrief: Eine ambulante Rehabilitation wird empfohlen. Eine ärztliche Nachkontrolle soll vereinbart werden." = "Eine ambulante Rehabilitation wird empfohlen. Eine ärztliche Nachkontrolle soll vereinbart werden.";
 "Fragen für eine Ernährungsberatung sammeln" = "Fragen für eine Ernährungsberatung sammeln";
-"Für diese Demo brauche ich eine ausdrückliche Empfehlung zu Rehabilitation oder Nachkontrolle. Oder verwende den fiktiven Beispielbrief." = "Für diese Demo brauche ich eine ausdrückliche Empfehlung zu Rehabilitation oder Nachkontrolle. Oder verwende den fiktiven Beispielbrief.";
+"Für diese Demo brauche ich eine ausdrückliche Empfehlung zu Rehabilitation oder Nachkontrolle. Oder verwende den fiktiven Beispielbrief." = "Bitte übernimm die Empfehlung zu Reha oder Nachkontrolle aus deinem Brief. Du kannst auch einen Brief öffnen.";
 "Für sie an meinem aktuellen Standort suchen" = "Für sie an meinem aktuellen Standort suchen";
 "Geburtsdatum (TT.MM.JJJJ)" = "Geburtsdatum (TT.MM.JJJJ)";
 "Geburtsland" = "Geburtsland";
@@ -561,7 +561,7 @@
 "Nachmittags" = "Nachmittags";
 "Nachname" = "Nachname";
 "Nur auf diesem Gerät" = "Nur auf diesem Gerät";
-"Nur auf diesem Gerät. Dieses Profil wird nicht mit der fiktiven Lebensgeschichte oder dem Online-Chat zusammengeführt." = "Nur auf diesem Gerät. Dieses Profil wird nicht mit der fiktiven Lebensgeschichte oder dem Online-Chat zusammengeführt.";
+"Nur auf diesem Gerät. Dieses Profil wird nicht mit der fiktiven Lebensgeschichte oder dem Online-Chat zusammengeführt." = "Deine Angaben bleiben auf diesem Gerät und werden nicht an den Online-Chat gesendet.";
 "Ohne Erinnerungen weiter" = "Ohne Erinnerungen weiter";
 "Ohne Standort weiter" = "Ohne Standort weiter";
 "PDF prüfen" = "PDF prüfen";
@@ -607,7 +607,7 @@
 "Wann hättest du am liebsten einen Termin? Das ist ein Wunsch, noch keine Buchung." = "Wann hättest du am liebsten einen Termin? Das ist ein Wunsch, noch keine Buchung.";
 "Was braucht deine Mutter gerade: Hilfe zu Hause, finanzielle Unterstützung oder beides?" = "Was braucht deine Mutter gerade: Hilfe zu Hause, finanzielle Unterstützung oder beides?";
 "Was interessiert dich: Vorsorge, Bewegung oder Ernährung?" = "Was interessiert dich: Vorsorge, Bewegung oder Ernährung?";
-"Was wurde im Entlassungsbrief ausdrücklich empfohlen? Du kannst einen Satz abschreiben oder den fiktiven Beispielbrief verwenden." = "Was wurde im Entlassungsbrief ausdrücklich empfohlen? Du kannst einen Satz abschreiben oder den fiktiven Beispielbrief verwenden.";
+"Was wurde im Entlassungsbrief ausdrücklich empfohlen? Du kannst einen Satz abschreiben oder den fiktiven Beispielbrief verwenden." = "Was wurde im Entlassungsbrief empfohlen? Du kannst einen Satz abschreiben oder einen Brief öffnen.";
 "Weitere Angaben · freiwillig" = "Weitere Angaben · freiwillig";
 "Welche Angebote suchst du für dein Kind?" = "Welche Angebote suchst du für dein Kind?";
 "Welche E-Mail-Adresse möchtest du verwenden?" = "Welche E-Mail-Adresse möchtest du verwenden?";
@@ -621,7 +621,7 @@
 "Wir können Beratung und einen passenden Antragsentwurf vorbereiten. Ein Anspruch oder eine Pflegestufe wird hier nicht festgestellt." = "Wir können Beratung und einen passenden Antragsentwurf vorbereiten. Ein Anspruch oder eine Pflegestufe wird hier nicht festgestellt.";
 "Wir organisieren nur die ausdrücklich genannte Empfehlung. Die ärztlichen Teile des Reha-Antrags bleiben offen." = "Wir organisieren nur die ausdrücklich genannte Empfehlung. Die ärztlichen Teile des Reha-Antrags bleiben offen.";
 "Wir sammeln Angebote und bereiten deine Fragen vor. Es wird kein Untersuchungs- oder Impfbedarf aus dem Alter abgeleitet." = "Wir sammeln Angebote und bereiten deine Fragen vor. Es wird kein Untersuchungs- oder Impfbedarf aus dem Alter abgeleitet.";
-"Wähle für diese Demo eine der Möglichkeiten. Andere Anliegen kannst du im normalen Chat stellen." = "Wähle für diese Demo eine der Möglichkeiten. Andere Anliegen kannst du im normalen Chat stellen.";
+"Wähle für diese Demo eine der Möglichkeiten. Andere Anliegen kannst du im normalen Chat stellen." = "Bitte wähle eine der Möglichkeiten. Andere Anliegen kannst du im Chat stellen.";
 "Zeiten und Teilnahmebedingungen klären" = "Zeiten und Teilnahmebedingungen klären";
 "Zeitlich flexibel" = "Zeitlich flexibel";
 "Zuständige Stelle für Pflegegeld klären" = "Zuständige Stelle für Pflegegeld klären";
@@ -753,3 +753,179 @@
 "Abschnitte" = "Abschnitte";
 
 "Zur neuesten Nachricht" = "Zur neuesten Nachricht";
+
+"Mehr" = "Mehr";
+
+"Du kannst auswählen oder selbst antworten." = "Du kannst auswählen oder selbst antworten.";
+
+"Der Zugangscode wird im Schlüsselbund dieses Geräts gespeichert. Trage hier nicht deinen OpenAI-Schlüssel ein." = "Der Zugangscode wird im Schlüsselbund dieses Geräts gespeichert. Trage hier nicht deinen OpenAI-Schlüssel ein.";
+
+"Deine Angaben bleiben auf diesem Gerät und werden nicht an den Online-Chat gesendet." = "Deine Angaben bleiben auf diesem Gerät und werden nicht an den Online-Chat gesendet.";
+
+"Was wurde im Entlassungsbrief empfohlen? Du kannst einen Satz abschreiben oder einen Brief öffnen." = "Was wurde im Entlassungsbrief empfohlen? Du kannst einen Satz abschreiben oder einen Brief öffnen.";
+
+"Hinterlegten Brief öffnen" = "Hinterlegten Brief öffnen";
+
+"Eine ambulante Rehabilitation wird empfohlen. Eine ärztliche Nachkontrolle soll vereinbart werden." = "Eine ambulante Rehabilitation wird empfohlen. Eine ärztliche Nachkontrolle soll vereinbart werden.";
+
+"Bitte übernimm die Empfehlung zu Reha oder Nachkontrolle aus deinem Brief. Du kannst auch einen Brief öffnen." = "Bitte übernimm die Empfehlung zu Reha oder Nachkontrolle aus deinem Brief. Du kannst auch einen Brief öffnen.";
+
+"Bitte wähle eine der Möglichkeiten. Andere Anliegen kannst du im Chat stellen." = "Bitte wähle eine der Möglichkeiten. Andere Anliegen kannst du im Chat stellen.";
+
+"Der Lebensverlauf konnte nicht geladen werden." = "Der Lebensverlauf konnte nicht geladen werden.";
+
+"Der Lebensverlauf ist nicht vollständig lesbar." = "Der Lebensverlauf ist nicht vollständig lesbar.";
+
+/* Conversational onboarding */
+"Hi" = "Hi";
+"Hi, ich bin Sovi, dein persönlicher Gesundheitsbegleiter." = "Hi, ich bin Sovi, dein persönlicher Gesundheitsbegleiter.";
+"Damit ich dir wirklich helfen kann, würde ich dich gern besser kennenlernen." = "Damit ich dir wirklich helfen kann, würde ich dich gern besser kennenlernen.";
+"Hier findest du die Nutzungsbedingungen. Bitte lies sie kurz durch, bevor wir starten." = "Hier findest du die Nutzungsbedingungen. Bitte lies sie kurz durch, bevor wir starten.";
+"Nutzungsbedingungen" = "Nutzungsbedingungen";
+"Akzeptieren" = "Akzeptieren";
+"Wie heißt du mit Vornamen?" = "Wie heißt du mit Vornamen?";
+"Wie ist dein Nachname?" = "Wie ist dein Nachname?";
+"Wann bist du geboren?" = "Wann bist du geboren?";
+"Wo wohnst du?" = "Wo wohnst du?";
+"Unter welcher Telefonnummer kann man dich erreichen?" = "Unter welcher Telefonnummer kann man dich erreichen?";
+"Wie lautet deine E-Mail-Adresse?" = "Wie lautet deine E-Mail-Adresse?";
+"Wie lautet deine Sozialversicherungsnummer? Du findest die 10 Ziffern auf deiner e-card." = "Wie lautet deine Sozialversicherungsnummer? Du findest die 10 Ziffern auf deiner e-card.";
+"Bei welcher Versicherung bist du?" = "Bei welcher Versicherung bist du?";
+"Darf ich deinen Standort nutzen, um Angebote in deiner Nähe zu finden?" = "Darf ich deinen Standort nutzen, um Angebote in deiner Nähe zu finden?";
+"Darf ich dich an deine Termine und nächsten Schritte erinnern?" = "Darf ich dich an deine Termine und nächsten Schritte erinnern?";
+"Danke! Jetzt können wir loslegen. Du kannst deine Angaben jederzeit ändern." = "Danke! Jetzt können wir loslegen. Du kannst deine Angaben jederzeit ändern.";
+"Bitte eine gültige Telefonnummer eingeben, zum Beispiel +43 660 1234567." = "Bitte eine gültige Telefonnummer eingeben, zum Beispiel +43 660 1234567.";
+"Bitte Straße und Hausnummer, dann PLZ und Ort eingeben. Oder wähle einen Adressvorschlag." = "Bitte Straße und Hausnummer, dann PLZ und Ort eingeben. Oder wähle einen Adressvorschlag.";
+"Bitte ergänze Straße, Hausnummer, PLZ und Ort." = "Bitte ergänze Straße, Hausnummer, PLZ und Ort.";
+"Geburtsdatum auswählen" = "Geburtsdatum auswählen";
+"Geburtsdatum" = "Geburtsdatum";
+"Deine Antwort" = "Deine Antwort";
+"10 Ziffern" = "10 Ziffern";
+"%lld von 10 Ziffern" = "%lld von 10 Ziffern";
+"Adresse wird gesucht" = "Adresse wird gesucht";
+"Straße Hausnummer, PLZ Ort" = "Straße Hausnummer, PLZ Ort";
+"Die Adresssuche ist gerade nicht verfügbar. Du kannst deine Adresse selbst eingeben: Straße Hausnummer, PLZ Ort." = "Die Adresssuche ist gerade nicht verfügbar. Du kannst deine Adresse selbst eingeben: Straße Hausnummer, PLZ Ort.";
+"Adressvorschläge von Apple Karten. Du kannst auch Straße Hausnummer, PLZ Ort eingeben." = "Adressvorschläge von Apple Karten. Du kannst auch Straße Hausnummer, PLZ Ort eingeben.";
+"Dein Standort wird für jede Suche neu abgefragt. Apple kann daraus einen Ortsnamen bestimmen. Im Online-Chat geht er an den Sovi-Server, nicht an OpenAI." = "Dein Standort wird für jede Suche neu abgefragt. Apple kann daraus einen Ortsnamen bestimmen. Im Online-Chat geht er an den Sovi-Server, nicht an OpenAI.";
+"Mitteilungen enthalten keine Gesundheitsdetails. Du kannst sie jederzeit ausschalten." = "Mitteilungen enthalten keine Gesundheitsdetails. Du kannst sie jederzeit ausschalten.";
+"Sovi hilft dir, passende Anlaufstellen zu finden, nächste Schritte zu planen und Formulare vorzubereiten." = "Sovi hilft dir, passende Anlaufstellen zu finden, nächste Schritte zu planen und Formulare vorzubereiten.";
+"Sovi stellt keine Diagnosen. Medizinische Fragen klärst du mit Fachpersonal. Termine, Anträge und Kostenübernahmen sind erst bestätigt, wenn die zuständige Stelle sie bestätigt." = "Sovi stellt keine Diagnosen. Medizinische Fragen klärst du mit Fachpersonal. Termine, Anträge und Kostenübernahmen sind erst bestätigt, wenn die zuständige Stelle sie bestätigt.";
+"Deine Profilangaben und dieses Gespräch bleiben auf deinem Gerät. Du kannst die Angaben ändern oder alle lokalen Daten in den Einstellungen löschen." = "Deine Profilangaben und dieses Gespräch bleiben auf deinem Gerät. Du kannst die Angaben ändern oder alle lokalen Daten in den Einstellungen löschen.";
+"Wenn du den Online-Chat aktivierst, werden deine Chatnachrichten an den Sovi-Server und zur Verarbeitung an OpenAI gesendet. Einträge aus deinem Verlauf teilst du nur nach Auswahl. Deine Profilangaben werden nicht automatisch mitgesendet." = "Wenn du den Online-Chat aktivierst, werden deine Chatnachrichten an den Sovi-Server und zur Verarbeitung an OpenAI gesendet. Einträge aus deinem Verlauf teilst du nur nach Auswahl. Deine Profilangaben werden nicht automatisch mitgesendet.";
+"Für Adressvorschläge wird deine Suche an Apple Karten gesendet. Standort und Mitteilungen sind freiwillig; Sovi fragt dich gesondert um Erlaubnis." = "Für Adressvorschläge wird deine Suche an Apple Karten gesendet. Standort und Mitteilungen sind freiwillig; Sovi fragt dich gesondert um Erlaubnis.";
+"Bitte prüfe Vorschläge und vorausgefüllte Formulare, bevor du sie verwendest. Mit „Akzeptieren“ stimmst du diesen Nutzungsbedingungen zu." = "Bitte prüfe Vorschläge und vorausgefüllte Formulare, bevor du sie verwendest. Mit „Akzeptieren“ stimmst du diesen Nutzungsbedingungen zu.";
+
+"Ohne Suche: Straße Hausnummer, PLZ Ort" = "Ohne Suche: Straße Hausnummer, PLZ Ort";
+
+"Vorschläge von Apple Karten · oder Adresse selbst eingeben" = "Vorschläge von Apple Karten · oder Adresse selbst eingeben";
+
+
+"Alle Einträge anzeigen" = "Alle Einträge anzeigen";
+
+"Kompakter Verlauf" = "Kompakter Verlauf";
+
+"Nicht erledigt" = "Nicht erledigt";
+
+"Verpasst" = "Verpasst";
+
+"Die Teilnahme kannst du ab dem Tag des Termins eintragen." = "Die Teilnahme kannst du ab dem Tag des Termins eintragen.";
+
+"Hast du „%@“ schon erledigt?" = "Hast du „%@“ schon erledigt?";
+
+"Wie ist es mit „%@“ gelaufen?" = "Wie ist es mit „%@“ gelaufen?";
+
+"Hier ist dein Termin." = "Hier ist dein Termin.";
+
+"Was steht als Nächstes an?" = "Was steht als Nächstes an?";
+
+"Hier sind deine Termine und Aufgaben. Was hast du schon erledigt?" = "Hier sind deine Termine und Aufgaben. Was hast du schon erledigt?";
+
+"Du hast gerade keine offenen Termine oder Aufgaben." = "Du hast gerade keine offenen Termine oder Aufgaben.";
+
+"Als erledigt gespeichert." = "Als erledigt gespeichert.";
+
+"Als nicht erledigt gespeichert." = "Als nicht erledigt gespeichert.";
+
+"Wieder offen." = "Wieder offen.";
+
+"Als teilgenommen gespeichert." = "Als teilgenommen gespeichert.";
+
+"Als nicht teilgenommen gespeichert." = "Als nicht teilgenommen gespeichert.";
+
+"Die Teilnahme ist wieder offen." = "Die Teilnahme ist wieder offen.";
+
+"Ausgewählt" = "Ausgewählt";
+
+"Nicht ausgewählt" = "Nicht ausgewählt";
+"Seite" = "Seite";
+"Für diese Schritte ist kein eindeutiger Formularvorschlag verfügbar." = "Für diese Schritte ist kein eindeutiger Formularvorschlag verfügbar.";
+"Passendes Formular" = "Passendes Formular";
+"Schritte aus dem Befund" = "Schritte aus dem Befund";
+"Ich finde keinen ausdrücklichen organisatorischen Auftrag in diesem Befund." = "Ich finde keinen ausdrücklichen organisatorischen Auftrag in diesem Befund.";
+"Dokumentierte Impfungen" = "Dokumentierte Impfungen";
+"Bitte unvollständige Zeilen im Original prüfen." = "Bitte unvollständige Zeilen im Original prüfen.";
+"Im Dokument kannst du die Impfungen für deinen Pfad auswählen." = "Im Dokument kannst du die Impfungen für deinen Pfad auswählen.";
+"Öffne das Dokument, um den Originaltext zu lesen." = "Öffne das Dokument, um den Originaltext zu lesen.";
+"Wähle das Dokument aus, das wir gemeinsam ansehen sollen." = "Wähle das Dokument aus, das wir gemeinsam ansehen sollen.";
+"Dokument prüfen" = "Dokument prüfen";
+"Beispielbefund öffnen" = "Beispielbefund öffnen";
+"Im Chat besprechen" = "Im Chat besprechen";
+"Text aus einem Scan. Bitte mit dem Original vergleichen." = "Text aus einem Scan. Bitte mit dem Original vergleichen.";
+"Im Pfad gespeichert" = "Im Pfad gespeichert";
+"Ausgewählte Schritte hinzufügen" = "Ausgewählte Schritte hinzufügen";
+"Prüfe Person und Impfdatum, bevor du Einträge zu diesem Pfad hinzufügst." = "Prüfe Person und Impfdatum, bevor du Einträge zu diesem Pfad hinzufügst.";
+"Auswahl aufheben" = "Auswahl aufheben";
+"Alle auswählen" = "Alle auswählen";
+"Impfungen zum Pfad hinzufügen" = "Impfungen zum Pfad hinzufügen";
+"Originaltext öffnen" = "Originaltext öffnen";
+"Keine lesbare Datei." = "Keine lesbare Datei.";
+"Bitte ein einzelnes Bild oder ein PDF auswählen." = "Bitte ein einzelnes Bild oder ein PDF auswählen.";
+"Auszug aus meinem Brief" = "Auszug aus meinem Brief";
+"Benötigte Unterlagen mit der zuständigen Stelle klären" = "Benötigte Unterlagen mit der zuständigen Stelle klären";
+"Familienleistungen" = "Familienleistungen";
+"Fragen für die Impfberatung sammeln" = "Fragen für die Impfberatung sammeln";
+"Gesundheitskurse" = "Gesundheitskurse";
+"Impfangebote" = "Impfangebote";
+"Impfpass bereitlegen" = "Impfpass bereitlegen";
+"Informationen zur Familienbeihilfe ansehen" = "Informationen zur Familienbeihilfe ansehen";
+"Welches Gesundheitsangebot interessiert dich?" = "Welches Gesundheitsangebot interessiert dich?";
+"Wähle die Person für den Entwurf. Ich übernehme ihre gespeicherten Angaben." = "Wähle die Person für den Entwurf. Ich übernehme ihre gespeicherten Angaben.";
+"Wähle eine Person und ein Formular." = "Wähle eine Person und ein Formular.";
+"Person aus diesem Befund übernehmen" = "Person aus diesem Befund übernehmen";
+"Angaben aus dem Befund prüfen" = "Angaben aus dem Befund prüfen";
+"Pflegeantrag vorbereiten" = "Pflegeantrag vorbereiten";
+"Für Wien gibt es den Entwurf „%@“. Passt Wien zu deinem Antrag?" = "Für Wien gibt es den Entwurf „%@“. Passt Wien zu deinem Antrag?";
+"Formularentwurf vorbereiten" = "Formularentwurf vorbereiten";
+
+"Warst du am %@ beim Termin „%@“?" = "Warst du am %@ beim Termin „%@“?";
+"Ja, ich war dort" = "Ja, ich war dort";
+"Nein, ich war nicht dort" = "Nein, ich war nicht dort";
+"Später antworten" = "Später antworten";
+"Danke, ich habe deine Teilnahme eingetragen." = "Danke, ich habe deine Teilnahme eingetragen.";
+"Danke, ich habe eingetragen, dass du nicht dort warst." = "Danke, ich habe eingetragen, dass du nicht dort warst.";
+"Okay, ich lasse den Termin offen. Ich frage frühestens morgen wieder." = "Okay, ich lasse den Termin offen. Ich frage frühestens morgen wieder.";
+"Ich finde keinen vergangenen Termin mit offener Teilnahme." = "Ich finde keinen vergangenen Termin mit offener Teilnahme.";
+"Die Teilnahme kannst du nach dem Termin eintragen." = "Die Teilnahme kannst du nach dem Termin eintragen.";
+
+"Auswählen" = "Auswählen";
+"Lesen" = "Lesen";
+"Ansehen" = "Ansehen";
+"Vorbereiten" = "Vorbereiten";
+"Starten" = "Starten";
+"Fortsetzen" = "Fortsetzen";
+
+"Dokumentkontext schließen" = "Dokumentkontext schließen";
+"Beispielbefund anhängen" = "Beispielbefund anhängen";
+"Ereignisse im Pfad" = "Ereignisse im Pfad";
+"Im Pfad öffnen" = "Im Pfad öffnen";
+"Dokument wird auf diesem Gerät gelesen …" = "Dokument wird auf diesem Gerät gelesen …";
+"Ich kann dir den Originaltext und die dokumentierten Ereignisse zeigen." = "Ich kann dir den Originaltext und die dokumentierten Ereignisse zeigen.";
+
+"Dokument gespeichert. Ich habe kein eindeutig datiertes Ereignis gefunden." = "Dokument gespeichert. Ich habe kein eindeutig datiertes Ereignis gefunden.";
+"Diese Ereignisse stehen bereits auf deinem Pfad." = "Diese Ereignisse stehen bereits auf deinem Pfad.";
+"Ich habe ein Ereignis in deinen Pfad eingetragen." = "Ich habe ein Ereignis in deinen Pfad eingetragen.";
+"Ich habe %lld Ereignisse in deinen Pfad eingetragen." = "Ich habe %lld Ereignisse in deinen Pfad eingetragen.";
+"Bitte prüfe unvollständige Impfzeilen im Original." = "Bitte prüfe unvollständige Impfzeilen im Original.";
+"Anhänge in diesem Chat" = "Anhänge in diesem Chat";
+"Ausgeklappt" = "Ausgeklappt";
+"Eingeklappt" = "Eingeklappt";
