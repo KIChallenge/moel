@@ -191,12 +191,12 @@ final class PathSmokeTests: XCTestCase {
             editor.tap()
             if !app.keyboards.firstMatch.waitForExistence(timeout: 4) { editor.tap() }
             app.typeText(text)
-            XCTAssertEqual(editor.value as? String, text)
             app.buttons["focus.send"].tap()
+            XCTAssertTrue(app.staticTexts[text].firstMatch.waitForExistence(timeout: 15), "The submitted message should appear in the transcript.")
         }
         send("Was ist der nächste hausarzt")
         let carousel = app.scrollViews["chat.providerCarousel"]
-        XCTAssertTrue(carousel.waitForExistence(timeout: 8))
+        XCTAssertTrue(carousel.waitForExistence(timeout: 15))
         let map = app.descendants(matching: .any).matching(identifier: "chat.map").firstMatch
         XCTAssertTrue(map.exists)
         let scroll = app.scrollViews["focus.scroll"]

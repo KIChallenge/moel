@@ -4,6 +4,8 @@ Updated 6 November 2026.
 
 ## Build 6 chat
 
+Apple validated Sovi 0.1.0 (6) and marked it active for internal TestFlight testing. App Store Connect build ID `55d88753-efae-4fc4-897b-b85fc1e25006`.
+
 - The hosted API returned three geocoded practices for “Was ist der nächste hausarzt” at synthetic Vienna coordinates. Without GPS it requested a town, then used “Linz” for the same GP search. The iOS client decoded the real response, and a separate native MapKit lookup returned dental practices in distance order.
 - “Ich habe Zahnschmerzen” offered a dentist. A typed “Ja” started the search and “Nein, danke” declined. A new skin concern prompted a follow-up and an offer to find a skin doctor. Questions about football and programming redirected to health topics across German, English, Turkish and Arabic. A mixed English request still found a pharmacy.
 - Five supplied medical PDFs created source-linked events through the chat importer. Seven blank forms stayed attachments. A synthetic report excerpt retained negation and uncertainty in the hosted explanation. The local excerpt-selection test also verified that the personal fields were removed.
