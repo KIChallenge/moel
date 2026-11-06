@@ -1,1 +1,2 @@
 "NSLocationWhenInUseUsageDescription" = "Sovi nutzt deinen Standort nur auf deinen Wunsch für die Suche nach Anlaufstellen. Er geht an den Sovi-Server, nicht an OpenAI.";
+"NSCameraUsageDescription" = "Sovi nutzt die Kamera, um mit deiner Zustimmung Angaben von deiner e-card auf diesem Gerät zu lesen.";

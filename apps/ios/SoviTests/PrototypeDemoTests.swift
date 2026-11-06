@@ -45,6 +45,79 @@ final class PrototypeDemoTests: XCTestCase {
         XCTAssertFalse(store.state.notificationsEnabled)
     }
 
+    func testReviewedECardPersistsWithoutRepeatingQuestionsOrCopyingPersonalValuesIntoChat() throws {
+        let container = try SoviStore.makeContainer(inMemory: true)
+        let store = try SoviStore(container: container)
+        try store.perform(.startWelcome)
+        try store.perform(.answerWelcome(String(localized: "Hi")))
+        try store.perform(.answerWelcome(String(localized: "Akzeptieren")))
+        let values: [PersonField: String] = [
+            .firstName: "Ada", .lastName: "Beispiel", .birthDate: "06.07.1975", .insuranceNumber: "0000000000", .insurer: "ÖGK"
+        ]
+        try store.perform(.confirmWelcomeECard(values))
+        let reopened = try SoviStore(container: container)
+        let welcome = try XCTUnwrap(reopened.state.welcome)
+        let person = try XCTUnwrap(reopened.state.formPeople?.first)
+        XCTAssertEqual(welcome.field, .street)
+        XCTAssertEqual(welcome.reviewedECardFields, Set(values.keys))
+        for (field, value) in values {
+            XCTAssertEqual(person.values[field.rawValue], value)
+            XCTAssertFalse(welcome.history.contains { $0.text.contains(value) })
+        }
+        XCTAssertTrue(reopened.state.conversation.isEmpty)
+        try reopened.perform(.answerWelcomeAddress(WelcomeAddress(street: "Beispielweg", house: "1", postcode: "1010", city: "Wien")))
+        XCTAssertEqual(reopened.state.welcome?.field, .phone)
+        try reopened.perform(.answerWelcome(nil))
+        XCTAssertEqual(reopened.state.welcome?.field, .email)
+        try reopened.perform(.answerWelcome(nil))
+        XCTAssertTrue(reopened.state.welcome?.isLocationStep == true)
+        try reopened.perform(.answerWelcome("Ohne Standort weiter"))
+        XCTAssertTrue(reopened.state.welcome?.isNotificationStep == true)
+        try reopened.perform(.answerWelcome("Ohne Erinnerungen weiter"))
+        XCTAssertTrue(reopened.state.welcome?.completed == true)
+        XCTAssertThrowsError(try reopened.perform(.confirmWelcomeECard(values)))
+    }
+
+    func testPartialECardKeepsManualAnswersAndOnlySkipsReviewedFields() throws {
+        let store = try makeStore()
+        try store.perform(.startWelcome)
+        try store.perform(.answerWelcome(String(localized: "Hi")))
+        try store.perform(.answerWelcome(String(localized: "Akzeptieren")))
+        try store.perform(.answerWelcome("Ada"))
+        var person = try XCTUnwrap(store.state.formPeople?.first)
+        person.values["insurer"] = "Existing"
+        try store.perform(.savePerson(person))
+        try store.perform(.confirmWelcomeECard([.firstName: "Another", .lastName: " Beispiel ", .insuranceNumber: "0000000000"]))
+        XCTAssertEqual(store.state.formPeople?.first?.values["firstName"], "Ada")
+        XCTAssertEqual(store.state.formPeople?.first?.values["lastName"], "Beispiel")
+        XCTAssertNil(store.state.formPeople?.first?.values["birthDate"])
+        XCTAssertEqual(store.state.welcome?.field, .birthDate)
+        for field: PersonField in [.birthDate, .street, .phone, .email] {
+            XCTAssertEqual(store.state.welcome?.field, field)
+            try store.perform(.answerWelcome(nil))
+        }
+        XCTAssertEqual(store.state.welcome?.field, .insurer)
+        XCTAssertEqual(store.state.formPeople?.first?.values["insurer"], "Existing")
+    }
+
+    func testOnlyAcceptedTermsAndValidCardFieldsCanChangeOnboarding() throws {
+        let store = try makeStore()
+        try store.perform(.startWelcome)
+        XCTAssertThrowsError(try store.perform(.confirmWelcomeECard([.firstName: "Ada"])))
+        try store.perform(.answerWelcome(String(localized: "Hi")))
+        XCTAssertThrowsError(try store.perform(.confirmWelcomeECard([.firstName: "Ada"])))
+        try store.perform(.answerWelcome(String(localized: "Akzeptieren")))
+        let before = store.state
+        let invalid: [[PersonField: String]] = [
+            [:], [.firstName: "Ada", .phone: "0123456789"], [.firstName: "Ada", .insuranceNumber: "123"],
+            [.firstName: "Ada", .birthDate: "31.02.1990"]
+        ]
+        for values in invalid {
+            XCTAssertThrowsError(try store.perform(.confirmWelcomeECard(values)))
+            XCTAssertEqual(store.state, before)
+        }
+    }
+
     func testSingleAddressAndContactValidationPreserveFormFields() throws {
         let store = try makeStore()
         try store.perform(.startWelcome)
@@ -72,6 +145,7 @@ final class PrototypeDemoTests: XCTestCase {
         XCTAssertThrowsError(try store.perform(.answerWelcome("12345678901")))
         XCTAssertThrowsError(try store.perform(.answerWelcome("123456789a")))
         try store.perform(.answerWelcome("1234567890"))
+        XCTAssertFalse(store.state.welcome?.history.contains { $0.text.contains("1234567890") } ?? true)
         XCTAssertEqual(store.state.welcome?.field, .insurer)
         XCTAssertTrue(store.state.conversation.isEmpty)
     }
@@ -84,10 +158,16 @@ final class PrototypeDemoTests: XCTestCase {
         XCTAssertEqual(person.address, "Musterstraße 12, 1010 Wien")
         XCTAssertEqual(person.values["country"], "Österreich")
         XCTAssertEqual(welcome.field, .phone)
-        let legacy = WelcomeProgress(personID: person.id, step: 8, flowVersion: nil)
-        let restored = try JSONDecoder().decode(WelcomeProgress.self, from: JSONEncoder().encode(legacy))
+        var legacyPerson = FormPerson(isSelf: true)
+        let legacy = WelcomeProgress(personID: legacyPerson.id, step: 8, flowVersion: nil)
+        var restored = try JSONDecoder().decode(WelcomeProgress.self, from: JSONEncoder().encode(legacy))
         XCTAssertEqual(restored.field, .email)
         XCTAssertFalse(restored.isLocationStep)
+        XCTAssertNil(restored.reviewedECardFields)
+        XCTAssertTrue(restored.remainingECardFields(for: legacyPerson).isEmpty)
+        XCTAssertThrowsError(try restored.confirmECard([.insuranceNumber: "0000000000"], person: &legacyPerson, now: Date()))
+        try restored.recordAnswer(nil, person: &legacyPerson, now: Date())
+        XCTAssertEqual(restored.field, .insuranceNumber)
     }
 
     func testRelativeProfileAndFormDraftSurviveRestartAndClearWithDeletion() throws {

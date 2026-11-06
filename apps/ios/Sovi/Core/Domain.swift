@@ -270,6 +270,7 @@ enum AppCommand {
     case startWelcome
     case answerWelcome(String?, finish: Bool = false)
     case answerWelcomeAddress(WelcomeAddress)
+    case confirmWelcomeECard([PersonField: String])
     case savePerson(FormPerson)
     case saveFormDraft(String, SavedFormDraft)
     case setTask(UUID, TaskStatus)

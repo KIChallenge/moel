@@ -1,1 +1,2 @@
 "NSLocationWhenInUseUsageDescription" = "With your permission, Sovi uses your location to find services. It is sent to the Sovi server, not to OpenAI.";
+"NSCameraUsageDescription" = "With your permission, Sovi uses the camera to read your e-card on this device.";

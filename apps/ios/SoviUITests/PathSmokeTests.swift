@@ -370,6 +370,87 @@ final class PathSmokeTests: XCTestCase {
         let shot = XCTAttachment(screenshot: app.screenshot()); shot.name = "Discharge source linked to prefilled rehabilitation form"; shot.lifetime = .keepAlways; add(shot)
     }
 
+    func testWelcomeOffersOptionalCardScanAfterTermsAndResumesManualEntry() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--uitesting", "--welcome", "-AppleLanguages", "(en)", "-AppleLocale", "en_AT"]
+        app.launch()
+        let scan = app.buttons["welcome.scanECard"]
+        let hi = app.buttons["welcome.hi"]
+        XCTAssertTrue(hi.waitForExistence(timeout: 12))
+        XCTAssertFalse(scan.exists)
+        hi.tap()
+        XCTAssertFalse(scan.exists)
+        app.buttons["welcome.accept"].tap()
+        XCTAssertTrue(scan.waitForExistence(timeout: 5))
+        scan.tap()
+        XCTAssertTrue(app.buttons["welcome.ecard.camera"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["welcome.ecard.photo"].exists)
+        app.buttons["welcome.ecard.manual"].tap()
+        let composer = app.textFields["welcome.composer"]
+        XCTAssertTrue(composer.waitForExistence(timeout: 5))
+        composer.tap()
+        composer.typeText("Alex")
+        app.buttons["welcome.send"].tap()
+        XCTAssertTrue(scan.waitForExistence(timeout: 5))
+        XCTAssertTrue(composer.exists)
+    }
+
+    /// Seed the most recent simulator photo with the synthetic ALMA PROBE card before opting in.
+    func testWelcomeECardFromSystemPhotosPickerConfirmsCorrections() throws {
+        // Run on a test simulator after adding SoviUITests/Fixtures/synthetic-e-card.png with simctl addmedia.
+        // Set TEST_RUNNER_SOVI_ECARD_PHOTO_QA=1 so the picker uses only the intended test input.
+        let environment = ProcessInfo.processInfo.environment
+        try XCTSkipUnless(environment["SOVI_ECARD_PHOTO_QA"] == "1" || environment["TEST_RUNNER_SOVI_ECARD_PHOTO_QA"] == "1",
+                          "This UI check needs a simulator photo library seeded with the synthetic e-card.")
+        let app = XCUIApplication()
+        app.launchArguments = ["--uitesting", "--welcome", "-AppleLanguages", "(en)", "-AppleLocale", "en_AT"]
+        app.launch()
+        XCTAssertTrue(app.buttons["welcome.hi"].waitForExistence(timeout: 15))
+        app.buttons["welcome.hi"].tap()
+        app.buttons["welcome.accept"].tap()
+        app.buttons["welcome.scanECard"].tap()
+        app.buttons["welcome.ecard.photo"].tap()
+
+        let thumbnail = app.images.matching(NSPredicate(
+            format: "identifier == %@ OR label BEGINSWITH[c] %@ OR label BEGINSWITH[c] %@",
+            "PXGGridLayout-Info", "Photo,", "Foto,")).firstMatch
+        guard thumbnail.waitForExistence(timeout: 30) else {
+            XCTFail("The native Photos picker should contain the seeded card.")
+            return
+        }
+        thumbnail.tap()
+
+        let name = app.textFields["welcome.ecard.field.firstName"]
+        XCTAssertTrue(name.waitForExistence(timeout: 20))
+        XCTAssertEqual(name.value as? String, "ALMA")
+        XCTAssertEqual(app.textFields["welcome.ecard.field.lastName"].value as? String, "PROBE")
+        XCTAssertEqual(app.textFields["welcome.ecard.field.birthDate"].value as? String, "09.03.1980")
+        XCTAssertEqual(app.textFields["welcome.ecard.field.insuranceNumber"].value as? String, "0000000000")
+        XCTAssertEqual(app.textFields["welcome.ecard.field.insurer"].value as? String, "ÖGK")
+        name.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+        name.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 4) + "Alina")
+        XCTAssertEqual(name.value as? String, "Alina")
+        let confirm = app.buttons["welcome.ecard.confirm"]
+        for _ in 0..<6 where !confirm.isHittable { app.scrollViews["sheet.content"].swipeUp(velocity: .slow) }
+        confirm.tap()
+
+        let skip = app.buttons["welcome.skip"]
+        for next in ["Street", "Phone", "Email"] {
+            expectation(for: NSPredicate(format: "value == %@", next), evaluatedWith: skip)
+            waitForExpectations(timeout: 5)
+            skip.tap()
+        }
+        let location = app.buttons["Continue without location"]
+        XCTAssertTrue(location.waitForExistence(timeout: 5))
+        for _ in 0..<6 where !location.isHittable { app.swipeUp() }
+        location.tap()
+        app.buttons["Continue without reminders"].tap()
+        let review = app.buttons["Review details"]
+        XCTAssertTrue(review.waitForExistence(timeout: 5))
+        review.tap()
+        XCTAssertEqual(app.textFields["profile.firstName"].value as? String, "Alina")
+    }
+
     func testWelcomeChatResumesAndOffersOptionalPermissions() {
         let app = XCUIApplication()
         app.launchArguments = ["--uitesting", "--welcome", "-AppleLanguages", "(de)", "-AppleLocale", "de_AT"]

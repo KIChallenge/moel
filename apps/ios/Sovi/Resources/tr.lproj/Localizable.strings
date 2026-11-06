@@ -322,3 +322,23 @@
 "Anhänge in diesem Chat" = "Bu sohbetteki ekler";
 "Ausgeklappt" = "Genişletildi";
 "Eingeklappt" = "Daraltıldı";
+
+"e-card scannen" = "E-card’ı tara";
+"e-card einlesen" = "E-card’ını okut";
+"Fotografiere eine Seite deiner e-card. Du kannst auch ein Foto auswählen. Sovi liest es nur auf diesem Gerät." = "E-card’ının bir yüzünün fotoğrafını çek veya mevcut bir fotoğraf seç. Sovi fotoğrafı yalnızca bu cihazda okur.";
+"Foto aufnehmen" = "Fotoğraf çek";
+"Foto auswählen" = "Fotoğraf seç";
+"Daten werden gelesen …" = "Kartın okunuyor…";
+"Prüfe die Angaben. Du kannst sie ändern oder ein Feld leeren." = "Bilgileri kontrol et. İstersen değiştirebilir ya da bir alanı boş bırakabilirsin.";
+"Weitere Kartenseite einlesen" = "Diğer yüzü tara";
+"Angaben übernehmen" = "Bu bilgileri kullan";
+"Manuell weiter" = "Elle devam et";
+"Die Kamera ist nicht verfügbar. Du kannst ein Foto auswählen." = "Kamera kullanılamıyor. Bir fotoğraf seçebilirsin.";
+"Erlaube den Kamerazugriff in den Einstellungen oder wähle ein Foto aus." = "Ayarlardan kamera erişimine izin ver veya bir fotoğraf seç.";
+"Auf diesem Foto konnte ich keine neuen Angaben für die offenen Fragen lesen." = "Bu fotoğrafta kalan sorulara yanıt olacak yeni bir bilgi okuyamadım.";
+"Die Angaben auf der Karte passen nicht zu deinen bisherigen Antworten." = "Kart bilgileri önceki yanıtlarınla uyuşmuyor.";
+"Diese Aufnahmen lassen sich nicht sicher derselben Karte zuordnen." = "Bu fotoğrafların aynı karta ait olduğundan emin olamadım.";
+"Nur die neue Aufnahme verwenden" = "Yalnızca yeni fotoğrafı kullan";
+"Bisherige Angaben behalten" = "Mevcut bilgileri koru";
+"Angaben von meiner e-card übernehmen" = "E-card bilgilerimi kullan";
+"Sozialversicherungsnummer eingegeben" = "Sosyal sigorta numarası girildi";

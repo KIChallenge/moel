@@ -21,6 +21,8 @@ The responsible rehabilitation carrier is deliberately left open in the PDF and 
 
 ## Reusing details in the supplied forms
 
+After accepting the terms in onboarding, tap **e-card scannen**. Photograph the front or back, or select an existing photo. Review the recognized fields, correct or clear any value, and tap **Angaben übernehmen**. Sovi skips the questions those values answer. You can add the other side for more fields or continue manually. Sovi reads the photo on the device, discards it, and saves the confirmed values in your local profile for forms.
+
 Open **Profile und Formulare** in chat or settings. Add/edit a fictional applicant, including optional bank/contact details, and select that person before opening one of the seven templates. Review the prefilled text, edit missing text fields, save the draft, inspect **PDF prüfen**, and use **PDF-Entwurf teilen** for a real interactive PDF. The German source form and its instructions are retained. Checkboxes, declarations, signatures, institution confirmations and clinical sections are not completed automatically. The hospital-only accident rehabilitation form only receives patient identity/contact details.
 
 Drafts are stored separately by person and form; changing the profile does not overwrite an existing draft. Deleting local data clears profiles, welcome and scenario histories, form drafts and owned temporary exports. Copies shared outside the app cannot be recalled. All data in a presentation should be fictional.

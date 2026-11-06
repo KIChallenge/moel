@@ -327,6 +327,14 @@ final class SoviStore {
                 updated.formPeople?[personIndex] = person
                 updated.welcome = welcome
 
+            case .confirmWelcomeECard(let values):
+                guard var welcome = updated.welcome,
+                      let personIndex = updated.formPeople?.firstIndex(where: { $0.id == welcome.personID }),
+                      var person = updated.formPeople?[personIndex] else { throw SoviError.invalidAction }
+                try welcome.confirmECard(values, person: &person, now: now)
+                updated.formPeople?[personIndex] = person
+                updated.welcome = welcome
+
             case .savePerson(let person):
                 guard person.label.count <= 200, person.values.count <= PersonField.allCases.count,
                       person.values.keys.allSatisfy({ PersonField(rawValue: $0) != nil }) else { throw SoviError.invalidAction }

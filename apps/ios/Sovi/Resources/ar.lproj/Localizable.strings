@@ -322,3 +322,23 @@
 "Anhänge in diesem Chat" = "مرفقات هذه المحادثة";
 "Ausgeklappt" = "موسّع";
 "Eingeklappt" = "مطوي";
+
+"e-card scannen" = "مسح بطاقة e-card";
+"e-card einlesen" = "قراءة بطاقة e-card";
+"Fotografiere eine Seite deiner e-card. Du kannst auch ein Foto auswählen. Sovi liest es nur auf diesem Gerät." = "صوّر أحد جانبي بطاقة e-card أو اختر صورة موجودة. يقرأ Sovi الصورة على هذا الجهاز فقط.";
+"Foto aufnehmen" = "التقاط صورة";
+"Foto auswählen" = "اختيار صورة";
+"Daten werden gelesen …" = "جارٍ قراءة البطاقة…";
+"Prüfe die Angaben. Du kannst sie ändern oder ein Feld leeren." = "راجع البيانات. يمكنك تعديلها أو مسح أي حقل.";
+"Weitere Kartenseite einlesen" = "مسح الجانب الآخر";
+"Angaben übernehmen" = "استخدام هذه البيانات";
+"Manuell weiter" = "الإدخال يدويًا";
+"Die Kamera ist nicht verfügbar. Du kannst ein Foto auswählen." = "الكاميرا غير متاحة. يمكنك اختيار صورة.";
+"Erlaube den Kamerazugriff in den Einstellungen oder wähle ein Foto aus." = "اسمح باستخدام الكاميرا في الإعدادات أو اختر صورة.";
+"Auf diesem Foto konnte ich keine neuen Angaben für die offenen Fragen lesen." = "لم أتمكن من قراءة إجابات جديدة من هذه الصورة.";
+"Die Angaben auf der Karte passen nicht zu deinen bisherigen Antworten." = "لا تتطابق بيانات البطاقة مع إجاباتك السابقة.";
+"Diese Aufnahmen lassen sich nicht sicher derselben Karte zuordnen." = "لا أستطيع التأكد من أن الصورتين للبطاقة نفسها.";
+"Nur die neue Aufnahme verwenden" = "استخدام الصورة الجديدة فقط";
+"Bisherige Angaben behalten" = "الاحتفاظ بالبيانات الحالية";
+"Angaben von meiner e-card übernehmen" = "استخدام بيانات بطاقتي e-card";
+"Sozialversicherungsnummer eingegeben" = "تم إدخال رقم التأمين الاجتماعي";

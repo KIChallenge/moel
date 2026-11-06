@@ -12,6 +12,7 @@ struct WelcomeChatView: View {
     @State private var showsProfile = false
     @State private var showsTerms = false
     @State private var showsBirthDate = false
+    @State private var showsECardScan = false
     @State private var birthDate = Calendar.current.date(byAdding: .year, value: -30, to: Date()) ?? Date()
     @State private var requestingPermission = false
     @State private var addressSearch = WelcomeAddressSearch()
@@ -21,6 +22,13 @@ struct WelcomeChatView: View {
 
     private var progress: WelcomeProgress? { store.state.welcome }
     private var field: PersonField? { progress?.field }
+    private var person: FormPerson? {
+        store.state.formPeople?.first { $0.id == progress?.personID }
+    }
+    private var cardFields: Set<PersonField> {
+        guard let progress, let person else { return [] }
+        return Set(progress.remainingECardFields(for: person))
+    }
     private var busy: Bool { requestingPermission || addressSearch.resolving }
     private var usesTextInput: Bool { field != nil && field != .birthDate && progress?.completed != true }
     private var inputError: String? {
@@ -58,6 +66,14 @@ struct WelcomeChatView: View {
         }
         .sheet(isPresented: $showsTerms) { WelcomeTermsSheet() }
         .sheet(isPresented: $showsBirthDate) { birthDateSheet }
+        .sheet(isPresented: $showsECardScan) {
+            WelcomeECardScan(eligibleFields: cardFields, existingValues: person?.values ?? [:]) { values in
+                let previousStep = progress?.step
+                try store.perform(.confirmWelcomeECard(values))
+                if progress?.step != previousStep { text = "" }
+                error = nil
+            }
+        }
     }
 
     private var header: some View {
@@ -106,6 +122,20 @@ struct WelcomeChatView: View {
     }
 
     @ViewBuilder private var controls: some View {
+        if let field, cardFields.contains(field) {
+            Button {
+                focused = false
+                showsECardScan = true
+            } label: {
+                Label("e-card scannen", systemImage: "camera")
+                    .font(.headline).padding(.horizontal, 16)
+                    .frame(minHeight: 44)
+                    .soviGlass(in: RoundedRectangle(cornerRadius: 14), interactive: true)
+            }
+            .buttonStyle(.plain)
+            .disabled(busy)
+            .accessibilityIdentifier("welcome.scanECard")
+        }
         if progress?.completed == true {
             Button("Angaben prüfen") { showsProfile = true }.buttonStyle(SheetPrimaryButtonStyle())
             Button("Los geht’s") { dismiss() }.buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("welcome.done")
@@ -155,7 +185,8 @@ struct WelcomeChatView: View {
                 inputField.padding(12).background(SoviTheme.softGreen, in: RoundedRectangle(cornerRadius: 18))
                 .accessibilityLabel(field?.title ?? String(localized: "Deine Antwort"))
                 .accessibilityIdentifier("welcome.composer")
-                .id(field)
+                // Keep the keyboard in place between the first- and last-name questions.
+                .id(keyboardType)
                 if field == .insuranceNumber {
                     Text("\(text.count)/10").font(.caption.monospacedDigit()).foregroundStyle(SoviTheme.secondary).accessibilityLabel("\(text.count) von 10 Ziffern")
                 }

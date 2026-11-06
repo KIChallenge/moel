@@ -35,7 +35,7 @@ strings = resources.new_variant_group('Localizable.strings')
 ['de', 'en', 'ar', 'tr'].each { |language| strings.new_file("#{language}.lproj/Localizable.strings").name = language }
 app.resources_build_phase.add_file_reference(strings)
 info_strings = resources.new_variant_group('InfoPlist.strings')
-['de', 'en'].each { |language| info_strings.new_file("#{language}.lproj/InfoPlist.strings").name = language }
+['de', 'en', 'ar', 'tr'].each { |language| info_strings.new_file("#{language}.lproj/InfoPlist.strings").name = language }
 app.resources_build_phase.add_file_reference(info_strings)
 config_group = project.main_group.new_group('Configuration', 'Configuration')
 config_group.new_file('Base.xcconfig')

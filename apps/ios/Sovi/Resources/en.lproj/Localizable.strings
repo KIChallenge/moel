@@ -929,3 +929,23 @@
 "Anhänge in diesem Chat" = "Attachments in this chat";
 "Ausgeklappt" = "Expanded";
 "Eingeklappt" = "Collapsed";
+
+"e-card scannen" = "Scan e-card";
+"e-card einlesen" = "Read your e-card";
+"Fotografiere eine Seite deiner e-card. Du kannst auch ein Foto auswählen. Sovi liest es nur auf diesem Gerät." = "Take a photo of either side of your e-card, or choose an existing photo. Sovi reads it on this device only.";
+"Foto aufnehmen" = "Take a photo";
+"Foto auswählen" = "Choose a photo";
+"Daten werden gelesen …" = "Reading your card…";
+"Prüfe die Angaben. Du kannst sie ändern oder ein Feld leeren." = "Check these details. You can edit them or clear a field.";
+"Weitere Kartenseite einlesen" = "Scan the other side";
+"Angaben übernehmen" = "Use these details";
+"Manuell weiter" = "Enter manually";
+"Die Kamera ist nicht verfügbar. Du kannst ein Foto auswählen." = "The camera is unavailable. You can choose a photo instead.";
+"Erlaube den Kamerazugriff in den Einstellungen oder wähle ein Foto aus." = "Allow camera access in Settings or choose a photo.";
+"Auf diesem Foto konnte ich keine neuen Angaben für die offenen Fragen lesen." = "I couldn’t read any new answers from this photo.";
+"Die Angaben auf der Karte passen nicht zu deinen bisherigen Antworten." = "The card details don’t match your earlier answers.";
+"Diese Aufnahmen lassen sich nicht sicher derselben Karte zuordnen." = "I can’t tell whether these photos show the same card.";
+"Nur die neue Aufnahme verwenden" = "Use only the new photo";
+"Bisherige Angaben behalten" = "Keep the current details";
+"Angaben von meiner e-card übernehmen" = "Use the details from my e-card";
+"Sozialversicherungsnummer eingegeben" = "Social insurance number entered";

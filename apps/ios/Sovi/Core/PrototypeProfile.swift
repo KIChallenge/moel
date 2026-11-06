@@ -24,7 +24,7 @@ struct FormPerson: Codable, Equatable, Identifiable, Sendable {
     }
 }
 
-enum PersonField: String, CaseIterable, Identifiable {
+enum PersonField: String, CaseIterable, Identifiable, Codable, Sendable {
     case firstName, lastName, birthDate, street, house, postcode, city, phone, email, insuranceNumber, insurer
     case title, stair, door, country, nationality, birthCountry, maritalStatus, iban, accountHolder, fswNumber
     var id: String { rawValue }
@@ -99,6 +99,7 @@ enum PersonField: String, CaseIterable, Identifiable {
 
 struct WelcomeProgress: Codable, Equatable, Sendable {
     static let fields: [PersonField] = [.firstName, .lastName, .birthDate, .street, .phone, .email, .insuranceNumber, .insurer]
+    static let eCardFields: [PersonField] = [.firstName, .lastName, .birthDate, .insuranceNumber, .insurer]
     private static let legacyFields: [PersonField] = [.firstName, .lastName, .birthDate, .street, .house, .postcode, .city, .phone, .email, .insuranceNumber, .insurer]
     static let termsVersion = "2026-11-05"
     var personID: UUID
@@ -110,6 +111,8 @@ struct WelcomeProgress: Codable, Equatable, Sendable {
     var termsAcceptedAt: Date?
     var acceptedTermsVersion: String?
     var termsMessageID: UUID?
+    // Values live in the profile. Only remember which questions a reviewed scan answered.
+    private(set) var reviewedECardFields: Set<PersonField>?
     var activeFields: [PersonField] { flowVersion == nil ? Self.legacyFields : Self.fields }
     var field: PersonField? { activeFields.indices.contains(step) ? activeFields[step] : nil }
     var isGreetingStep: Bool { step == -2 }
@@ -117,6 +120,38 @@ struct WelcomeProgress: Codable, Equatable, Sendable {
     var isAddressStep: Bool { field == .street }
     var isLocationStep: Bool { step == activeFields.count }
     var isNotificationStep: Bool { step == activeFields.count + 1 }
+
+    func remainingECardFields(for person: FormPerson) -> [PersonField] {
+        guard !completed, field != nil, person.id == personID, person.isSelf,
+              termsAcceptedAt != nil, acceptedTermsVersion == Self.termsVersion else { return [] }
+        return activeFields[step...].filter { field in
+            Self.eCardFields.contains(field) && (person.values[field.rawValue] ?? "").isEmpty
+        }
+    }
+
+    mutating func confirmECard(_ values: [PersonField: String], person: inout FormPerson, now: Date) throws {
+        guard values.keys.allSatisfy(Self.eCardFields.contains) else { throw SoviError.invalidAction }
+        let available = remainingECardFields(for: person)
+        var accepted: [PersonField: String] = [:]
+        for field in available {
+            guard let value = values[field]?.trimmingCharacters(in: .whitespacesAndNewlines), !value.isEmpty else { continue }
+            if let error = field.validate(value) { throw SoviError.invalidInput(error) }
+            accepted[field] = value
+        }
+        guard !accepted.isEmpty else { throw SoviError.invalidAction }
+        for (field, value) in accepted { person.values[field.rawValue] = value }
+        reviewedECardFields = (reviewedECardFields ?? []).union(accepted.keys)
+        history.append(ConversationTurn(role: "user", text: String(localized: "Angaben von meiner e-card übernehmen"), date: now))
+        skipReviewedECardFields(in: person)
+        history.append(ConversationTurn(role: "assistant", text: question, date: now))
+    }
+
+    private mutating func skipReviewedECardFields(in person: FormPerson) {
+        while let field, reviewedECardFields?.contains(field) == true, !(person.values[field.rawValue] ?? "").isEmpty {
+            step += 1
+        }
+    }
+
     var question: String {
         if isGreetingStep { return String(localized: "Hi, ich bin Sovi, dein persönlicher Gesundheitsbegleiter.") }
         if isTermsStep { return String(localized: "Hier findest du die Nutzungsbedingungen. Bitte lies sie kurz durch, bevor wir starten.") }
@@ -145,6 +180,8 @@ struct WelcomeProgress: Codable, Equatable, Sendable {
                 person.values[field.rawValue] = value
                 if field == .birthDate, let date = Self.birthDateFormatter.date(from: value) {
                     reply = date.formatted(date: .long, time: .omitted)
+                } else if field == .insuranceNumber {
+                    reply = String(localized: "Sozialversicherungsnummer eingegeben")
                 }
             }
         }
@@ -152,6 +189,7 @@ struct WelcomeProgress: Codable, Equatable, Sendable {
         let wasAddress = isAddressStep
         step = finish ? activeFields.count + 2 : step + 1
         if wasAddress && !finish { step = activeFields.firstIndex(of: .phone) ?? step }
+        skipReviewedECardFields(in: person)
         completed = step >= activeFields.count + 2
         if isTermsStep {
             history.append(ConversationTurn(role: "assistant", text: String(localized: "Damit ich dir wirklich helfen kann, würde ich dich gern besser kennenlernen."), date: now))

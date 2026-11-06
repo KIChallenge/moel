@@ -11,6 +11,7 @@
 		02E457F1C61D83060DA08CAF /* CaseDocumentImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80FF180518EB05337AED093C /* CaseDocumentImport.swift */; };
 		087BF37344F071435D1EE7F1 /* AdministrativeDraftSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C141652ED5BBA94D3AF606 /* AdministrativeDraftSheet.swift */; };
 		08E45782B97D5328C6897762 /* BefundReaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A13AA9B3AA47609655C1F6 /* BefundReaderTests.swift */; };
+		A7471ADC0650B5782930A7E1 /* ECardReaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A43711EB03EF3BD908C6329 /* ECardReaderTests.swift */; };
 		112D3DE4F8E6F90C14AEFB8A /* DocumentReviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D696013B1F66A4D2D63013 /* DocumentReviewSheet.swift */; };
 		136A407E36B22551B334170E /* PathCompanionPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 310005DB9D218FB8CA853C3E /* PathCompanionPrompt.swift */; };
 		18D2425BF764C7834B9A8419 /* CompanionServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CD18EBF2FC06185B8891145 /* CompanionServiceTests.swift */; };
@@ -50,6 +51,7 @@
 		A09E6486B352937DBC696E2D /* VaccinationPass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7240604ED0CD2D953E2247EC /* VaccinationPass.swift */; };
 		A1D709C9233FABE379310728 /* VaccinationImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80EC53ABF76FBCF45AD32B05 /* VaccinationImport.swift */; };
 		AEA7488BDDC5D4C9DE2F5B84 /* DocumentDiscussion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54123D4818BE51AF9410E109 /* DocumentDiscussion.swift */; };
+		4E452D5FBB184230222701E1 /* ECardReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63B1C2B3D0B080A89A5C9840 /* ECardReader.swift */; };
 		AF1710DF0A14FA7E30F8AB48 /* SoviFocusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58B2718B7492562049433179 /* SoviFocusView.swift */; };
 		B7145AFD78A6435BC2B9DB9A /* PathNodeSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FA4E6CD400B1BCC8553F4A7 /* PathNodeSymbol.swift */; };
 		BC6866CB5265D29FEB187163 /* SheetSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EE6DD9F8953868EF1474EFA /* SheetSupport.swift */; };
@@ -58,6 +60,7 @@
 		C3E33B6E95CAE710DA21566D /* DomainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6D80344CD350DF03AF975B9 /* DomainTests.swift */; };
 		C61EC737314279EC05D9B6EC /* PrototypeFormService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA34F734E31176FEBB34CE80 /* PrototypeFormService.swift */; };
 		C9343651C4F157A196505E73 /* WelcomeChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3A8F37990C66BDB9DF682DC /* WelcomeChatView.swift */; };
+		458266184FF138A18FC814E5 /* WelcomeECardScan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E6C5ECAEA430ADDCF93B665 /* WelcomeECardScan.swift */; };
 		CFD776AEE5651B6F73D60FAE /* LifePath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DC3C9A24561F526D003E1A7 /* LifePath.swift */; };
 		D14DCBCB897DEEF17A3E849A /* LifePathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FC3228B8B4444CFD470A953 /* LifePathTests.swift */; };
 		D2F4E6E9ADF837A1BEDEAF60 /* VaccinationDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB3779312FA7D588B6628248 /* VaccinationDetails.swift */; };
@@ -90,8 +93,11 @@
 
 /* Begin PBXFileReference section */
 		06A13AA9B3AA47609655C1F6 /* BefundReaderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BefundReaderTests.swift; sourceTree = "<group>"; };
+		5A43711EB03EF3BD908C6329 /* ECardReaderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ECardReaderTests.swift; sourceTree = "<group>"; };
 		0856DE028DD1D14CEAB966FD /* PathSmokeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PathSmokeTests.swift; sourceTree = "<group>"; };
 		0E5D73FB58D2B50939B98667 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		15070B79A307F026207C9913 /* tr */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		AECA6DBC9F1999C32DDC4C62 /* ar */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1CD18EBF2FC06185B8891145 /* CompanionServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CompanionServiceTests.swift; sourceTree = "<group>"; };
 		20759540EFD1C52FE14A331E /* DemoPlanExtractor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DemoPlanExtractor.swift; sourceTree = "<group>"; };
 		22150F6ACBAD0061DCD8B9FF /* SoviMascot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoviMascot.swift; sourceTree = "<group>"; };
@@ -108,6 +114,7 @@
 		4BDB9678E1B15D2DB2DB31C7 /* tr */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		5393A159CAE700F73351F2CC /* SoviChatBubble.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoviChatBubble.swift; sourceTree = "<group>"; };
 		54123D4818BE51AF9410E109 /* DocumentDiscussion.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DocumentDiscussion.swift; sourceTree = "<group>"; };
+		63B1C2B3D0B080A89A5C9840 /* ECardReader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ECardReader.swift; sourceTree = "<group>"; };
 		58B2718B7492562049433179 /* SoviFocusView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoviFocusView.swift; sourceTree = "<group>"; };
 		5D8CB77D218843FFE38CA002 /* SoviTheme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SoviTheme.swift; sourceTree = "<group>"; };
 		5FA4E6CD400B1BCC8553F4A7 /* PathNodeSymbol.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PathNodeSymbol.swift; sourceTree = "<group>"; };
@@ -136,6 +143,7 @@
 		A2C141652ED5BBA94D3AF606 /* AdministrativeDraftSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AdministrativeDraftSheet.swift; sourceTree = "<group>"; };
 		A386E5782023D05B74F01F2F /* AppIcon.icon */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		A3A8F37990C66BDB9DF682DC /* WelcomeChatView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WelcomeChatView.swift; sourceTree = "<group>"; };
+		1E6C5ECAEA430ADDCF93B665 /* WelcomeECardScan.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WelcomeECardScan.swift; sourceTree = "<group>"; };
 		A4C3B6EBF4305C70F810919B /* CaseSourcePDFSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaseSourcePDFSheet.swift; sourceTree = "<group>"; };
 		A81B64EBD04704BA3E07143B /* LiveChatViews.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LiveChatViews.swift; sourceTree = "<group>"; };
 		A92C2BB594F3F9E894C94366 /* DemoScenarioChat.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DemoScenarioChat.swift; sourceTree = "<group>"; };
@@ -227,6 +235,7 @@
 				FD48EBE0A21B241FAFB24797 /* VaccinationImportTests.swift */,
 				715297AA8D4B2213E587D545 /* DocumentChatTests.swift */,
 				06A13AA9B3AA47609655C1F6 /* BefundReaderTests.swift */,
+				5A43711EB03EF3BD908C6329 /* ECardReaderTests.swift */,
 			);
 			path = SoviTests;
 			sourceTree = "<group>";
@@ -263,6 +272,7 @@
 				58B2718B7492562049433179 /* SoviFocusView.swift */,
 				A81B64EBD04704BA3E07143B /* LiveChatViews.swift */,
 				A3A8F37990C66BDB9DF682DC /* WelcomeChatView.swift */,
+				1E6C5ECAEA430ADDCF93B665 /* WelcomeECardScan.swift */,
 				A92C2BB594F3F9E894C94366 /* DemoScenarioChat.swift */,
 				E9E9DB36B5415746A54D6F52 /* CasePreparationView.swift */,
 			);
@@ -341,6 +351,7 @@
 				DA34F734E31176FEBB34CE80 /* PrototypeFormService.swift */,
 				80FF180518EB05337AED093C /* CaseDocumentImport.swift */,
 				54123D4818BE51AF9410E109 /* DocumentDiscussion.swift */,
+				63B1C2B3D0B080A89A5C9840 /* ECardReader.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -535,6 +546,7 @@
 				3FE3AB5CF810C3AFC1640DB8 /* VaccinationImportTests.swift in Sources */,
 				8FEDCB255FE2DCF322905F30 /* DocumentChatTests.swift in Sources */,
 				08E45782B97D5328C6897762 /* BefundReaderTests.swift in Sources */,
+				A7471ADC0650B5782930A7E1 /* ECardReaderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -573,6 +585,7 @@
 				73034E9C9EBCDDF8FD1D9F84 /* DemoScenarios.swift in Sources */,
 				C61EC737314279EC05D9B6EC /* PrototypeFormService.swift in Sources */,
 				C9343651C4F157A196505E73 /* WelcomeChatView.swift in Sources */,
+				458266184FF138A18FC814E5 /* WelcomeECardScan.swift in Sources */,
 				806A8033E5B358CA1D611595 /* DemoScenarioChat.swift in Sources */,
 				550EC23A0133F00A3F99D65B /* FormLibrarySheet.swift in Sources */,
 				55C9B8DCF3EBAE9EF310A9D4 /* CasePreparation.swift in Sources */,
@@ -583,6 +596,7 @@
 				A1D709C9233FABE379310728 /* VaccinationImport.swift in Sources */,
 				F7BE1567CF4B69AF84BDE3BB /* DocumentInsights.swift in Sources */,
 				AEA7488BDDC5D4C9DE2F5B84 /* DocumentDiscussion.swift in Sources */,
+				4E452D5FBB184230222701E1 /* ECardReader.swift in Sources */,
 				887E0E150EDCBE93F1ECF274 /* ReviewedApplicantFields.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -619,6 +633,8 @@
 			children = (
 				93113E62F6511636D3B5F8A6 /* de */,
 				0E5D73FB58D2B50939B98667 /* en */,
+				15070B79A307F026207C9913 /* tr */,
+				AECA6DBC9F1999C32DDC4C62 /* ar */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
