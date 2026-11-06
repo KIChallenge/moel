@@ -236,6 +236,10 @@ final class PathSmokeTests: XCTestCase {
             return
         }
         XCTAssertTrue(general.isHittable)
+        let buttons = XCTAttachment(screenshot: app.screenshot())
+        buttons.name = "Chat answer buttons"
+        buttons.lifetime = .keepAlways
+        add(buttons)
         // The padded trailing area must answer too, not just the text itself.
         general.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
         let insurance = app.buttons["chat.insurance"]
@@ -255,6 +259,39 @@ final class PathSmokeTests: XCTestCase {
         XCTAssertTrue(app.buttons["focus.close"].waitForExistence(timeout: 5))
         XCTAssertEqual(editor.value as? String, "Mein Entwurf bleibt hier")
         XCTAssertEqual(app.staticTexts["focus.response"].label, "Danke. Du kannst jetzt weiterschreiben.")
+    }
+
+    func testChatButtonsWrapAtLargestTextAndAcceptEdgeTaps() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--uitesting", "--chat-ui-fixture", "--long-chat-buttons",
+                               "-AppleLanguages", "(de)", "-AppleLocale", "de_AT",
+                               "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launch()
+        XCTAssertTrue(app.buttons["path.sovi"].waitForExistence(timeout: 12))
+        app.buttons["path.sovi"].tap()
+        let general = app.buttons["chat.general"]
+        XCTAssertTrue(general.waitForExistence(timeout: 15))
+        let scroll = app.scrollViews["focus.scroll"]
+        for _ in 0..<12 {
+            let visible = general.frame.intersection(scroll.frame)
+            if general.isHittable && visible.height >= min(80, general.frame.height) { break }
+            if general.frame.midY < scroll.frame.midY { scroll.swipeDown() }
+            else { scroll.swipeUp() }
+        }
+        XCTAssertTrue(general.isHittable)
+        XCTAssertEqual(general.label, "Ich suche eine Hausarztpraxis in meiner Nähe")
+        XCTAssertGreaterThan(general.frame.height, 80)
+        XCTAssertGreaterThanOrEqual(general.frame.minX, scroll.frame.minX)
+        XCTAssertLessThanOrEqual(general.frame.maxX, scroll.frame.maxX)
+        let image = XCTAttachment(screenshot: app.screenshot())
+        image.name = "Chat buttons at largest text size in dark mode"
+        image.lifetime = .keepAlways
+        add(image)
+        let visible = general.frame.intersection(scroll.frame)
+        scroll.coordinate(withNormalizedOffset: .zero)
+            .withOffset(CGVector(dx: visible.maxX - scroll.frame.minX - 12, dy: visible.midY - scroll.frame.minY)).tap()
+        XCTAssertTrue(app.buttons["chat.insurance"].waitForExistence(timeout: 15))
+        XCTAssertFalse(general.exists)
     }
 
     func testGroupedPathCardAnchorsToTheButtonAndReturnsToItsEntries() {

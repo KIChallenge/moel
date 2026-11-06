@@ -1,5 +1,59 @@
 import SwiftUI
 
+struct ChatActionLabel: View {
+    let title: Text
+    var systemImage: String?
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            if let systemImage {
+                Image(systemName: systemImage)
+                    .font(.system(size: 18, weight: .bold))
+                    .frame(width: 24)
+                    .accessibilityHidden(true)
+            }
+            title
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .multilineTextAlignment(.leading)
+    }
+}
+
+struct ChatActionButtonStyle: ButtonStyle {
+    var tone: SoviButtonTone = .green
+    @Environment(\.isEnabled) private var enabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorSchemeContrast) private var contrast
+
+    func makeBody(configuration: Configuration) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 18)
+        let pressed = enabled && configuration.isPressed
+        configuration.label
+            .font(.system(.body, design: .rounded, weight: .bold))
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .frame(maxWidth: .infinity, minHeight: 52, alignment: .leading)
+            .foregroundStyle(enabled ? SoviTheme.ink : SoviTheme.secondary)
+            .background(enabled ? tone.surface : SoviTheme.bubble, in: shape)
+            .overlay {
+                shape.strokeBorder(SoviTheme.ink.opacity(contrast == .increased ? 0.6 : 0.18), lineWidth: 1.5)
+                    .allowsHitTesting(false)
+            }
+            .offset(y: pressed ? 3 : 0)
+            .padding(.bottom, 4)
+            .background {
+                shape.fill(SoviTheme.ink.opacity(enabled ? 0.28 : 0.12))
+                    .padding(.top, 4)
+                    .allowsHitTesting(false)
+            }
+            .contentShape(shape)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: pressed)
+    }
+}
+
 /// Delivery is presentation state. The actual conversation stays in its store.
 struct ChatTurnKey: Equatable {
     let id: String

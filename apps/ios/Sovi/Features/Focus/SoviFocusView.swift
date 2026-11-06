@@ -165,7 +165,7 @@ struct SoviFocusView: View {
                         welcomeHistory
                         conversation
                         if online && chat.busy {
-                            Button("Abbrechen") { chat.cancel() }.frame(minHeight: 44)
+                            Button("Abbrechen") { chat.cancel() }.buttonStyle(ChatActionButtonStyle(tone: .quiet))
                         }
                         ForEach(replyVisible ? localEntryIDs : [], id: \.self) { id in
                             CompanionEntryCard(nodeID: id, primary: id == localEntryIDs.first, act: actFromChat)
@@ -173,19 +173,16 @@ struct SoviFocusView: View {
                         if online { onlineState }
                         else if replyVisible, let action = standaloneAction {
                             Button { persistComposer(); keyboardOpen = false; act(action) } label: {
-                                HStack { Text(action.title(in: language)).font(.headline); Spacer(); Image(systemName: "arrow.up.right") }
-                                    .padding(16).frame(maxWidth: .infinity, minHeight: 52)
-                                    .background(SoviTheme.accent, in: RoundedRectangle(cornerRadius: 18))
-                                    .foregroundStyle(SoviTheme.background).contentShape(Rectangle())
-                            }.buttonStyle(.plain).accessibilityIdentifier("focus.action")
+                                ChatActionLabel(title: Text(action.title(in: language)), systemImage: "arrow.up.right")
+                            }.buttonStyle(ChatActionButtonStyle()).accessibilityIdentifier("focus.action")
                         }
                         if replyVisible && !online {
                             if !localEntryIDs.isEmpty {
                                 Button("Was steht als Nächstes an?") { persistComposer(); keyboardOpen = false; act(.showProgress) }
-                                    .frame(minHeight: 44).accessibilityIdentifier("focus.progress")
+                                    .buttonStyle(ChatActionButtonStyle(tone: .blue)).accessibilityIdentifier("focus.progress")
                             }
                             ForEach(response.caseChoices) { item in
-                                Button(item.title(in: language)) { openScenario(item) }.buttonStyle(SheetPrimaryButtonStyle())
+                                Button(item.title(in: language)) { openScenario(item) }.buttonStyle(ChatActionButtonStyle())
                             }
                         }
                         if showStarters && replyVisible { starters }
@@ -407,7 +404,7 @@ struct SoviFocusView: View {
                 Text(error).font(.subheadline).accessibilityIdentifier("chat.error")
                 if let message = chat.failedMessage {
                     Button("Erneut senden") { sendMessage(message) }
-                        .buttonStyle(SheetPrimaryButtonStyle()).disabled(chat.busy).accessibilityIdentifier("chat.retry")
+                        .buttonStyle(ChatActionButtonStyle()).disabled(chat.busy).accessibilityIdentifier("chat.retry")
                 }
             }.padding(16).frame(maxWidth: .infinity, alignment: .leading)
                 .background(SoviTheme.softGreen, in: RoundedRectangle(cornerRadius: 18))
@@ -429,9 +426,8 @@ struct SoviFocusView: View {
                     VStack(spacing: 8) {
                         ForEach(DemoScenario.allCases) { item in
                             Button { openScenario(item) } label: {
-                                HStack { Text(item.title(in: language)); Spacer(); Image(systemName: "arrow.up.right") }
-                                    .padding(14).frame(maxWidth: .infinity, minHeight: 48).contentShape(Rectangle())
-                            }.buttonStyle(.plain).background(SoviTheme.softGreen, in: RoundedRectangle(cornerRadius: 16))
+                                ChatActionLabel(title: Text(item.title(in: language)), systemImage: "arrow.up.right")
+                            }.buttonStyle(ChatActionButtonStyle())
                                 .accessibilityIdentifier("focus.scenario.\(item.rawValue)")
                         }
                     }.padding(.top, 8)
@@ -439,9 +435,8 @@ struct SoviFocusView: View {
                     Text("Gemeinsam starten").frame(maxWidth: .infinity, minHeight: 44, alignment: .leading).contentShape(Rectangle())
                 }
                 Button { persistComposer(); keyboardOpen = false; forms() } label: {
-                    HStack { Label("Profile und Formulare", systemImage: "doc.text"); Spacer(); Image(systemName: "chevron.right") }
-                        .frame(maxWidth: .infinity, minHeight: 44).contentShape(Rectangle())
-                }.buttonStyle(.plain).accessibilityIdentifier("focus.forms")
+                    ChatActionLabel(title: Text("Profile und Formulare"), systemImage: "doc.text")
+                }.buttonStyle(ChatActionButtonStyle(tone: .purple)).accessibilityIdentifier("focus.forms")
                 ScrollView(.horizontal) {
                     HStack(spacing: 8) {
                         prompt("Offene Aufgaben", message: "Was ist noch offen?")
@@ -472,7 +467,7 @@ struct SoviFocusView: View {
                     keyboardOpen = false
                     followsReplies = true
                     attach()
-                } label: { Image(systemName: "paperclip").frame(width: 44, height: 44).contentShape(Rectangle()) }
+                } label: { Image(systemName: "paperclip").font(.system(size: 22, weight: .semibold)).frame(width: 44, height: 44).contentShape(Rectangle()) }
                     .disabled(importingDocument).accessibilityLabel("Dokument hinzufügen").accessibilityIdentifier("focus.attach")
                 TextField("Schreib Sovi …", text: $text, axis: .vertical)
                     .lineLimit(1...(textSize.isAccessibilitySize ? 2 : 4)).focused($keyboardOpen).submitLabel(.send).onSubmit(submit)
@@ -512,12 +507,8 @@ struct SoviFocusView: View {
     }
     private func prompt(_ title: LocalizedStringKey, message: String) -> some View {
         Button { keyboardOpen = false; sendMessage(message) } label: {
-            Text(title).font(.subheadline.weight(.medium)).padding(.horizontal, 14).padding(.vertical, 12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(SoviTheme.bubble, in: RoundedRectangle(cornerRadius: 16))
-                .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(SoviTheme.border, lineWidth: 1))
-                .contentShape(Rectangle())
-        }.buttonStyle(.plain).disabled(chat.busy)
+            ChatActionLabel(title: Text(title), systemImage: "arrow.turn.down.right")
+        }.buttonStyle(ChatActionButtonStyle(tone: .blue)).disabled(chat.busy)
     }
     private var latestScrollID: String {
         if let incoming = writingID ?? delivery.expanding { return incoming }
@@ -565,7 +556,7 @@ private struct AttendanceQuickReplies: View {
     @Environment(SoviStore.self) private var store
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 12) {
             if let node = store.node(id: nodeID) {
                 ChatPathButton(node: node, showsCaption: false, identifier: "focus.timeline.\(nodeID)") { act(.preview(nodeID)) }
             }
@@ -583,10 +574,9 @@ private struct AttendanceQuickReplies: View {
     private func reply(_ answer: Attendance?, symbol: String, suffix: String) -> some View {
         let action = CompanionAction.answerCheckIn(nodeID, answer)
         return Button { act(action) } label: {
-            Label(action.title(in: language), systemImage: symbol)
-                .fixedSize(horizontal: false, vertical: true)
+            ChatActionLabel(title: Text(action.title(in: language)), systemImage: symbol)
         }
-        .buttonStyle(SheetPrimaryButtonStyle(tone: answer == .attended ? .green : answer == .notAttended ? .coral : .quiet))
+        .buttonStyle(ChatActionButtonStyle(tone: answer == .attended ? .green : answer == .notAttended ? .coral : .quiet))
         .accessibilityIdentifier("focus.checkIn.\(suffix).\(nodeID)")
     }
 }
@@ -637,16 +627,8 @@ private struct CompanionEntryCard: View {
     }
     private func option(_ title: String, selected: Bool, symbol: String, identifier: String, positive: Bool = false, negative: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack(spacing: 10) {
-                Image(systemName: selected ? symbol + ".fill" : "circle").font(.title3)
-                Text(title).font(.system(.subheadline, design: .rounded, weight: .semibold))
-                Spacer(minLength: 0)
-            }
-            .foregroundStyle(selected && positive ? SoviTheme.accent : selected && negative ? SoviTheme.missed : SoviTheme.ink)
-            .padding(12).frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-            .background(selected ? positive ? SoviTheme.softGreen : negative ? SoviTheme.coral : SoviTheme.sky : SoviTheme.background, in: RoundedRectangle(cornerRadius: 12))
-            .contentShape(Rectangle())
-        }.buttonStyle(.plain)
+            ChatActionLabel(title: Text(title), systemImage: selected ? symbol + ".fill" : "circle")
+        }.buttonStyle(ChatActionButtonStyle(tone: selected && positive ? .green : selected && negative ? .coral : .quiet))
             .accessibilityValue(selected ? String(localized: "Ausgewählt") : String(localized: "Nicht ausgewählt"))
             .accessibilityAddTraits(selected ? .isSelected : [])
             .accessibilityIdentifier("focus.entry.\(identifier).\(nodeID)")

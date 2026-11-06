@@ -66,7 +66,7 @@ struct WelcomeChatView: View {
                 Button(WelcomeReply.confirmCard.text) {
                     do { try eCardAction(.confirm(id, cardAnswers)) } catch { self.error = error.localizedDescription }
                 }
-                .buttonStyle(SheetPrimaryButtonStyle())
+                .buttonStyle(ChatActionButtonStyle())
                 .disabled(cardAnswers.isEmpty || cardAnswers.contains { $0.key.validate($0.value) != nil })
                 .accessibilityIdentifier("welcome.ecard.confirm")
                 .padding(.horizontal, 16).padding(.vertical, 6)
@@ -197,38 +197,38 @@ struct WelcomeChatView: View {
             .accessibilityIdentifier("welcome.scanECard")
         }
         if progress?.completed == true {
-            Button("Angaben prüfen") { showsProfile = true }.buttonStyle(SheetPrimaryButtonStyle())
-            Button("Los geht’s") { dismiss() }.buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("welcome.done")
+            Button("Angaben prüfen") { showsProfile = true }.buttonStyle(ChatActionButtonStyle())
+            Button("Los geht’s") { dismiss() }.buttonStyle(ChatActionButtonStyle()).accessibilityIdentifier("welcome.done")
         } else if progress?.isGreetingStep == true {
-            Button("Hi") { answer(String(localized: "Hi")) }.buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("welcome.hi")
+            Button("Hi") { answer(String(localized: "Hi")) }.buttonStyle(ChatActionButtonStyle()).accessibilityIdentifier("welcome.hi")
         } else if progress?.isTermsStep == true {
             Button("Akzeptieren") { answer(String(localized: "Akzeptieren")) }
-                .buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("welcome.accept")
+                .buttonStyle(ChatActionButtonStyle()).accessibilityIdentifier("welcome.accept")
         } else if field == .birthDate {
             Button { focused = false; showsBirthDate = true } label: {
                 if textSize.isAccessibilitySize { Text("Geburtsdatum auswählen") }
                 else { Label("Geburtsdatum auswählen", systemImage: "calendar") }
-            }.buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("welcome.birthDate")
+            }.buttonStyle(ChatActionButtonStyle()).accessibilityIdentifier("welcome.birthDate")
         } else if progress?.isLocationStep == true {
-            Button(WelcomeReply.useLocation.text) { requestLocation() }.buttonStyle(SheetPrimaryButtonStyle()).disabled(busy).accessibilityIdentifier("welcome.location")
+            Button(WelcomeReply.useLocation.text) { requestLocation() }.buttonStyle(ChatActionButtonStyle()).disabled(busy).accessibilityIdentifier("welcome.location")
             Button(WelcomeReply.enterPlace.text) {
                 do {
                     try chat.setLocationSharing(false)
                     answer(WelcomeReply.enterPlace.text)
                 } catch { self.error = error.localizedDescription }
-            }.frame(minHeight: 44).disabled(busy).accessibilityIdentifier("welcome.skipLocation")
+            }.buttonStyle(ChatActionButtonStyle(tone: .quiet)).disabled(busy).accessibilityIdentifier("welcome.skipLocation")
         } else if progress?.isNotificationStep == true {
-            Button(WelcomeReply.remindMe.text) { requestNotifications() }.buttonStyle(SheetPrimaryButtonStyle()).disabled(busy).accessibilityIdentifier("welcome.notifications")
+            Button(WelcomeReply.remindMe.text) { requestNotifications() }.buttonStyle(ChatActionButtonStyle()).disabled(busy).accessibilityIdentifier("welcome.notifications")
             Button(WelcomeReply.noReminders.text) {
                 do {
                     try store.perform(.setPreferences(notifications: false, spokenReplies: nil, straightPath: nil))
                     Task { await device.cancelAllNotifications() }
                     answer(WelcomeReply.noReminders.text)
                 } catch { self.error = error.localizedDescription }
-            }.frame(minHeight: 44).disabled(busy).accessibilityIdentifier("welcome.skipNotifications")
+            }.buttonStyle(ChatActionButtonStyle(tone: .quiet)).disabled(busy).accessibilityIdentifier("welcome.skipNotifications")
         } else if field == .insurer {
             ForEach(["ÖGK", "SVS", "BVAEB", "KFA"], id: \.self) { value in
-                Button(value) { answer(value) }.buttonStyle(SheetPrimaryButtonStyle())
+                Button(value) { answer(value) }.buttonStyle(ChatActionButtonStyle(tone: .blue))
             }
         }
     }
@@ -328,7 +328,7 @@ struct WelcomeChatView: View {
                 .datePickerStyle(.wheel).labelsHidden().accessibilityIdentifier("welcome.date.picker")
             Button("Übernehmen") {
                 answer(WelcomeProgress.birthDateFormatter.string(from: birthDate)); showsBirthDate = false
-            }.buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("welcome.date.confirm")
+            }.buttonStyle(ChatActionButtonStyle()).accessibilityIdentifier("welcome.date.confirm")
         }.environment(\.calendar, Calendar(identifier: .gregorian)).environment(\.timeZone, TimeZone.current)
     }
 

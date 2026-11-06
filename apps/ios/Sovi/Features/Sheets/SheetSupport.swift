@@ -57,20 +57,6 @@ struct SheetSection<Content: View>: View {
     }
 }
 
-enum SoviButtonTone {
-    case green, blue, purple, coral, quiet
-
-    var surface: Color {
-        switch self {
-        case .green: SoviTheme.action
-        case .blue: SoviTheme.sky
-        case .purple: SoviTheme.lilac
-        case .coral: SoviTheme.coral
-        case .quiet: SoviTheme.bubble
-        }
-    }
-}
-
 struct SheetPrimaryButtonStyle: ButtonStyle {
     var tone: SoviButtonTone = .green
     @Environment(\.isEnabled) private var enabled

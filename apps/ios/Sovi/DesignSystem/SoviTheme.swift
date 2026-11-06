@@ -24,6 +24,20 @@ enum SoviTheme {
     }
 }
 
+enum SoviButtonTone {
+    case green, blue, purple, coral, quiet
+
+    var surface: Color {
+        switch self {
+        case .green: SoviTheme.action
+        case .blue: SoviTheme.sky
+        case .purple: SoviTheme.lilac
+        case .coral: SoviTheme.coral
+        case .quiet: SoviTheme.bubble
+        }
+    }
+}
+
 /// Native glass for controls, with a material fallback and an opaque accessibility mode.
 private struct SoviGlassSurface<S: InsettableShape>: ViewModifier {
     let shape: S

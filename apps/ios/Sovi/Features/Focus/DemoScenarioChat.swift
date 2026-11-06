@@ -110,11 +110,11 @@ struct DemoScenarioChat: View {
                                 if !progress.saved {
                                     Button("Schritte auf meinem Pfad speichern") {
                                         do { try store.perform(.saveScenarioSteps(scenario)) } catch { self.error = error.localizedDescription }
-                                    }.buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("scenario.save")
+                                    }.buttonStyle(ChatActionButtonStyle()).accessibilityIdentifier("scenario.save")
                                         .disabled(!canSave(progress))
                                 } else { Label("Auf deinem Pfad gespeichert", systemImage: "checkmark.circle").accessibilityIdentifier("scenario.saved") }
                                 if progress.suggestedForm != nil && ![.care, .hospital].contains(scenario) {
-                                    Button("Passenden Formularentwurf öffnen") { showsForms = true }.buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("scenario.forms")
+                                    Button("Passenden Formularentwurf öffnen") { showsForms = true }.buttonStyle(ChatActionButtonStyle()).accessibilityIdentifier("scenario.forms")
                                 }
                                 if nearbyQuery != nil {
                                     Button("Anlaufstellen in meiner Nähe") { showsNearby = true }.frame(minHeight: 44)
@@ -135,7 +135,7 @@ struct DemoScenarioChat: View {
                                     }.frame(minHeight: 44).disabled(locating)
                                 }
                                 ForEach(Array(progress.choices.enumerated()), id: \.offset) { index, choice in
-                                    Button(choice) { answer(choice) }.buttonStyle(SheetPrimaryButtonStyle(tone: .blue)).accessibilityIdentifier("scenario.choice.\(index)")
+                                    Button(choice) { answer(choice) }.buttonStyle(ChatActionButtonStyle(tone: .blue)).accessibilityIdentifier("scenario.choice.\(index)")
                                         .id("scenario.choice.\(index)")
                                         .firstChatChoice(index == 0)
                                 }
@@ -275,7 +275,7 @@ private struct NearbyServiceSheet: View {
     var body: some View {
         SheetPage(title: "Anlaufstellen") {
             TextField("Anderer Ort oder Postleitzahl", text: $place).textFieldStyle(.roundedBorder)
-            Button(place.isEmpty ? "An meinem Standort suchen" : "An diesem Ort suchen") { find() }.buttonStyle(SheetPrimaryButtonStyle(tone: .blue)).disabled(busy)
+            Button(place.isEmpty ? "An meinem Standort suchen" : "An diesem Ort suchen") { find() }.buttonStyle(ChatActionButtonStyle(tone: .blue)).disabled(busy)
             if busy { ProgressView() }
             if let notice { Text(notice).font(.subheadline) }
             if !items.isEmpty {

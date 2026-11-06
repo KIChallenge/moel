@@ -481,8 +481,9 @@ private final class ChatUIFixtureProtocol: URLProtocol, @unchecked Sendable {
         switch attempt {
         case 1:
             reply = "Welchen Arzt suchst du?"
-            choices = [["id": "general", "label": "Allgemeinmedizin", "message": "Allgemeinmedizin"],
-                       ["id": "own", "label": "Etwas anderes", "message": "", "opens_composer": true]]
+            let longLabels = ProcessInfo.processInfo.arguments.contains("--long-chat-buttons")
+            choices = [["id": "general", "label": longLabels ? "Ich suche eine Hausarztpraxis in meiner Nähe" : "Allgemeinmedizin", "message": "Allgemeinmedizin"],
+                       ["id": "own", "label": longLabels ? "Ich möchte meine Antwort selbst schreiben" : "Etwas anderes", "message": "", "opens_composer": true]]
         case 2:
             reply = "Was ist dir für den Termin wichtig?"
             choices = [["id": "insurance", "label": "Mit Versicherung", "message": "Mit Versicherung"]]

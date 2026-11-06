@@ -2,6 +2,12 @@
 
 Updated 6 November 2026.
 
+## Build 7 chat buttons
+
+Chat replies, attendance choices, onboarding actions and practice links share raised full-width buttons. Labels wrap, icons use consistent widths, and pressed feedback stays inside the tap area. Secondary replies use a quiet surface, answers use blue, directions use purple and attendance uses green or coral.
+
+The simulator build passed. UI checks passed for reply-edge taps, retry with a retained draft, postponed attendance and long German labels at the largest text size in dark appearance. The exact request “Ich möchte für meine Mutter pflegegeld beantragen” matched the guided care journey, and the existing four-journey check passed.
+
 ## Build 6 chat
 
 Apple validated Sovi 0.1.0 (6) and marked it active for internal TestFlight testing. App Store Connect build ID `55d88753-efae-4fc4-897b-b85fc1e25006`.

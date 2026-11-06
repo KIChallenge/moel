@@ -50,6 +50,9 @@ struct SoviApp: App {
                 ])))
             }
             chat.connectHistory(to: loaded)
+            #if DEBUG
+            if inMemory && arguments.contains("--long-chat-buttons") { chat.submit("Arzt") }
+            #endif
             store = loaded
             startupError = nil
         } catch { startupError = error.localizedDescription }

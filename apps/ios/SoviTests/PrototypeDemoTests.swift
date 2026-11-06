@@ -348,6 +348,7 @@ final class PrototypeDemoTests: XCTestCase {
     }
 
     func testAllFourJourneysProduceReviewableTasksWithoutBookingsAndStayIdempotent() throws {
+        XCTAssertEqual(DemoScenario.matching("Ich möchte für meine Mutter pflegegeld beantragen"), .care)
         let container = try SoviStore.makeContainer(inMemory: true)
         let store = try SoviStore(container: container)
         let count = store.nodes.count

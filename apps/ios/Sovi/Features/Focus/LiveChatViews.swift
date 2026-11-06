@@ -143,11 +143,9 @@ struct LiveChatResultView: View {
         VStack(alignment: .leading, spacing: 14) {
             ForEach(active ? result.choices : []) { choice in
                 Button { if choice.opens_composer == true { openAnswer() } else { send(choice.message) } } label: {
-                    HStack { Text(choice.label); Spacer(); Image(systemName: "arrow.turn.down.right") }
-                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                        .contentShape(Rectangle())
+                    ChatActionLabel(title: Text(choice.label), systemImage: choice.opens_composer == true ? "pencil" : "arrow.turn.down.right")
                 }
-                .buttonStyle(SheetPrimaryButtonStyle(tone: choice.opens_composer == true ? .quiet : .blue))
+                .buttonStyle(ChatActionButtonStyle(tone: choice.opens_composer == true ? .quiet : .blue))
                 .disabled(busy).accessibilityIdentifier("chat.\(choice.id)")
             }
             if looking { ProgressView(language.text("Praxen werden gesucht …")) }
@@ -181,13 +179,16 @@ struct LiveChatResultView: View {
                                         .font(.caption)
                                 }
                                 if let phone = provider.phone, let url = ChatDestination.allowedURL("tel:" + phone) {
-                                    Link(destination: url) { Label("Anrufen", systemImage: "phone") }.frame(minHeight: 44)
+                                    Link(destination: url) { ChatActionLabel(title: Text("Anrufen"), systemImage: "phone") }
+                                        .buttonStyle(ChatActionButtonStyle())
                                 }
                                 if let url = ChatDestination.allowedURL(provider.map_url) {
-                                    Link(destination: url) { Label("Wegbeschreibung", systemImage: "map") }.frame(minHeight: 44)
+                                    Link(destination: url) { ChatActionLabel(title: Text("Wegbeschreibung"), systemImage: "map") }
+                                        .buttonStyle(ChatActionButtonStyle(tone: .purple))
                                 }
                                 if let profile = provider.url, let url = ChatDestination.allowedURL(profile) {
-                                    Link("Praxisprofil öffnen", destination: url).frame(minHeight: 44)
+                                    Link(destination: url) { ChatActionLabel(title: Text("Praxisprofil öffnen"), systemImage: "arrow.up.right") }
+                                        .buttonStyle(ChatActionButtonStyle(tone: .quiet))
                                 }
                             }
                             .padding(18).frame(maxWidth: .infinity, alignment: .leading)
@@ -208,10 +209,9 @@ struct LiveChatResultView: View {
             ForEach(Array(result.actions.enumerated()), id: \.offset) { _, action in
                 if let url = action.safeURL, !(action.type == "map_search" && !providers.isEmpty) {
                     Link(destination: url) {
-                        HStack { Text(action.label); Spacer(); Image(systemName: url.scheme == "tel" ? "phone" : "arrow.up.right") }
-                            .padding(16).frame(minHeight: 44)
-                            .background(SoviTheme.softGreen, in: RoundedRectangle(cornerRadius: 18))
+                        ChatActionLabel(title: Text(action.label), systemImage: url.scheme == "tel" ? "phone" : action.type == "map_search" ? "map" : "arrow.up.right")
                     }
+                    .buttonStyle(ChatActionButtonStyle(tone: url.scheme == "tel" ? .green : .purple))
                 }
             }
             if result.status != "needs_clarification", !result.sources.isEmpty || !providers.isEmpty {
