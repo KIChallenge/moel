@@ -83,9 +83,7 @@ enum LiveChatError: LocalizedError {
     case setup, token, outdated, limit, unavailable, invalidReply, tooLong
     var errorDescription: String? {
         switch self {
-        case .setup: String(localized: "Bitte aktiviere den Online-Chat in den Chat-Einstellungen.")
-        case .token: String(localized: "Der API-Zugangscode ist ungültig. Prüfe die Chat-Einstellungen.")
-        case .outdated: String(localized: "Der Server braucht das Chat-Update (Version 3). Bitte aktualisiere sovi.php auf dem Hosting.")
+        case .setup, .token, .outdated: String(localized: "Sovi kann gerade keine Verbindung herstellen. Bitte versuche es später erneut.")
         case .limit: String(localized: "Das Anfrage-Limit ist erreicht. Bitte versuche es später erneut.")
         case .unavailable: String(localized: "Sovi ist gerade nicht erreichbar. Deine Nachricht bleibt zum erneuten Senden erhalten.")
         case .invalidReply: String(localized: "Die Serverantwort konnte nicht geprüft werden. Bitte versuche es erneut.")
@@ -161,16 +159,18 @@ struct LiveChatAPI: Sendable {
 final class LiveChatController {
     private(set) var enabled = false
     private(set) var shareLocation = false
-    private(set) var responseLanguage = "auto"
+    let responseLanguage = "auto"
     private(set) var localServiceArea: String?
     private(set) var background: [ChatBackground] = []
     private(set) var busy = false
+    private(set) var transcriptID = UUID()
     private(set) var messages: [ChatMessage] = []
     private(set) var result: LiveChatReply?
     private(set) var error: String?
     private(set) var failedMessage: String?
     private(set) var locationNotice: String?
     @ObservationIgnored private var token = ""
+    @ObservationIgnored private let managedToken: String
     @ObservationIgnored private var operation: Task<Void, Never>?
     @ObservationIgnored private var generation = UUID()
     @ObservationIgnored private var pendingMessage: String?
@@ -178,13 +178,19 @@ final class LiveChatController {
     @ObservationIgnored private let api: LiveChatAPI
     @ObservationIgnored private let testing: Bool
 
-    init(api: LiveChatAPI = LiveChatAPI(), testing: Bool = ProcessInfo.processInfo.arguments.contains("--uitesting")) {
+    init(api: LiveChatAPI = LiveChatAPI(), testing: Bool = ProcessInfo.processInfo.arguments.contains("--uitesting"), managedToken: String? = nil) {
         self.api = api
         self.testing = testing
+        // A restricted prototype access token is supplied by the release build,
+        // never the OpenAI key. UI tests cannot accidentally use the live token.
+        let bundled = managedToken ?? (testing ? "" : (Bundle.main.object(forInfoDictionaryKey: "SoviChatAccessToken") as? String ?? ""))
+        self.managedToken = bundled
+        token = bundled
         if !testing, let saved = try? ChatCredentials.read() {
-            token = saved.token; enabled = saved.enabled; shareLocation = saved.shareLocation
-            responseLanguage = saved.responseLanguage ?? "auto"
+            if token.isEmpty { token = saved.token }
+            shareLocation = saved.shareLocation
         }
+        enabled = !testing || !token.isEmpty
     }
 
     static func forApp() -> LiveChatController {
@@ -193,21 +199,26 @@ final class LiveChatController {
         if arguments.contains("--uitesting") && arguments.contains("--chat-ui-fixture") {
             let configuration = URLSessionConfiguration.ephemeral
             configuration.protocolClasses = [ChatUIFixtureProtocol.self]
-            let controller = LiveChatController(api: LiveChatAPI(session: URLSession(configuration: configuration)), testing: true)
-            try? controller.configure(token: String(repeating: "ui-fixture-", count: 4), enabled: true, shareLocation: false)
-            return controller
+            return LiveChatController(api: LiveChatAPI(session: URLSession(configuration: configuration)), testing: true,
+                                      managedToken: String(repeating: "ui-fixture-", count: 4))
         }
         #endif
         return LiveChatController()
     }
 
-    var editableToken: String { token }
     /// Previous choices belong to the answered turn, not a pending or failed request.
     var currentResult: LiveChatReply? { busy || failedMessage != nil ? nil : result }
     func enableLocationFromWelcome() async throws -> Bool {
         let allowed = await location.requestPermission()
-        try configure(token: token, enabled: enabled, shareLocation: allowed, responseLanguage: responseLanguage)
+        try setLocationSharing(allowed)
         return allowed
+    }
+
+    func setLocationSharing(_ allowed: Bool) throws {
+        if !testing { try ChatCredentials.save(.init(token: token, enabled: true, shareLocation: allowed, responseLanguage: "auto")) }
+        cancel()
+        shareLocation = allowed
+        if !allowed { localServiceArea = nil; location.cancel() }
     }
     /// Only a coarse place name is returned to local demos; coordinates are not saved.
     func refreshLocalServiceArea() async -> String? {
@@ -227,22 +238,26 @@ final class LiveChatController {
         return messages + (pending.map { [ChatMessage(role: "user", content: $0)] } ?? [])
     }
 
-    func configure(token: String, enabled: Bool, shareLocation: Bool, responseLanguage: String = "auto") throws {
+    #if DEBUG
+    /// Test-only configuration for failure and cancellation cases.
+    func configure(token: String, enabled: Bool, shareLocation: Bool) throws {
         let token = token.trimmingCharacters(in: .whitespacesAndNewlines)
         if enabled && (token.utf8.count < 32 || token.rangeOfCharacter(from: .whitespacesAndNewlines) != nil) { throw LiveChatError.token }
-        guard ["auto", "de", "en", "ar", "tr"].contains(responseLanguage) else { throw LiveChatError.setup }
         if !testing { try ChatCredentials.save(.init(token: token, enabled: enabled, shareLocation: shareLocation, responseLanguage: responseLanguage)) }
         cancel()
         self.token = token; self.enabled = enabled; self.shareLocation = shareLocation
         if !shareLocation { localServiceArea = nil }
-        self.responseLanguage = responseLanguage
         if !enabled { reset() }
     }
+    #endif
 
     func submit(_ text: String) {
         let message = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !busy, !message.isEmpty else { return }
         guard enabled else { error = LiveChatError.setup.localizedDescription; return }
+        guard token.utf8.count >= 32 else {
+            error = LiveChatError.setup.localizedDescription; failedMessage = message; return
+        }
         let pending = messages + [ChatMessage(role: "user", content: message)]
         do { _ = try LiveChatAPI.request(messages: pending, location: nil, token: token, locale: "de") }
         catch { self.error = error.localizedDescription; failedMessage = message; return }
@@ -257,7 +272,7 @@ final class LiveChatController {
                 try Task.checkCancellation()
                 guard generation == id, enabled else { return }
                 if shareLocation && coordinates == nil {
-                    locationNotice = String(localized: "Kein aktueller Standort verfügbar. Du kannst einen Ort im Chat nennen.")
+                    locationNotice = ChatLanguage.resolve(message, preference: locale).text("Ich kann deinen Standort gerade nicht verwenden.")
                 }
                 let reply = try await api.respond(messages: pending, location: coordinates, token: token, locale: locale, background: background)
                 try Task.checkCancellation()
@@ -280,14 +295,15 @@ final class LiveChatController {
         generation = UUID(); operation?.cancel(); operation = nil; location.cancel(); busy = false
         pendingMessage = nil
     }
-    func reset() { cancel(); messages = []; result = nil; error = nil; failedMessage = nil; locationNotice = nil }
+    func reset() { cancel(); transcriptID = UUID(); messages = []; result = nil; error = nil; failedMessage = nil; locationNotice = nil }
     func setBackground(_ entries: [ChatBackground]) {
         if background != entries { reset(); background = Array(entries.prefix(4)) }
     }
-    func deleteCredentials() throws {
+    func clearLocalData() throws {
         reset()
         if !testing { try ChatCredentials.delete() }
-        token = ""; enabled = false; shareLocation = false; background = []; responseLanguage = "auto"
+        token = managedToken; enabled = !testing || !managedToken.isEmpty
+        shareLocation = false; background = []
         localServiceArea = nil
     }
 }

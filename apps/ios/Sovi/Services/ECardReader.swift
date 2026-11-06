@@ -1,9 +1,15 @@
 import Foundation
 import ImageIO
+import UniformTypeIdentifiers
 import Vision
 
-/// Only returns reviewable onboarding fields; the image and OCR observations live for this call.
+/// Returns a compact photo for the local welcome history and the values printed on that side.
 enum ECardReader {
+    struct Capture: Sendable {
+        let photo: WelcomeECardPhoto
+        let fields: [PersonField: String]
+    }
+
     struct Line {
         let text: String
         /// Normalized image coordinates, measured from the top left.
@@ -15,12 +21,12 @@ enum ECardReader {
         }
     }
 
-    static func read(_ imageData: Data) async throws -> [PersonField: String] {
-        let task = Task.detached(priority: .userInitiated) { try recognize(imageData) }
+    static func read(_ imageData: Data, expecting side: ECardSide) async throws -> Capture {
+        let task = Task.detached(priority: .userInitiated) { try recognize(imageData, expecting: side) }
         return try await withTaskCancellationHandler { try await task.value } onCancel: { task.cancel() }
     }
 
-    private static func recognize(_ data: Data) throws -> [PersonField: String] {
+    private static func recognize(_ data: Data, expecting side: ECardSide) throws -> Capture {
         try Task.checkCancellation()
         let options: [CFString: Any] = [kCGImageSourceCreateThumbnailFromImageAlways: true,
                                         kCGImageSourceCreateThumbnailWithTransform: true,
@@ -43,20 +49,50 @@ enum ECardReader {
                 let r = item.boundingBox
                 return Line(text: candidate.string, box: CGRect(x: r.minX, y: 1 - r.maxY, width: r.width, height: r.height))
             }
-            let values = fields(in: lines)
             try Task.checkCancellation()
-            if !values.isEmpty { return values }
+            guard let reading = reading(in: lines) else { continue }
+            guard reading.side == side else {
+                throw SoviError.invalidInput(side == .front
+                    ? String(localized: "Das ist die Rückseite. Bitte zeig mir zuerst die Vorderseite.")
+                    : String(localized: "Das ist die Vorderseite. Jetzt brauche ich die Rückseite."))
+            }
+            let jpeg = try chatPhoto(from: source)
+            try Task.checkCancellation()
+            return Capture(photo: WelcomeECardPhoto(side: side, jpeg: jpeg), fields: reading.fields)
         }
-        return [:]
+        throw SoviError.invalidInput(String(localized: "Ich konnte die Kartenseite nicht lesen. Versuche es mit einem deutlicheren Foto."))
+    }
+
+    private static func chatPhoto(from source: CGImageSource) throws -> Data {
+        // Render upright pixels into a new JPEG so the original photo's EXIF and GPS metadata stay out of chat.
+        for size in [1024, 640] {
+            let options: [CFString: Any] = [kCGImageSourceCreateThumbnailFromImageAlways: true,
+                                            kCGImageSourceCreateThumbnailWithTransform: true,
+                                            kCGImageSourceThumbnailMaxPixelSize: size]
+            let bytes = NSMutableData()
+            guard let image = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary),
+                  let destination = CGImageDestinationCreateWithData(bytes, UTType.jpeg.identifier as CFString, 1, nil) else { break }
+            CGImageDestinationAddImage(destination, image, [kCGImageDestinationLossyCompressionQuality: 0.76] as CFDictionary)
+            if CGImageDestinationFinalize(destination), bytes.length <= WelcomeECardPhoto.maxBytes { return bytes as Data }
+        }
+        throw SoviError.invalidInput(String(localized: "Keine lesbare Datei."))
     }
 
     static func fields(in lines: [Line]) -> [PersonField: String] {
+        reading(in: lines)?.fields ?? [:]
+    }
+
+    private static func reading(in lines: [Line]) -> (side: ECardSide, fields: [PersonField: String])? {
         let backLabels = Set(lines.compactMap { Cell(label: $0.key) })
         if lines.contains(where: { $0.key.contains("europaische krankenversicherungskarte") })
             || (backLabels.contains(.personalNumber) && backLabels.contains(.cardNumber) && backLabels.contains(.institution)) {
-            return backFields(lines)
+            let fields = backFields(lines)
+            // An Austrian reverse with masked fields is still a photo of the second side.
+            guard !fields.isEmpty || (lines.contains { $0.key == "at" } && backLabels.contains(.personalNumber) && backLabels.contains(.cardNumber)) else { return nil }
+            return (.back, fields)
         }
-        return frontFields(lines)
+        let fields = frontFields(lines)
+        return fields.isEmpty ? nil : (.front, fields)
     }
 
     // The EKVK labels 3–9 delimit their respective cells. Labels 8 and 9 only

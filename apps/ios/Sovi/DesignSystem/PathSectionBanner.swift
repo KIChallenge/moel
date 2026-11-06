@@ -25,7 +25,7 @@ struct PathOverviewStrip: View {
         .padding(.horizontal, 18).padding(.vertical, 6)
     }
 
-    private var appointmentCount: some View { count(appointments, symbol: "calendar", color: Color(hex: 0x008E5C), label: "Termine") }
+    private var appointmentCount: some View { count(appointments, symbol: "calendar", color: SoviTheme.accent, label: "Termine") }
     private var documentCount: some View { count(documents, symbol: "doc.text.fill", color: Color(hex: 0xA263D4), label: "Dokumente") }
     private var vaccinationCount: some View { count(vaccinations, symbol: "syringe.fill", color: Color(hex: 0x129BDC), label: "Impfungen") }
     private var taskCount: some View { count(tasks, symbol: "checklist", color: Color(hex: 0xB77D00), label: "Offene Aufgaben") }

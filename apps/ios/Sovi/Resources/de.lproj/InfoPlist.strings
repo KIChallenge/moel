@@ -1,2 +1,4 @@
-"NSLocationWhenInUseUsageDescription" = "Sovi nutzt deinen Standort nur auf deinen Wunsch für die Suche nach Anlaufstellen. Er geht an den Sovi-Server, nicht an OpenAI.";
-"NSCameraUsageDescription" = "Sovi nutzt die Kamera, um mit deiner Zustimmung Angaben von deiner e-card auf diesem Gerät zu lesen.";
+"NSLocationWhenInUseUsageDescription" = "Mit deinem Standort findet Sovi Anlaufstellen in deiner Nähe.";
+"NSCameraUsageDescription" = "Fotografiere beide Seiten deiner e-card für dein Profil.";
+"NSMicrophoneUsageDescription" = "Diktiere eine Nachricht an Sovi.";
+"NSSpeechRecognitionUsageDescription" = "Sovi wandelt dein Diktat auf diesem Gerät in Text um.";

@@ -2,12 +2,37 @@ import SwiftUI
 import MapKit
 import UniformTypeIdentifiers
 
+struct FirstChatChoiceY: PreferenceKey {
+    static var defaultValue: CGFloat? { nil }
+    static func reduce(value: inout CGFloat?, nextValue: () -> CGFloat?) { value = nextValue() ?? value }
+}
+
+extension View {
+    func firstChatChoice(_ first: Bool) -> some View {
+        background {
+            if first {
+                GeometryReader { geometry in
+                    Color.clear.preference(key: FirstChatChoiceY.self, value: geometry.frame(in: .named("guided.transcript")).minY)
+                }
+            }
+        }
+    }
+}
+
 struct DemoScenarioChat: View {
     let scenario: DemoScenario
+    var restoredTurnCount: Int? = nil
     @Environment(SoviStore.self) private var store
     @Environment(DeviceServices.self) private var device
     @Environment(LiveChatController.self) private var chat
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var textSize
+    @State private var delivery = ChatDelivery()
+    @State private var transcriptHeight = 0
+    @State private var viewportHeight: CGFloat = 0
+    @State private var firstChoiceY: CGFloat?
+    @State private var scrollPosition = ScrollPosition(edge: .bottom)
     @State private var text = ""
     @FocusState private var composerFocused: Bool
     @State private var error: String?
@@ -19,6 +44,29 @@ struct DemoScenarioChat: View {
     @State private var importTask: Task<Void, Never>?
     private var language: ChatLanguage { progress?.replyLanguage ?? ChatLanguage(rawValue: chat.responseLanguage) ?? .app }
     private var progress: DemoScenarioProgress? { store.state.demoScenarios?[scenario.rawValue] }
+    private var preparationPrompt: String? {
+        guard let progress, let prompt = progress.preparation?.nextQuestion(for: progress)?.text,
+              prompt != progress.history.last?.text else { return nil }
+        return prompt
+    }
+    private var timeline: ChatTimeline {
+        var turns = (progress?.history ?? []).map(ChatTurnKey.init)
+        if let preparationPrompt { turns.append(ChatTurnKey(preparationPrompt, isUser: false)) }
+        return ChatTimeline(turns: turns)
+    }
+    private var writingID: String? { delivery.writingID(timeline) }
+    private var awaitingReply: Bool { delivery.expanding != nil || delivery.isTyping(timeline) }
+    private var questionVisible: Bool { timeline.turns.last.map { delivery.visible.contains($0.id) } == true && !awaitingReply }
+    private var scrollTarget: String? {
+        if let incoming = writingID ?? delivery.expanding { return incoming }
+        if questionVisible, !textSize.isAccessibilitySize, let progress {
+            if let question = progress.preparation?.nextQuestion(for: progress), let first = question.choices.first {
+                return "case.answer.\(question.key).\(first.0)"
+            }
+            if !progress.finished && !progress.choices.isEmpty { return "scenario.choice.0" }
+        }
+        return timeline.turns.last(where: { delivery.visible.contains($0.id) })?.id
+    }
     var body: some View {
         VStack(spacing: 0) {
             HStack {
@@ -31,11 +79,17 @@ struct DemoScenarioChat: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        ForEach(progress?.history ?? []) { turn in
-                            SoviChatBubble(text: turn.displayText, isUser: turn.role == "user", read: turn.role == "assistant" ? { device.speak(turn.displayText, enabled: true) } : nil)
-                                .id(turn.id)
+                        ForEach((progress?.history ?? []).filter { delivery.displays($0.id.uuidString, writingID: writingID) }) { turn in
+                            SoviChatBubble(text: turn.displayText, isUser: turn.role == "user", isWriting: !delivery.visible.contains(turn.id.uuidString),
+                                           language: language.rawValue, read: turn.role == "assistant" ? { device.speak(turn.displayText, enabled: true) } : nil)
+                                .id(turn.id).transition(.chatMessage)
                         }
-                        if let progress {
+                        if let preparationPrompt, delivery.displays(preparationPrompt, writingID: writingID) {
+                            SoviChatBubble(text: preparationPrompt, isUser: false, isWriting: !delivery.visible.contains(preparationPrompt), language: language.rawValue,
+                                           read: { device.speak(preparationPrompt, enabled: true) })
+                                .id(preparationPrompt).transition(.chatMessage)
+                        }
+                        if questionVisible, let progress {
                             if progress.finished {
                                 preparation(progress)
                                 if !(scenario == .care && progress.preparation?.nextQuestion(for: progress) != nil) {
@@ -68,21 +122,22 @@ struct DemoScenarioChat: View {
                                 ForEach(progress.sources, id: \.1) { source in
                                     if let url = URL(string: source.1) { Link(source.0, destination: url).frame(minHeight: 44) }
                                 }
-                                Text("Quellenstand: 05.11.2026. Termine, Förderungen und Kosten sind nicht bestätigt.").font(.caption).foregroundStyle(SoviTheme.secondary)
                                 }
                             } else {
                                 if scenario == .care && progress.answers.count == 1 && chat.shareLocation {
-                                    Button("Für sie an meinem aktuellen Standort suchen") {
+                                    Button(language.text("Such bitte in meiner Nähe")) {
                                         locating = true
                                         Task { @MainActor in
                                             if let place = await chat.refreshLocalServiceArea() { answer(place) }
-                                            else { error = progress.replyLanguage.text("Kein aktueller Standort verfügbar. Du kannst einen Ort im Chat nennen.") }
+                                            else { error = progress.replyLanguage.text("Ich finde deinen Standort gerade nicht. In welchem Ort soll ich suchen?") }
                                             locating = false
                                         }
                                     }.frame(minHeight: 44).disabled(locating)
                                 }
                                 ForEach(Array(progress.choices.enumerated()), id: \.offset) { index, choice in
-                                    Button(choice) { answer(choice) }.buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("scenario.choice.\(index)")
+                                    Button(choice) { answer(choice) }.buttonStyle(SheetPrimaryButtonStyle(tone: .blue)).accessibilityIdentifier("scenario.choice.\(index)")
+                                        .id("scenario.choice.\(index)")
+                                        .firstChatChoice(index == 0)
                                 }
                                 if scenario == .hospital && progress.answers.isEmpty {
                                     Button("Brief importieren") { importsLetter = true }.frame(minHeight: 44).accessibilityIdentifier("case.import")
@@ -95,13 +150,22 @@ struct DemoScenarioChat: View {
                         if let error { Text(error).foregroundStyle(.red).font(.subheadline) }
                         Color.clear.frame(height: 1).id("end")
                     }.padding(20).frame(maxWidth: 620).frame(maxWidth: .infinity)
+                        .coordinateSpace(name: "guided.transcript")
+                        .onGeometryChange(for: Int.self, of: { Int($0.size.height.rounded()) }) { transcriptHeight = $0 }
                 }.scrollDismissesKeyboard(.interactively)
-                    .task(id: progress?.history.last?.id) {
-                        // Wait for the new bubble to enter layout; show its beginning,
-                        // rather than skipping over it to the end of a long checklist.
+                    .scrollPosition($scrollPosition)
+                    .onPreferenceChange(FirstChatChoiceY.self) { firstChoiceY = $0 }
+                    .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { viewportHeight = $0 }
+                    .task(id: "\(scrollTarget ?? "")-\(transcriptHeight)-\(Int(firstChoiceY ?? -1))-\(Int(viewportHeight))") {
                         await Task.yield()
-                        guard !Task.isCancelled, let id = progress?.history.last?.id else { return }
-                        proxy.scrollTo(id, anchor: .top)
+                        guard !Task.isCancelled, let id = scrollTarget else { return }
+                        if id.hasPrefix("case.answer.") || id.hasPrefix("scenario.choice.") {
+                            // Keep the question above its first answer in the compact sheet.
+                            if let firstChoiceY { scrollPosition.scrollTo(y: max(0, firstChoiceY - viewportHeight * 0.40)) }
+                            else { proxy.scrollTo(id, anchor: .center) }
+                        } else if let message = UUID(uuidString: id) {
+                            proxy.scrollTo(message, anchor: awaitingReply ? .bottom : .top)
+                        } else { proxy.scrollTo(id, anchor: awaitingReply ? .bottom : .top) }
                     }
             }
             if progress?.finished != true || progress.map({ $0.preparation?.nextQuestion(for: $0) != nil }) == true {
@@ -110,13 +174,21 @@ struct DemoScenarioChat: View {
                     TextField("Schreib Sovi …", text: $text, axis: .vertical).lineLimit(1...3).focused($composerFocused).padding(12)
                         .background(SoviTheme.softGreen, in: RoundedRectangle(cornerRadius: 18)).accessibilityIdentifier("scenario.composer")
                     Button { answer(text) } label: { Image(systemName: "arrow.up.circle.fill").font(.title).frame(width: 44, height: 44) }
-                        .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty).accessibilityLabel("Nachricht senden").accessibilityIdentifier("scenario.send")
+                        .disabled(!questionVisible || text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty).accessibilityLabel("Nachricht senden").accessibilityIdentifier("scenario.send")
                 }.padding(12)
             }
         }.background(SoviTheme.background).foregroundStyle(SoviTheme.ink)
             .environment(\.locale, Locale(identifier: language.rawValue))
             .environment(\.layoutDirection, progress?.replyLanguage == .ar ? .rightToLeft : .leftToRight)
-            .task { do { try store.perform(.startScenario(scenario, language: ChatLanguage(rawValue: chat.responseLanguage))) } catch { self.error = error.localizedDescription } }
+            .onAppear {
+                let turns = timeline.turns
+                if let restoredTurnCount, restoredTurnCount < (progress?.history.count ?? 0) {
+                    delivery.restore(Array(turns.prefix(restoredTurnCount)))
+                } else { delivery.restore(turns) }
+                do { try store.perform(.startScenario(scenario, language: ChatLanguage(rawValue: chat.responseLanguage))) }
+                catch { self.error = error.localizedDescription }
+            }
+            .task(id: timeline) { await delivery.present(timeline, reduceMotion: reduceMotion) }
             .onDisappear { device.stopAudio(); importTask?.cancel() }
             .sheet(isPresented: $showsForms) { FormLibrarySheet(suggestedFormID: progress?.suggestedForm, requiresPersonSelection: scenario == .care, caseScenario: scenario).environment(\.locale, Locale(identifier: language.rawValue)) }
             .sheet(isPresented: $showsDocuments) { DocumentReviewSheet(onChooseForCase: { id in
@@ -134,6 +206,7 @@ struct DemoScenarioChat: View {
         }
     }
     private func answer(_ text: String) {
+        guard questionVisible else { return }
         composerFocused = false
         if scenario == .hospital, progress?.answers.isEmpty == true, text == progress?.choices.first {
             do { useLetter(try CaseDocumentImport.sampleURL()) } catch { self.error = error.localizedDescription }
@@ -201,9 +274,8 @@ private struct NearbyServiceSheet: View {
     @State private var searchTask: Task<Void, Never>?
     var body: some View {
         SheetPage(title: "Anlaufstellen") {
-            Text("Kontakttreffer aus Apple Karten. Leistungen, Eignung, Termine und Versicherungsverträge bitte direkt bestätigen.").font(.caption)
             TextField("Anderer Ort oder Postleitzahl", text: $place).textFieldStyle(.roundedBorder)
-            Button(place.isEmpty ? "An meinem Standort suchen" : "An diesem Ort suchen") { find() }.buttonStyle(SheetPrimaryButtonStyle()).disabled(busy)
+            Button(place.isEmpty ? "An meinem Standort suchen" : "An diesem Ort suchen") { find() }.buttonStyle(SheetPrimaryButtonStyle(tone: .blue)).disabled(busy)
             if busy { ProgressView() }
             if let notice { Text(notice).font(.subheadline) }
             if !items.isEmpty {

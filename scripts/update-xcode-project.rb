@@ -39,6 +39,7 @@ info_strings = resources.new_variant_group('InfoPlist.strings')
 app.resources_build_phase.add_file_reference(info_strings)
 config_group = project.main_group.new_group('Configuration', 'Configuration')
 config_group.new_file('Base.xcconfig')
+config_group.new_file('Info.plist')
 config_group.new_file('Local.xcconfig.example')
 ['Debug', 'Release'].each do |name|
   ref = config_group.new_file("#{name}.xcconfig")
@@ -69,6 +70,10 @@ ui = project.new_target(:ui_test_bundle, 'SoviUITests', :ios, '18.0', nil, :swif
     end
   end
 end
+ecard_fixtures = project.main_group['SoviTests'].new_file('../SoviUITests/Fixtures')
+ecard_fixtures.name = 'e-card fixtures'
+ecard_fixtures.last_known_file_type = 'folder'
+unit.resources_build_phase.add_file_reference(ecard_fixtures)
 project.build_configurations.each do |config|
   config.build_settings['SWIFT_VERSION'] = '6.0'
   config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '18.0'

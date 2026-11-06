@@ -63,17 +63,17 @@ fileprivate enum PathSymbolTone {
 
     var light: (surface: UInt32, ink: UInt32, base: UInt32) {
         switch self {
-        case .green: (0xDDEFE5, 0x246A4E, 0xA5CCB6)
-        case .gold: (0xFAEDCE, 0x876529, 0xDBCA9C)
-        case .coral: (0xF8E5DF, 0xA05C4B, 0xDEB8AA)
-        case .blue: (0xE2EDF5, 0x436D89, 0xB3CBDC)
-        case .lavender: (0xEDE7F6, 0x715B94, 0xC9BADD)
+        case .green: (0xD7F2B4, 0x3F7D00, 0xA4CB86)
+        case .gold: (0xFFF1CE, 0x806016, 0xDDC57E)
+        case .coral: (0xF1DEDA, 0x955747, 0xD5B3A9)
+        case .blue: (0xE7F1FB, 0x3A6789, 0xB4CEE4)
+        case .lavender: (0xE5D8F4, 0x715393, 0xC1A9DB)
         }
     }
 
     var dark: (surface: UInt32, ink: UInt32, base: UInt32) {
         switch self {
-        case .green: (0x284E3D, 0xB0E1C6, 0x1A382A)
+        case .green: (0x344D23, 0xD7F2B4, 0x243619)
         case .gold: (0x51452D, 0xF1D797, 0x352D1D)
         case .coral: (0x563C36, 0xF1C2B2, 0x3A2723)
         case .blue: (0x2D4657, 0xBDDDED, 0x1C2F3C)
@@ -138,7 +138,8 @@ struct PathNodeButton: View {
     var buttonIdentifier: String?
     var labelTitle: String?
     var selectionAnchor = false
-    var activeEntryIndex: Int?
+    var entryProgress: [PathProgress] = []
+    var showsCaption = true
     var action: () -> Void
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.colorSchemeContrast) private var contrast
@@ -159,12 +160,10 @@ struct PathNodeButton: View {
     private var icon: Color {
         contrast == .increased && (progress == .neutral || progress == .done) ? SoviTheme.ink : palette.ink
     }
-    private var halo: Color {
-        progress == .missed ? icon : isCurrent ? SoviTheme.accent : icon
-    }
-
     var body: some View {
-        if textSize.isAccessibilitySize {
+        if !showsCaption {
+            diskButton
+        } else if textSize.isAccessibilitySize {
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: 18) {
                     controlColumn.fixedSize(horizontal: true, vertical: false)
@@ -219,8 +218,7 @@ struct PathNodeButton: View {
                 }
         }
         .buttonStyle(PathNodePressStyle(base: palette.base, diameter: max(faceWidth, faceHeight + 8) + 24,
-                                        count: entryCount, haloColor: halo, emphasized: isCurrent || selectionAnchor,
-                                        activeEntryIndex: activeEntryIndex))
+                                        segments: entryProgress.isEmpty ? [progress] : entryProgress))
         .anchorPreference(key: PathSelectedButtonBounds.self, value: .bounds) { selectionAnchor ? $0 : nil }
         .accessibilityLabel(Text(labelTitle ?? node.displayTitle))
         .accessibilityValue(Text(accessibilitySummary))
@@ -250,9 +248,7 @@ struct PathNodeButton: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityHidden(true)
         }
-        if progress == .missed {
-            Text("Verpasst").font(.caption2.weight(.semibold)).foregroundStyle(icon).accessibilityHidden(true)
-        }
+
     }
 
     private func formattedDate(_ date: Date, abbreviated: Bool = false) -> String {
@@ -274,66 +270,60 @@ struct PathNodeButton: View {
         if entryCount > 1 && !statusText.contains(String(entryCount)) {
             parts.append(String(localized: "\(entryCount) Einträge"))
         }
-        if !statusText.isEmpty { parts.append(statusText) }
+        if entryProgress.count > 1 {
+            let completed = entryProgress.filter { $0 == .done }.count
+            parts.append(String(localized: "\(completed) von \(entryProgress.count) erledigt"))
+        } else if !statusText.isEmpty && statusText != progress.title { parts.append(statusText) }
         return parts.joined(separator: ", ")
     }
 }
 
-/// The accented segment locates an entry in its day; it never implies that a visit was attended.
+/// Each arc describes the corresponding entry, in the same order as the day sheet.
 private struct DayEntryHalo: View {
-    let count: Int
-    let color: Color
+    let segments: [PathProgress]
     let diameter: CGFloat
-    let activeEntryIndex: Int?
     @Environment(\.colorSchemeContrast) private var contrast
 
+    private func tint(_ progress: PathProgress) -> Color {
+        switch progress {
+        case .done: SoviTheme.accent
+        case .missed: SoviTheme.missed
+        default: contrast == .increased ? SoviTheme.secondary : SoviTheme.border
+        }
+    }
+
     var body: some View {
+        let count = segments.count
         let thickness = min(7, diameter * .pi / CGFloat(count) * 0.38)
         let ring = Circle().inset(by: thickness / 2)
-        let neutral = contrast == .increased ? SoviTheme.secondary : SoviTheme.border
-        let halfGap = min(0.23 / CGFloat(count), (thickness + 3) / (2 * .pi * (diameter - thickness)))
+        let halfGap = count == 1 ? 0 : min(0.23 / CGFloat(count), (thickness + 3) / (2 * .pi * (diameter - thickness)))
         ZStack {
-            ring.stroke(neutral.opacity(0.25), lineWidth: thickness)
-            if count == 1 {
-                ring.stroke(color, lineWidth: thickness)
-            } else {
-                ForEach(0..<count, id: \.self) { index in
-                    ring.trim(from: CGFloat(index) / CGFloat(count) + halfGap,
-                              to: CGFloat(index + 1) / CGFloat(count) - halfGap)
-                        .stroke(index == activeEntryIndex ? color : neutral, style: StrokeStyle(lineWidth: thickness, lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-                }
+            ForEach(segments.indices, id: \.self) { index in
+                ring.trim(from: CGFloat(index) / CGFloat(count) + halfGap,
+                          to: CGFloat(index + 1) / CGFloat(count) - halfGap)
+                    .stroke(tint(segments[index]), style: StrokeStyle(lineWidth: thickness, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
             }
         }
-        .frame(width: diameter, height: diameter)
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
+        .frame(width: diameter, height: diameter).allowsHitTesting(false).accessibilityHidden(true)
     }
 }
 
 private struct PathNodePressStyle: ButtonStyle {
     let base: Color
     let diameter: CGFloat
-    let count: Int
-    let haloColor: Color
-    let emphasized: Bool
-    let activeEntryIndex: Int?
+    let segments: [PathProgress]
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func makeBody(configuration: Configuration) -> some View {
         ZStack {
-            if count > 1 || emphasized {
-                DayEntryHalo(count: max(1, count), color: haloColor, diameter: diameter,
-                             activeEntryIndex: activeEntryIndex ?? (emphasized ? 0 : nil))
-            }
+            DayEntryHalo(segments: segments, diameter: diameter)
             configuration.label
                 .offset(y: configuration.isPressed ? 6 : 0)
                 .background(base, in: Ellipse().offset(y: 8))
                 .offset(y: -4)
                 .animation(reduceMotion ? nil : .easeOut(duration: 0.10), value: configuration.isPressed)
-        }
-        .frame(width: diameter, height: diameter)
-        .contentShape(Circle())
+        }.frame(width: diameter, height: diameter).contentShape(Circle())
     }
 }
 

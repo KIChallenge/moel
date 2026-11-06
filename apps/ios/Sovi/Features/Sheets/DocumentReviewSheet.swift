@@ -16,6 +16,7 @@ struct DocumentReviewSheet: View {
     @State private var showsPDF = false
     @State private var error: String?
     @State private var showsCase = false
+    @State private var restoredHospitalTurns = 0
 
     private var selectedDocument: SourceDocument? {
         selectedID.flatMap { store.document(id: $0) }
@@ -44,7 +45,7 @@ struct DocumentReviewSheet: View {
         .sheet(isPresented: $showsPDF) {
             if let document = selectedDocument { CaseSourcePDFSheet(document: document) }
         }
-        .sheet(isPresented: $showsCase) { DemoScenarioChat(scenario: .hospital) }
+        .sheet(isPresented: $showsCase) { DemoScenarioChat(scenario: .hospital, restoredTurnCount: restoredHospitalTurns) }
         .sheetError($error)
     }
 
@@ -108,7 +109,11 @@ struct DocumentReviewSheet: View {
                 Button("Empfehlungen für meine Nachsorge prüfen") {
                     if let onChooseForCase { onChooseForCase(document.id) }
                     else {
-                        do { try store.perform(.useCaseDocument(document.id)); showsCase = true }
+                        do {
+                            restoredHospitalTurns = store.state.demoScenarios?[DemoScenario.hospital.rawValue]?.history.count ?? 0
+                            try store.perform(.useCaseDocument(document.id))
+                            showsCase = true
+                        }
                         catch { self.error = error.localizedDescription }
                     }
                 }.buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("documents.case")

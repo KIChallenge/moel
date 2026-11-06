@@ -223,6 +223,7 @@ struct ConversationTurn: Codable, Equatable, Identifiable, Sendable {
     var attachmentDocumentID: UUID?
     var attachmentEventIDs: [UUID]?
     var replyDocumentID: UUID?
+    var eCardPhoto: WelcomeECardPhoto?
 }
 
 struct AppState: Codable, Equatable, Sendable {
@@ -268,9 +269,9 @@ enum AppCommand {
     case answerScenario(DemoScenario, String)
     case saveScenarioSteps(DemoScenario)
     case startWelcome
-    case answerWelcome(String?, finish: Bool = false)
+    case answerWelcome(String?, finish: Bool = false, permissionUnavailable: Bool = false)
     case answerWelcomeAddress(WelcomeAddress)
-    case confirmWelcomeECard([PersonField: String])
+    case welcomeECard(WelcomeECardAction)
     case savePerson(FormPerson)
     case saveFormDraft(String, SavedFormDraft)
     case setTask(UUID, TaskStatus)

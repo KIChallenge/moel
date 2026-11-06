@@ -16,10 +16,11 @@ struct CasePreparationView: View {
         VStack(alignment: .leading, spacing: 16) {
             if progress.scenario == .hospital { recommendations }
             if let question = prep.nextQuestion(for: progress) {
-                if progress.history.last?.text != question.text { SoviChatBubble(text: question.text, isUser: false) }
                 ForEach(question.choices, id: \.0) { choice in
                     Button(choice.1) { perform(.answerCaseQuestion(question.key, choice.0)) }
-                        .buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("case.answer.\(question.key).\(choice.0)")
+                        .buttonStyle(SheetPrimaryButtonStyle(tone: .blue)).accessibilityIdentifier("case.answer.\(question.key).\(choice.0)")
+                        .id("case.answer.\(question.key).\(choice.0)")
+                        .firstChatChoice(choice.0 == question.choices.first?.0)
                 }
             } else if progress.finished {
                 authority
@@ -27,7 +28,6 @@ struct CasePreparationView: View {
                 applicant
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Unterlagen und Prüfung").font(.headline)
-                    Text("Markierungen bedeuten: von dir geprüft oder bereitgelegt. Sie bestätigen keine behördliche Vollständigkeit.").font(.caption)
                     ForEach(prep.documentItems(for: progress)) { item in
                         Toggle(isOn: Binding(get: { prep.checkedDocuments.contains(item.id) }, set: { perform(.setCaseDocument(progress.scenario, item.id, $0)) })) {
                             VStack(alignment: .leading, spacing: 4) {
@@ -36,15 +36,18 @@ struct CasePreparationView: View {
                             }
                         }.accessibilityIdentifier("case.document.\(item.id)")
                     }
-                    if prep.answers["reports"] == "no" { Text("Keine Befunde angegeben. Du kannst vorhandene Unterlagen später ergänzen; Sovi erstellt keine medizinischen Angaben.").font(.caption) }
                 }
                 if !prep.formIDs(for: progress).isEmpty {
-                    Button("Fallbezogenen Formularentwurf öffnen", action: openForms).buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("case.forms")
+                    Button("Fallbezogenen Formularentwurf öffnen", action: openForms).buttonStyle(SheetPrimaryButtonStyle(tone: .purple)).accessibilityIdentifier("case.forms")
                 }
                 let missing = store.state.missingCaseItems(progress.scenario)
-                Text(missing.isEmpty ? progress.replyLanguage.localized("Vorbereitungsschritte geprüft. Unterschrift und Einreichung erfolgen durch die zuständige Person.") : progress.replyLanguage.localized("Noch offen: \(missing.count) Punkte"))
-                    .font(.subheadline.weight(.semibold)).accessibilityIdentifier("case.missing")
-                DisclosureGroup("Was fehlt noch?") { ForEach(Array(missing.enumerated()), id: \.offset) { _, item in Text("• " + item).font(.subheadline).padding(.vertical, 3) } }
+                if missing.isEmpty {
+                    Text("Unterlagen vorbereitet").accessibilityIdentifier("case.missing")
+                } else {
+                    DisclosureGroup(progress.replyLanguage.localized("Noch offen: \(missing.count) Punkte")) {
+                        ForEach(Array(missing.enumerated()), id: \.offset) { _, item in Text(item).font(.subheadline).padding(.vertical, 3) }
+                    }.accessibilityIdentifier("case.missing")
+                }
             }
         }.sheet(item: $editingPerson, onDismiss: {
             if let id = editedPersonID, store.state.formPeople?.contains(where: { $0.id == id }) == true { perform(.setCaseApplicant(progress.scenario, id)) }
@@ -56,7 +59,6 @@ struct CasePreparationView: View {
     private var recommendations: some View {
         VStack(alignment: .leading, spacing: 12) {
             if prep.sourceDocumentID == nil {
-                Text("Verbinde zuerst den Originalbrief. Ein frei eingegebener Satz ersetzt keine Dokumentquelle.").font(.subheadline)
                 Button("Brief auswählen oder importieren", action: openDocuments).frame(minHeight: 44)
             }
             ForEach(prep.recommendations) { recommendation in
@@ -81,9 +83,7 @@ struct CasePreparationView: View {
         if progress.scenario == .care {
             if progress.answers.first != "home" {
                 Text(prep.careAuthority.map { progress.replyLanguage.localized("Pflegegeld: \($0)") } ?? progress.replyLanguage.localized("Pflegegeld: zuständige Stelle noch offen")).font(.headline)
-                Text("Diese Zuordnung folgt deinen Angaben zum üblichen Fall. Bei Sonderfällen die Zuständigkeit direkt prüfen. Es wird kein Anspruch festgestellt.").font(.caption)
                 if ["svs", "bvaeb"].contains(prep.answers["payer"] ?? "") {
-                    Text("Das mitgelieferte Pflegegeldformular gehört zur PV. Für diesen Träger bitte das passende offizielle Formular verwenden.").font(.subheadline)
                     Link("Offizielle Pflegegeldformulare", destination: URL(string: "https://www.oesterreich.gv.at/de/formsearch/form/265")!).frame(minHeight: 44)
                 }
                 Link("Quelle zur Zuständigkeit", destination: URL(string: CasePreparation.authoritySource)!).frame(minHeight: 44)
@@ -106,7 +106,7 @@ struct CasePreparationView: View {
             }.frame(minHeight: 44)
             if let person {
                 let missing = CasePreparation.missingProfileFields(person, language: progress.replyLanguage)
-                Text(missing.isEmpty ? progress.replyLanguage.localized("Allgemeine Personendaten vorhanden. Bitte im Formular prüfen.") : progress.replyLanguage.localized("Noch ergänzen: \(missing.joined(separator: ", "))")).font(.caption)
+                if !missing.isEmpty { Text(progress.replyLanguage.localized("Noch ergänzen: \(missing.joined(separator: ", "))")).font(.caption) }
             }
         }
     }

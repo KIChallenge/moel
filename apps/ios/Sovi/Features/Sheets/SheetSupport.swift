@@ -57,17 +57,37 @@ struct SheetSection<Content: View>: View {
     }
 }
 
+enum SoviButtonTone {
+    case green, blue, purple, coral, quiet
+
+    var surface: Color {
+        switch self {
+        case .green: SoviTheme.action
+        case .blue: SoviTheme.sky
+        case .purple: SoviTheme.lilac
+        case .coral: SoviTheme.coral
+        case .quiet: SoviTheme.bubble
+        }
+    }
+}
+
 struct SheetPrimaryButtonStyle: ButtonStyle {
+    var tone: SoviButtonTone = .green
+    @Environment(\.isEnabled) private var enabled
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.headline)
+            .font(.system(.headline, design: .rounded, weight: .bold))
             .multilineTextAlignment(.center)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
-            .frame(maxWidth: .infinity, minHeight: 52)
-            .foregroundStyle(SoviTheme.background)
-            .background(SoviTheme.accent, in: RoundedRectangle(cornerRadius: 20))
-            .opacity(configuration.isPressed ? 0.75 : 1)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 14).padding(.vertical, 12)
+            .frame(maxWidth: .infinity, minHeight: 48)
+            .foregroundStyle(enabled ? SoviTheme.ink : SoviTheme.secondary)
+            .background(enabled ? tone.surface : SoviTheme.bubble, in: RoundedRectangle(cornerRadius: 16))
+            .overlay { RoundedRectangle(cornerRadius: 16).strokeBorder(SoviTheme.ink.opacity(0.15)).allowsHitTesting(false) }
+            .shadow(color: SoviTheme.ink.opacity(enabled ? 0.26 : 0.1), radius: 0, y: configuration.isPressed ? 0 : 3)
+            .offset(y: configuration.isPressed ? 2 : 0)
+            .contentShape(Rectangle())
     }
 }
 

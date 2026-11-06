@@ -18,7 +18,6 @@ struct FormLibrarySheet: View {
 
     var body: some View {
         SheetPage(title: "Profile und Formulare", closeIdentifier: "forms.close") {
-            Text("Gespeicherte Angaben werden nur auf diesem Gerät für Entwürfe verwendet. Wähle zuerst die Person, für die das Formular bestimmt ist.").font(.subheadline)
             Picker("Person im Antrag", selection: $selectedPersonID) {
                 Text("Person auswählen").tag(nil as UUID?)
                 ForEach(store.state.formPeople ?? []) { person in Text(person.displayName).tag(Optional(person.id)) }
@@ -54,7 +53,6 @@ struct FormLibrarySheet: View {
                     }.accessibilityIdentifier("forms.open.\(form.id)")
                 }
             }
-            if selectedPerson == nil { Text("Lege ein Profil an oder wähle eine Person. Unbekannte Angaben dürfen leer bleiben.") }
         }.task {
             do {
                 forms = try PrototypeForm.load()
@@ -111,7 +109,6 @@ struct FormPersonEditor: View {
         NavigationStack {
             Form {
                 Section {
-                    Text("Deine Angaben bleiben auf diesem Gerät und werden nicht an den Online-Chat gesendet.").font(.caption)
                     TextField("Profilbezeichnung (z. B. Mutter)", text: $person.label)
                 }
                 if let source {
@@ -165,9 +162,10 @@ struct PrototypeFormEditor: View {
                 Text(person.displayName).font(.title2.bold())
                 if let caseScenario {
                     Text(caseScenario.title).font(.subheadline)
-                    Text("Dieser Entwurf wird mit deinem Vorgang verbunden. Gespeichert heißt noch nicht unterschrieben oder eingereicht.").font(.caption)
                 }
-                Text(form.displayNote).font(.subheadline)
+                if form.id == "kur-reha" || form.id == "reha-unfall" {
+                    Text("Den medizinischen Teil füllt die behandelnde Stelle aus.").font(.caption)
+                }
                 if form.id == "pflegegeld" {
                     Picker("Antragsart prüfen", selection: $purpose) {
                         Text("Noch offen").tag("")
@@ -175,8 +173,8 @@ struct PrototypeFormEditor: View {
                         Text("Erhöhung").tag("02")
                         Text("Weitergewährung nach Befristung").tag("03")
                     }.accessibilityIdentifier("form.purpose")
+                    Text("Antragsart im PDF ankreuzen.").font(.caption)
                 }
-                Text("Die Antragsart bleibt hier zur Prüfung gespeichert. Bitte das passende Kästchen im PDF selbst ankreuzen. Auswahlfelder, Erklärungen und Unterschriften bleiben im Export offen.").font(.caption)
                 ForEach(0..<form.pages, id: \.self) { page in
                     let fields = form.fields.filter { $0.page == page }
                     if !fields.isEmpty {
@@ -192,12 +190,11 @@ struct PrototypeFormEditor: View {
                     }
                 }
                 Button("PDF prüfen") { do { preview = try form.document(values: values); showsPreview = true } catch { self.error = error.localizedDescription } }
-                    .buttonStyle(SheetPrimaryButtonStyle()).accessibilityIdentifier("form.preview")
+                    .buttonStyle(SheetPrimaryButtonStyle(tone: .purple)).accessibilityIdentifier("form.preview")
                 Button("PDF-Entwurf teilen") {
                     guard save() else { return }
                     do { shared = SharedFile(url: try form.export(values: values)) } catch { self.error = error.localizedDescription }
                 }.frame(minHeight: 44).accessibilityIdentifier("form.export")
-                if saved { Label("Gespeichert", systemImage: "checkmark.circle") }
             }.padding(24).frame(maxWidth: 640).frame(maxWidth: .infinity)
         }.background(SoviTheme.background).foregroundStyle(SoviTheme.ink).navigationTitle(form.displayTitle).navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -259,5 +256,4 @@ private struct FormPDFPreview: UIViewRepresentable {
 
 extension PrototypeForm {
     var displayTitle: String { NSLocalizedString(title, comment: "Bundled form title") }
-    var displayNote: String { NSLocalizedString(note, comment: "Bundled form scope") }
 }

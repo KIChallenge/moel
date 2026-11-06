@@ -311,11 +311,11 @@ final class SoviStore {
                 welcome.history = [ConversationTurn(role: "assistant", text: welcome.question, date: now)]
                 updated.welcome = welcome
 
-            case .answerWelcome(let answer, let finish):
+            case .answerWelcome(let answer, let finish, let permissionUnavailable):
                 guard var welcome = updated.welcome, !welcome.completed,
                       let personIndex = updated.formPeople?.firstIndex(where: { $0.id == welcome.personID }) else { throw SoviError.invalidAction }
                 var person = updated.formPeople![personIndex]
-                try welcome.recordAnswer(answer, finish: finish, person: &person, now: now)
+                try welcome.recordAnswer(answer, finish: finish, permissionUnavailable: permissionUnavailable, person: &person, now: now)
                 updated.formPeople?[personIndex] = person
                 updated.welcome = welcome
 
@@ -327,11 +327,11 @@ final class SoviStore {
                 updated.formPeople?[personIndex] = person
                 updated.welcome = welcome
 
-            case .confirmWelcomeECard(let values):
+            case .welcomeECard(let action):
                 guard var welcome = updated.welcome,
                       let personIndex = updated.formPeople?.firstIndex(where: { $0.id == welcome.personID }),
                       var person = updated.formPeople?[personIndex] else { throw SoviError.invalidAction }
-                try welcome.confirmECard(values, person: &person, now: now)
+                try welcome.handleECard(action, person: &person, now: now)
                 updated.formPeople?[personIndex] = person
                 updated.welcome = welcome
 

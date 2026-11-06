@@ -38,6 +38,17 @@ final class LifePathTests: XCTestCase {
         XCTAssertEqual(day.actionBubbleTitle, String(localized: "Ansehen"))
     }
 
+    func testHaloKeepsIndependentOutcomesForEntriesOnOneDay() {
+        var information = PathNode(kind: .information, title: "Unterlagen")
+        var task = PathNode(kind: .task, title: "Rückruf")
+        let state = AppState()
+        XCTAssertEqual([information, task].map { $0.haloProgress(in: state, now: now) }, [.neutral, .pending])
+        information.informationRead = true
+        XCTAssertEqual([information, task].map { $0.haloProgress(in: state, now: now) }, [.done, .pending])
+        task.taskStatus = .completed
+        XCTAssertEqual([information, task].map { $0.haloProgress(in: state, now: now) }, [.done, .done])
+    }
+
     func testExplicitOutcomesPersistAndUnknownPastItemsStayPending() throws {
         let container = try SoviStore.makeContainer(inMemory: true)
         let store = try SoviStore(container: container, clock: { self.now })

@@ -109,9 +109,43 @@ final class LiveChatTests: XCTestCase {
         XCTAssertFalse(chat.busy)
         XCTAssertEqual(chat.failedMessage, "Help my mother")
         XCTAssertNil(chat.result)
-        try chat.deleteCredentials()
+        try chat.clearLocalData()
         XCTAssertFalse(chat.enabled)
         XCTAssertTrue(chat.messages.isEmpty)
         XCTAssertNil(chat.failedMessage)
+    }
+
+    func testManagedConnectionStartsImmediatelyAndSurvivesLocalDataReset() async throws {
+        let chat = LiveChatController(api: api(), testing: true, managedToken: String(repeating: "good", count: 10))
+        XCTAssertTrue(chat.enabled)
+        XCTAssertEqual(chat.responseLanguage, "auto")
+        XCTAssertFalse(chat.shareLocation)
+        chat.submit("I want to find a doctor")
+        for _ in 0..<100 { if !chat.busy { break }; try await Task.sleep(for: .milliseconds(10)) }
+        XCTAssertNil(chat.error)
+        XCTAssertEqual(chat.messages.map(\.role), ["user", "assistant"])
+        chat.submit("Daily support")
+        for _ in 0..<100 { if !chat.busy { break }; try await Task.sleep(for: .milliseconds(10)) }
+        XCTAssertEqual(chat.messages.count, 4, "Follow-ups preserve earlier turns.")
+        try chat.clearLocalData()
+        XCTAssertTrue(chat.enabled)
+        XCTAssertTrue(chat.messages.isEmpty)
+        XCTAssertFalse(chat.shareLocation)
+        chat.submit("Find a pharmacy")
+        for _ in 0..<100 { if !chat.busy { break }; try await Task.sleep(for: .milliseconds(10)) }
+        XCTAssertNil(chat.error)
+        XCTAssertNotNil(chat.currentResult)
+    }
+
+    func testRevokingLocationAlsoCancelsThePendingRequest() async throws {
+        let chat = LiveChatController(api: api(), testing: true, managedToken: String(repeating: "slow", count: 10))
+        chat.submit("Find a doctor")
+        await Task.yield()
+        XCTAssertTrue(chat.busy)
+        try chat.setLocationSharing(false)
+        XCTAssertFalse(chat.busy)
+        XCTAssertFalse(chat.shareLocation)
+        XCTAssertEqual(chat.failedMessage, "Find a doctor")
+        XCTAssertTrue(chat.messages.isEmpty)
     }
 }

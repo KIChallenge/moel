@@ -577,7 +577,6 @@
 "Postleitzahl" = "Postleitzahl";
 "Praxis nach Vorsorgeuntersuchung fragen" = "Praxis nach Vorsorgeuntersuchung fragen";
 "Profilbezeichnung (z. B. Mutter)" = "Profilbezeichnung (z. B. Mutter)";
-"Quellenstand: 05.11.2026. Termine, Förderungen und Kosten sind nicht bestätigt." = "Quellenstand: 05.11.2026. Termine, Förderungen und Kosten sind nicht bestätigt.";
 "Regionale Pflegeberatung kontaktieren" = "Regionale Pflegeberatung kontaktieren";
 "Reha-Antrag mit behandelnder Praxis vorbereiten" = "Reha-Antrag mit behandelnder Praxis vorbereiten";
 "Rehabilitation organisieren" = "Rehabilitation organisieren";
@@ -643,7 +642,6 @@
 
 "Anlaufstellen in meiner Nähe" = "Anlaufstellen in meiner Nähe";
 "Anlaufstellen" = "Anlaufstellen";
-"Kontakttreffer aus Apple Karten. Leistungen, Eignung, Termine und Versicherungsverträge bitte direkt bestätigen." = "Kontakttreffer aus Apple Karten. Leistungen, Eignung, Termine und Versicherungsverträge bitte direkt bestätigen.";
 "Anderer Ort oder Postleitzahl" = "Anderer Ort oder Postleitzahl";
 "An meinem Standort suchen" = "An meinem Standort suchen";
 "An diesem Ort suchen" = "An diesem Ort suchen";
@@ -756,7 +754,6 @@
 
 "Mehr" = "Mehr";
 
-"Du kannst auswählen oder selbst antworten." = "Du kannst auswählen oder selbst antworten.";
 
 "Der Zugangscode wird im Schlüsselbund dieses Geräts gespeichert. Trage hier nicht deinen OpenAI-Schlüssel ein." = "Der Zugangscode wird im Schlüsselbund dieses Geräts gespeichert. Trage hier nicht deinen OpenAI-Schlüssel ein.";
 
@@ -806,7 +803,6 @@
 "Straße Hausnummer, PLZ Ort" = "Straße Hausnummer, PLZ Ort";
 "Die Adresssuche ist gerade nicht verfügbar. Du kannst deine Adresse selbst eingeben: Straße Hausnummer, PLZ Ort." = "Die Adresssuche ist gerade nicht verfügbar. Du kannst deine Adresse selbst eingeben: Straße Hausnummer, PLZ Ort.";
 "Adressvorschläge von Apple Karten. Du kannst auch Straße Hausnummer, PLZ Ort eingeben." = "Adressvorschläge von Apple Karten. Du kannst auch Straße Hausnummer, PLZ Ort eingeben.";
-"Dein Standort wird für jede Suche neu abgefragt. Apple kann daraus einen Ortsnamen bestimmen. Im Online-Chat geht er an den Sovi-Server, nicht an OpenAI." = "Dein Standort wird für jede Suche neu abgefragt. Apple kann daraus einen Ortsnamen bestimmen. Im Online-Chat geht er an den Sovi-Server, nicht an OpenAI.";
 "Mitteilungen enthalten keine Gesundheitsdetails. Du kannst sie jederzeit ausschalten." = "Mitteilungen enthalten keine Gesundheitsdetails. Du kannst sie jederzeit ausschalten.";
 "Sovi hilft dir, passende Anlaufstellen zu finden, nächste Schritte zu planen und Formulare vorzubereiten." = "Sovi hilft dir, passende Anlaufstellen zu finden, nächste Schritte zu planen und Formulare vorzubereiten.";
 "Sovi stellt keine Diagnosen. Medizinische Fragen klärst du mit Fachpersonal. Termine, Anträge und Kostenübernahmen sind erst bestätigt, wenn die zuständige Stelle sie bestätigt." = "Sovi stellt keine Diagnosen. Medizinische Fragen klärst du mit Fachpersonal. Termine, Anträge und Kostenübernahmen sind erst bestätigt, wenn die zuständige Stelle sie bestätigt.";
@@ -817,7 +813,6 @@
 
 "Ohne Suche: Straße Hausnummer, PLZ Ort" = "Ohne Suche: Straße Hausnummer, PLZ Ort";
 
-"Vorschläge von Apple Karten · oder Adresse selbst eingeben" = "Vorschläge von Apple Karten · oder Adresse selbst eingeben";
 
 
 "Alle Einträge anzeigen" = "Alle Einträge anzeigen";
@@ -931,21 +926,75 @@
 "Eingeklappt" = "Eingeklappt";
 
 "e-card scannen" = "e-card scannen";
-"e-card einlesen" = "e-card einlesen";
-"Fotografiere eine Seite deiner e-card. Du kannst auch ein Foto auswählen. Sovi liest es nur auf diesem Gerät." = "Fotografiere eine Seite deiner e-card. Du kannst auch ein Foto auswählen. Sovi liest es nur auf diesem Gerät.";
 "Foto aufnehmen" = "Foto aufnehmen";
 "Foto auswählen" = "Foto auswählen";
 "Daten werden gelesen …" = "Daten werden gelesen …";
-"Prüfe die Angaben. Du kannst sie ändern oder ein Feld leeren." = "Prüfe die Angaben. Du kannst sie ändern oder ein Feld leeren.";
-"Weitere Kartenseite einlesen" = "Weitere Kartenseite einlesen";
 "Angaben übernehmen" = "Angaben übernehmen";
 "Manuell weiter" = "Manuell weiter";
 "Die Kamera ist nicht verfügbar. Du kannst ein Foto auswählen." = "Die Kamera ist nicht verfügbar. Du kannst ein Foto auswählen.";
 "Erlaube den Kamerazugriff in den Einstellungen oder wähle ein Foto aus." = "Erlaube den Kamerazugriff in den Einstellungen oder wähle ein Foto aus.";
-"Auf diesem Foto konnte ich keine neuen Angaben für die offenen Fragen lesen." = "Auf diesem Foto konnte ich keine neuen Angaben für die offenen Fragen lesen.";
 "Die Angaben auf der Karte passen nicht zu deinen bisherigen Antworten." = "Die Angaben auf der Karte passen nicht zu deinen bisherigen Antworten.";
-"Diese Aufnahmen lassen sich nicht sicher derselben Karte zuordnen." = "Diese Aufnahmen lassen sich nicht sicher derselben Karte zuordnen.";
-"Nur die neue Aufnahme verwenden" = "Nur die neue Aufnahme verwenden";
-"Bisherige Angaben behalten" = "Bisherige Angaben behalten";
 "Angaben von meiner e-card übernehmen" = "Angaben von meiner e-card übernehmen";
 "Sozialversicherungsnummer eingegeben" = "Sozialversicherungsnummer eingegeben";
+
+"Deine Daten" = "Deine Daten";
+"Profil" = "Profil";
+"Standort nicht mehr verwenden" = "Standort nicht mehr verwenden";
+"Berechtigungen verwalten" = "Berechtigungen verwalten";
+"Du kannst den Standort in den iPhone-Einstellungen erlauben." = "Du kannst den Standort in den iPhone-Einstellungen erlauben.";
+"Dein Profil und deine Dokumente bleiben auf diesem Gerät." = "Dein Profil und deine Dokumente bleiben auf diesem Gerät.";
+"Sovi kann gerade keine Verbindung herstellen. Bitte versuche es später erneut." = "Sovi kann gerade keine Verbindung herstellen. Bitte versuche es später erneut.";
+"Neues Gespräch" = "Neues Gespräch";
+"Hintergrund teilen" = "Hintergrund teilen";
+"Was soll Sovi bei deiner Frage berücksichtigen? Du kannst bis zu vier Einträge teilen." = "Was soll Sovi bei deiner Frage berücksichtigen? Du kannst bis zu vier Einträge teilen.";
+"Eintrag suchen" = "Eintrag suchen";
+"Nur die ausgewählten Titel und Daten werden mit OpenAI geteilt. Deine Dokumente bleiben auf dem Gerät." = "Nur die ausgewählten Titel und Daten werden mit OpenAI geteilt. Deine Dokumente bleiben auf dem Gerät.";
+"Deine Nachrichten werden mit OpenAI verarbeitet. Profil und Dokumente bleiben auf deinem Gerät." = "Deine Nachrichten werden mit OpenAI verarbeitet. Profil und Dokumente bleiben auf deinem Gerät.";
+"Im Chat werden deine Nachrichten über den Sovi-Server von OpenAI verarbeitet. Profil und Dokumente bleiben auf deinem Gerät. Einträge aus deinem Weg teilst du nur, wenn du sie auswählst." = "Im Chat werden deine Nachrichten über den Sovi-Server von OpenAI verarbeitet. Profil und Dokumente bleiben auf deinem Gerät. Einträge aus deinem Weg teilst du nur, wenn du sie auswählst.";
+"Hilfe für Angehörige" = "Hilfe für Angehörige";
+"Meine Mutter braucht Hilfe im Alltag." = "Meine Mutter braucht Hilfe im Alltag.";
+
+"Eine neue Auswahl startet ein neues Gespräch." = "Eine neue Auswahl startet ein neues Gespräch.";
+"Vorderseite der e-card" = "Vorderseite der e-card";
+"Rückseite der e-card" = "Rückseite der e-card";
+"Für die offenen Fragen konnte ich keine Angaben lesen." = "Für die offenen Fragen konnte ich keine Angaben lesen.";
+"Ich kann die Seiten nicht derselben Karte zuordnen. Bitte fotografiere die Rückseite noch einmal." = "Ich kann die Seiten nicht derselben Karte zuordnen. Bitte fotografiere die Rückseite noch einmal.";
+"Das ist die Rückseite. Bitte zeig mir zuerst die Vorderseite." = "Das ist die Rückseite. Bitte zeig mir zuerst die Vorderseite.";
+"Das ist die Vorderseite. Jetzt brauche ich die Rückseite." = "Das ist die Vorderseite. Jetzt brauche ich die Rückseite.";
+"Ich konnte die Kartenseite nicht lesen. Versuche es mit einem deutlicheren Foto." = "Ich konnte die Kartenseite nicht lesen. Versuche es mit einem deutlicheren Foto.";
+"Scan verwerfen" = "Scan verwerfen";
+"Zeig mir zuerst die Vorderseite deiner e-card." = "Zeig mir zuerst die Vorderseite deiner e-card.";
+"Jetzt die Rückseite, bitte." = "Jetzt die Rückseite, bitte.";
+"Stimmen die Angaben?" = "Stimmen die Angaben?";
+"Gib Straße, Hausnummer, PLZ und Ort ein." = "Gib Straße, Hausnummer, PLZ und Ort ein.";
+"Sovi hilft dir, Anlaufstellen zu finden und Formulare vorzubereiten. Medizinische Fragen besprichst du mit Fachpersonal." = "Sovi hilft dir, Anlaufstellen zu finden und Formulare vorzubereiten. Medizinische Fragen besprichst du mit Fachpersonal.";
+"Profil, e-card-Fotos und Dokumente bleiben auf deinem Gerät. Unter „Deine Daten“ kannst du sie löschen." = "Profil, e-card-Fotos und Dokumente bleiben auf deinem Gerät. Unter „Deine Daten“ kannst du sie löschen.";
+"Chatnachrichten und von dir geteilte Einträge verarbeitet OpenAI über Sovi. Deine Adresssuche geht an Apple. Standort und Mitteilungen sind freiwillig." = "Chatnachrichten und von dir geteilte Einträge verarbeitet OpenAI über Sovi. Deine Adresssuche geht an Apple. Standort und Mitteilungen sind freiwillig.";
+"Chatnachrichten werden mit OpenAI verarbeitet." = "Chatnachrichten werden mit OpenAI verarbeitet.";
+"Dokument wird gelesen …" = "Dokument wird gelesen …";
+"Wähle bis zu vier Einträge für das neue Gespräch." = "Wähle bis zu vier Einträge für das neue Gespräch.";
+"Nur ausgewählte Titel und Daten werden mit OpenAI geteilt." = "Nur ausgewählte Titel und Daten werden mit OpenAI geteilt.";
+"Unterlagen vorbereitet" = "Unterlagen vorbereitet";
+"Antragsart im PDF ankreuzen." = "Antragsart im PDF ankreuzen.";
+"Quellen" = "Quellen";
+"Später" = "Später";
+"Du" = "Du";
+"Den medizinischen Teil füllt die behandelnde Stelle aus." = "Den medizinischen Teil füllt die behandelnde Stelle aus.";
+
+"Ja, verwende meinen Standort" = "Ja, verwende meinen Standort";
+"Nein, ich gebe den Ort selbst ein" = "Nein, ich gebe den Ort selbst ein";
+"Ja, erinnere mich bitte" = "Ja, erinnere mich bitte";
+"Nein, danke" = "Nein, danke";
+"Ja, so stimmt’s" = "Ja, so stimmt’s";
+"Ich stimme zu." = "Ich stimme zu.";
+"Den Rest ergänze ich später." = "Den Rest ergänze ich später.";
+"Das lasse ich erst mal offen." = "Das lasse ich erst mal offen.";
+"Ich habe meine Versicherungsnummer eingetragen." = "Ich habe meine Versicherungsnummer eingetragen.";
+"Ich kann deinen Standort gerade nicht verwenden." = "Ich kann deinen Standort gerade nicht verwenden.";
+"Ich kann dir gerade keine Erinnerungen schicken." = "Ich kann dir gerade keine Erinnerungen schicken.";
+"Ich mache ohne Erinnerungen weiter." = "Ich mache ohne Erinnerungen weiter.";
+"Such bitte in meiner Nähe" = "Such bitte in meiner Nähe";
+"Ich finde deinen Standort gerade nicht. In welchem Ort soll ich suchen?" = "Ich finde deinen Standort gerade nicht. In welchem Ort soll ich suchen?";
+"Sovi schreibt …" = "Sovi schreibt …";
+"%lld von %lld erledigt" = "%lld von %lld erledigt";
+"Danke! Jetzt können wir loslegen." = "Danke! Jetzt können wir loslegen.";

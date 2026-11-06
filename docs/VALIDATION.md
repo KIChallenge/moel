@@ -1,6 +1,6 @@
 # Validation status
 
-Updated 5 November 2026. The original offline checks below and the current guided-prototype runtime checks at the end are separate validation stages.
+Updated 6 November 2026. The original offline checks below and the current guided-prototype runtime checks at the end are separate validation stages.
 
 ## Checks actually completed
 
@@ -133,3 +133,30 @@ The default example is fixed at 5 November 2026, 09:00 Europe/Vienna. The path d
 - The supplied discharge report produced eight reviewable administrative steps. The three imaging reports produced source-linked explanations. The supplied Impfpass yielded nine administrations on eight dates. Reimporting preserved the count.
 - Targeted simulator runs exercised the chat paperclip, report-to-task review, selected vaccination history, a German-device conversation in English, two case-linked form journeys, and the online transport fixture’s follow-up buttons, retry and draft restoration.
 - The version 3 health endpoint responded. The PHP suite passed 110 backend checks and 19 HTTP checks with a mocked upstream. An authenticated live upstream response still requires a configured prototype client token.
+
+## Automatic chat, simplified UI and supplied-document checks — 6 November 2026
+
+- `./scripts/check-ios.sh` passed. The unsigned Release device build also passed. Both built Info.plists contain the managed prototype connection; the configured access token is absent from tracked changes. The OpenAI key remains on the server.
+- Live synthetic English and German conversations progressed from an unspecified doctor request to doctor type, place and destinations. The German request using a sample Vienna GPS position returned three sourced providers. These were five paid synthetic requests; no document contents or profile fields were transmitted.
+- Nine chat-controller tests passed, including immediate managed connection, preserved follow-up history, local-data reset, cancellation when location sharing is revoked, failed-message retry and payload boundaries.
+- Five targeted UI flows passed: doctor search without setup, German follow-up buttons/retry/draft retention, large-text path-to-chat layout, leaving a local document conversation for a new doctor request, and local attachment/source/event navigation. An initial German send-tap failure left its text in the composer. The input now uses a plain white surface; the final three chat/layout flows passed with that implementation.
+- The supplied examples were tested from their original local directory using `CaseDocumentImport.read` → `SoviStore.importChatAttachment` → `DocumentDiscussion.reply`. Original PDF retention, source-backed events, local follow-up answers and duplicate-import idempotence passed. Document contents were not copied into source control or sent to the API.
+
+| Supplied document | PDF pages | Recognized dated records | Reviewed follow-up actions |
+| --- | ---: | ---: | ---: |
+| Befund bildgebende Diagnostik.pdf | 1 | 1 | 0 |
+| Entlassungsbefund.pdf | 7 | 1 | 8 |
+| Impfpass.pdf | 2 | 9 vaccinations | 0 |
+| Röntgen Befund.pdf | 3 | 1 | 0 |
+| Röntgen Befund2.pdf | 3 | 1 | 0 |
+| Seven supplied blank application forms | All readable | 0 false events | — |
+
+The document/form run passed 23 tests: report parsing, chat import, vaccination import and seven-form prefill/export. The seven bundled form PDFs match the supplied originals byte for byte. All supplied PDFs had readable native text; OCR is separately covered by the synthetic scanned-image test. Recognized vaccination records can reuse existing path records rather than duplicate them. The local sample-file tests explicitly skip on machines without the supplied source directory.
+
+Results: `artifacts/TestResults/20261106-061339.xcresult` (23 document/form checks), `20261106-060647.xcresult` (nine controller checks and the German UI flow), and `20261106-060942.xcresult` (three final chat/layout flows). Earlier attachment UI checks are in `20261106-055858.xcresult`. These are targeted checks, not a complete app-suite or clinical-validation claim. No new TestFlight upload was performed for this change.
+
+## Build 5
+
+The signed 0.1.0 (5) archive was accepted by App Store Connect. The Release bundle contains the leaf artwork and the managed chat configuration.
+
+The simulator build, all 113 existing unit checks, the per-entry halo regression, and all 38 path scenario checks passed. Simulator UI flows covered the retained welcome conversation, doctor follow-ups and retry, appointment attendance, and the guided care application through opening its form. A screen recording under `artifacts/Previews/build5` shows the typing bubble expanding into the next message.

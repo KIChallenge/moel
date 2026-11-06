@@ -2,14 +2,20 @@ import SwiftUI
 import UIKit
 
 enum SoviTheme {
-    static let background = adaptive(0xFFFFFF, 0x17191B)
-    static let ink = adaptive(0x3C3C3C, 0xEDEEEF)
-    static let secondary = adaptive(0x737373, 0xB8BABC)
-    static let accent = adaptive(0x006F48, 0xA9D8BC)
-    static let softGreen = adaptive(0xE8F5EF, 0x21372E)
-    static let bubble = adaptive(0xFFFFFF, 0x27292B)
-    static let border = adaptive(0xE5E5E5, 0x454749)
-    static let orange = Color(hex: 0xE9A35C)
+    // Shared with the Sovi website: a quiet green canvas and simple white cards.
+    static let background = adaptive(0xF0F8E7, 0x182117)
+    static let ink = adaptive(0x294226, 0xEFF7E7)
+    static let secondary = adaptive(0x5D7055, 0xBBCDB0)
+    static let accent = adaptive(0x3F7D00, 0xC8EC9F)
+    static let softGreen = adaptive(0xD7F2B4, 0x304528)
+    static let action = adaptive(0xC8EC9F, 0x395329)
+    static let bubble = adaptive(0xFFFFFF, 0x253021)
+    static let border = adaptive(0xCADCB9, 0x4B5F40)
+    static let missed = adaptive(0xCC3D41, 0xFF9287)
+    static let sky = adaptive(0xC8E8FF, 0x254660)
+    static let lilac = adaptive(0xE7DAFF, 0x46395B)
+    static let coral = adaptive(0xFFDAD5, 0x573332)
+    static let orange = Color(hex: 0xE2B749)
 
     private static func adaptive(_ light: UInt32, _ dark: UInt32) -> Color {
         Color(uiColor: UIColor { traits in

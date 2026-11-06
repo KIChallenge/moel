@@ -2,7 +2,8 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 private enum ActiveSheet: Identifiable, Equatable {
-    case node(UUID), documents, editor(NodeKind), draft, preparation(LifeDraftKind), controls, chatSettings, forms, scenario(DemoScenario)
+    case node(UUID), documents, editor(NodeKind), draft, preparation(LifeDraftKind), controls, chatBackground, forms
+    case scenario(DemoScenario, restoredTurnCount: Int)
     case matchedForm(String, ChatLanguage)
     case reviewDocument(UUID)
     var id: String {
@@ -14,10 +15,10 @@ private enum ActiveSheet: Identifiable, Equatable {
         case .draft: "draft"
         case .preparation(let kind): "preparation-\(kind.rawValue)"
         case .controls: "controls"
-        case .chatSettings: "chat-settings"
+        case .chatBackground: "chat-background"
         case .forms: "forms"
         case .matchedForm(let id, let language): "form-" + language.rawValue + id
-        case .scenario(let scenario): "scenario-" + scenario.rawValue
+        case .scenario(let scenario, _): "scenario-" + scenario.rawValue
         }
     }
 }
@@ -29,6 +30,7 @@ struct HomeView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @State private var isFocused = false
+    @State private var restoredFocusTurns = 0
     @State private var contextID: UUID?
     @State private var activeSheet: ActiveSheet?
     @State private var showsAttachmentPicker = false
@@ -53,12 +55,12 @@ struct HomeView: View {
                 .allowsHitTesting(!isFocused)
                 .accessibilityHidden(isFocused || showsWelcome)
             if isFocused {
-                SoviFocusView(contextID: $contextID, response: response, language: conversationLanguage,
+                SoviFocusView(contextID: $contextID, response: response, restoredTurnCount: restoredFocusTurns, language: conversationLanguage,
                               close: closeFocus, send: send, act: handleAction,
                               attach: { showsAttachmentPicker = true }, attachSample: attachExample,
                               importingDocument: attachmentTask != nil, cancelImport: { attachmentTask?.cancel() },
                               leaveDocument: leaveDocument, showEvent: { id in closeFocus(); requestedPathEntryID = id },
-                              chatSettings: { activeSheet = .chatSettings },
+                              shareBackground: { activeSheet = .chatBackground },
                               forms: { activeSheet = .forms }, scenario: openScenario, localCaseResponse: showsLocalCaseResponse)
                     .transition(.identity)
                     .zIndex(1)
@@ -90,12 +92,12 @@ struct HomeView: View {
                 case .draft: AdministrativeDraftSheet()
                 case .preparation(let kind): LifePreparationSheet(kind: kind)
                 case .controls: LocalControlsSheet()
-                case .chatSettings: LiveChatSettingsSheet()
+                case .chatBackground: ChatBackgroundSheet()
                 case .forms: FormLibrarySheet()
                 case .matchedForm(let id, let language):
                     FormLibrarySheet(suggestedFormID: id, requiresPersonSelection: true)
                         .environment(\.locale, Locale(identifier: language.rawValue))
-                case .scenario(let scenario): DemoScenarioChat(scenario: scenario)
+                case .scenario(let scenario, let count): DemoScenarioChat(scenario: scenario, restoredTurnCount: count)
                 }
             }
             .environment(store)
@@ -163,6 +165,7 @@ struct HomeView: View {
     }
 
     private func openFocus(_ id: UUID?, invitation: String? = nil) {
+        if !isFocused { restoredFocusTurns = store.state.conversation.count }
         conversationLanguage = documentLanguage
         if invitation == nil, id != nil, store.state.discussedDocumentID != nil { try? store.perform(.leaveDocumentDiscussion) }
         if let id, let node = store.node(id: id) {
@@ -310,12 +313,12 @@ struct HomeView: View {
         if let id = store.state.discussedDocumentID, contextID == nil, store.document(id: id) != nil {
             if let documentReply, documentReply.documentID == id {
                 recordDocumentReply(documentReply, question: message)
+                return
             } else {
-                let reply = CompanionResponse(text: language.text("Ich kann dir den Originaltext und die dokumentierten Ereignisse zeigen."),
-                                              action: .reviewDocument(id))
-                recordDocumentReply(.init(documentID: id, response: reply), question: message)
+                // An unrelated question starts ordinary chat. Never forward the
+                // document or its local transcript when leaving this context.
+                try? store.perform(.leaveDocumentDiscussion)
             }
-            return
         }
         if let documentReply {
             recordDocumentReply(documentReply, question: message)
@@ -369,11 +372,12 @@ struct HomeView: View {
         if let scenario = DemoScenario.matching(message) {
             chat.cancel()
             do {
+                let restoredCount = store.state.demoScenarios?[scenario.rawValue]?.history.count ?? 0
                 try store.perform(.startScenario(scenario, language: language, opening: message))
                 let progress = store.state.demoScenarios?[scenario.rawValue]
                 let reply = progress?.history.last?.text ?? scenario.title(in: language)
                 showsLocalCaseResponse = true
-                presentLocalRequest(message, reply: reply, sheet: .scenario(scenario), action: .scenario(scenario))
+                presentLocalRequest(message, reply: reply, sheet: .scenario(scenario, restoredTurnCount: restoredCount), action: .scenario(scenario))
             } catch { store.errorMessage = error.localizedDescription }
             return
         }
@@ -387,6 +391,7 @@ struct HomeView: View {
         if chat.enabled {
             guard !chat.busy else { return }
             contextID = nil
+            try? store.perform(.setFocusContext(nil))
             chat.submit(message)
             try? store.perform(.saveComposer(""))
             return
@@ -397,14 +402,14 @@ struct HomeView: View {
             response = service.respond(to: message, context: contextID, state: store.state, now: store.now)
             try store.perform(.appendConversation(role: "assistant", text: response.text))
             try store.perform(.saveComposer(""))
-            device.speak(response.text, enabled: store.state.spokenReplies)
         } catch { store.errorMessage = error.localizedDescription }
     }
 
     private func openScenario(_ scenario: DemoScenario) {
         do {
+            let restoredCount = store.state.demoScenarios?[scenario.rawValue]?.history.count ?? 0
             try store.perform(.startScenario(scenario, language: ChatLanguage(rawValue: chat.responseLanguage) ?? conversationLanguage))
-            activeSheet = .scenario(scenario)
+            activeSheet = .scenario(scenario, restoredTurnCount: restoredCount)
         } catch { store.errorMessage = error.localizedDescription }
     }
 
@@ -481,7 +486,6 @@ struct HomeView: View {
             lastMessage = nil
             response = CompanionResponse(text: confirmation, entryIDs: attendance == nil ? [] : [nodeID])
             device.stopAudio()
-            device.speak(confirmation, enabled: store.state.spokenReplies)
         } catch { store.errorMessage = error.localizedDescription }
     }
 
@@ -495,7 +499,6 @@ struct HomeView: View {
             try store.perform(.appendConversation(role: "assistant", text: confirmation))
             response = CompanionResponse(text: confirmation, entryIDs: response.entryIDs.isEmpty ? [nodeID] : response.entryIDs)
             device.stopAudio()
-            device.speak(confirmation, enabled: store.state.spokenReplies)
         } catch { store.errorMessage = error.localizedDescription }
     }
 }
@@ -565,7 +568,7 @@ private struct RouteView: View {
                 GeometryReader { viewport in
                     ScrollViewReader { reader in
                         VStack(spacing: 0) {
-                            navigation(reader, groups: groups, currentID: currentID)
+                            navigation(reader, currentID: currentID)
                                 .accessibilityHidden(selectedDayID != nil)
                             ScrollView {
                                 // Individual rows keep scroll targets and accessibility bounds
@@ -587,7 +590,7 @@ private struct RouteView: View {
                                                            progress: day.progress(in: store.state, now: store.now),
                                                            buttonIdentifier: "path.day.\(day.id)", labelTitle: labelTitle(for: day),
                                                            selectionAnchor: selectedDayID == day.id,
-                                                           activeEntryIndex: selectedDayID == day.id ? day.entries.firstIndex { $0.id == selectedEntryID } : nil) {
+                                                           entryProgress: day.entries.map { $0.haloProgress(in: store.state, now: referenceDate) }) {
                                                 selectedEntryID = nil
                                                 selectedDayID = day.id
                                             }
@@ -600,6 +603,12 @@ private struct RouteView: View {
                                                 routeCompanion(prompt, width: viewport.size.width, straight: straight)
                                             }
                                         }
+                                    }
+                                    if store.state.pathDays.count > store.state.compactPathDays.count {
+                                        Button { closeCard(); showsFullHistory.toggle() } label: {
+                                            Text(LocalizedStringKey(showsFullHistory ? "Kompakter Verlauf" : "Alle Einträge anzeigen"))
+                                                .frame(minHeight: 44)
+                                        }.accessibilityIdentifier("path.history.toggle")
                                     }
                                     if currentID == nil { routeCompanion(prompt, width: viewport.size.width, straight: straight) }
                                     if days.isEmpty {
@@ -694,18 +703,18 @@ private struct RouteView: View {
         requestedEntryID = nil
     }
 
-    private func navigation(_ reader: ScrollViewProxy, groups: [RouteSection], currentID: String?) -> some View {
+    private func navigation(_ reader: ScrollViewProxy, currentID: String?) -> some View {
         Group {
             if textSize.isAccessibilitySize {
-                navigationButtons(reader, groups: groups, currentID: currentID).labelStyle(.iconOnly)
+                navigationButtons(reader, currentID: currentID).labelStyle(.iconOnly)
                     .font(.system(size: 24, weight: .bold))
-            } else { navigationButtons(reader, groups: groups, currentID: currentID) }
+            } else { navigationButtons(reader, currentID: currentID) }
         }
         .font(.system(.subheadline, design: .rounded, weight: .bold))
         .padding(.horizontal, 20).frame(minHeight: 44)
     }
 
-    private func navigationButtons(_ reader: ScrollViewProxy, groups: [RouteSection], currentID: String?) -> some View {
+    private func navigationButtons(_ reader: ScrollViewProxy, currentID: String?) -> some View {
         HStack {
             if let currentID {
                 Button { jump(currentID, reader: reader) } label: {
@@ -715,22 +724,6 @@ private struct RouteView: View {
                     .accessibilityIdentifier("path.today")
             }
             Spacer(minLength: 12)
-            Menu {
-                Button { closeCard(); showsFullHistory.toggle() } label: { Text(LocalizedStringKey(showsFullHistory ? "Kompakter Verlauf" : "Alle Einträge anzeigen")) }
-                    .accessibilityIdentifier("path.history.toggle")
-                Divider()
-                ForEach(groups.filter { $0.stage.isEmpty }) { section in
-                    Button(section.title) { jump(section.id, reader: reader) }.accessibilityIdentifier("path.jump.\(section.id)")
-                }
-                Divider()
-                ForEach(groups.filter { !$0.stage.isEmpty }) { section in
-                    Button(section.title) { jump(section.id, reader: reader) }.accessibilityIdentifier("path.jump.\(section.id)")
-                }
-            } label: {
-                Label("Abschnitte", systemImage: "list.bullet").padding(.horizontal, 14).frame(minWidth: 44, minHeight: 44)
-                    .soviGlass(in: Capsule(), interactive: true)
-            }
-                .accessibilityIdentifier("path.sections")
             Button { closeCard(); openControls() } label: {
                 Image(systemName: "gearshape")
                     .frame(width: 44, height: 44)

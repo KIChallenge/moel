@@ -577,7 +577,6 @@
 "Postleitzahl" = "Postcode";
 "Praxis nach Vorsorgeuntersuchung fragen" = "Ask a practice about a health check";
 "Profilbezeichnung (z. B. Mutter)" = "Profile label (e.g. Mother)";
-"Quellenstand: 05.11.2026. Termine, Förderungen und Kosten sind nicht bestätigt." = "Sources checked: 5 November 2026. Appointments, funding and costs are not confirmed.";
 "Regionale Pflegeberatung kontaktieren" = "Contact regional care advice";
 "Reha-Antrag mit behandelnder Praxis vorbereiten" = "Prepare rehabilitation application with your treating practice";
 "Rehabilitation organisieren" = "Organise rehabilitation";
@@ -643,7 +642,6 @@
 
 "Anlaufstellen in meiner Nähe" = "Nearby services";
 "Anlaufstellen" = "Services";
-"Kontakttreffer aus Apple Karten. Leistungen, Eignung, Termine und Versicherungsverträge bitte direkt bestätigen." = "Contacts from Apple Maps. Confirm services, suitability, appointments and insurer contracts directly.";
 "Anderer Ort oder Postleitzahl" = "Another town or postcode";
 "An meinem Standort suchen" = "Search near my current location";
 "An diesem Ort suchen" = "Search in this place";
@@ -756,7 +754,6 @@
 
 "Mehr" = "More";
 
-"Du kannst auswählen oder selbst antworten." = "Choose an option or write your own answer.";
 
 "Der Zugangscode wird im Schlüsselbund dieses Geräts gespeichert. Trage hier nicht deinen OpenAI-Schlüssel ein." = "The access code is saved in this device’s Keychain. Do not enter your OpenAI key here.";
 
@@ -806,7 +803,6 @@
 "Straße Hausnummer, PLZ Ort" = "Street and house number, postcode and town";
 "Die Adresssuche ist gerade nicht verfügbar. Du kannst deine Adresse selbst eingeben: Straße Hausnummer, PLZ Ort." = "Address search is unavailable. You can enter your address: street and house number, postcode and town.";
 "Adressvorschläge von Apple Karten. Du kannst auch Straße Hausnummer, PLZ Ort eingeben." = "Suggestions from Apple Maps. You can also enter the street and house number, postcode and town.";
-"Dein Standort wird für jede Suche neu abgefragt. Apple kann daraus einen Ortsnamen bestimmen. Im Online-Chat geht er an den Sovi-Server, nicht an OpenAI." = "Your location is requested for each search. Apple may use it to find a place name. In online chat it goes to the Sovi server, not to OpenAI.";
 "Mitteilungen enthalten keine Gesundheitsdetails. Du kannst sie jederzeit ausschalten." = "Notifications contain no health details. You can turn them off anytime.";
 "Sovi hilft dir, passende Anlaufstellen zu finden, nächste Schritte zu planen und Formulare vorzubereiten." = "Sovi helps you find services, plan next steps and prepare forms.";
 "Sovi stellt keine Diagnosen. Medizinische Fragen klärst du mit Fachpersonal. Termine, Anträge und Kostenübernahmen sind erst bestätigt, wenn die zuständige Stelle sie bestätigt." = "Sovi does not diagnose conditions. Discuss medical questions with a professional. Appointments, applications and coverage are only confirmed by the responsible provider or authority.";
@@ -817,7 +813,6 @@
 
 "Ohne Suche: Straße Hausnummer, PLZ Ort" = "Without search: street and house number, postcode and town";
 
-"Vorschläge von Apple Karten · oder Adresse selbst eingeben" = "Apple Maps suggestions · or enter your address";
 
 
 "Alle Einträge anzeigen" = "Show all entries";
@@ -931,21 +926,75 @@
 "Eingeklappt" = "Collapsed";
 
 "e-card scannen" = "Scan e-card";
-"e-card einlesen" = "Read your e-card";
-"Fotografiere eine Seite deiner e-card. Du kannst auch ein Foto auswählen. Sovi liest es nur auf diesem Gerät." = "Take a photo of either side of your e-card, or choose an existing photo. Sovi reads it on this device only.";
 "Foto aufnehmen" = "Take a photo";
 "Foto auswählen" = "Choose a photo";
 "Daten werden gelesen …" = "Reading your card…";
-"Prüfe die Angaben. Du kannst sie ändern oder ein Feld leeren." = "Check these details. You can edit them or clear a field.";
-"Weitere Kartenseite einlesen" = "Scan the other side";
 "Angaben übernehmen" = "Use these details";
 "Manuell weiter" = "Enter manually";
 "Die Kamera ist nicht verfügbar. Du kannst ein Foto auswählen." = "The camera is unavailable. You can choose a photo instead.";
 "Erlaube den Kamerazugriff in den Einstellungen oder wähle ein Foto aus." = "Allow camera access in Settings or choose a photo.";
-"Auf diesem Foto konnte ich keine neuen Angaben für die offenen Fragen lesen." = "I couldn’t read any new answers from this photo.";
 "Die Angaben auf der Karte passen nicht zu deinen bisherigen Antworten." = "The card details don’t match your earlier answers.";
-"Diese Aufnahmen lassen sich nicht sicher derselben Karte zuordnen." = "I can’t tell whether these photos show the same card.";
-"Nur die neue Aufnahme verwenden" = "Use only the new photo";
-"Bisherige Angaben behalten" = "Keep the current details";
 "Angaben von meiner e-card übernehmen" = "Use the details from my e-card";
 "Sozialversicherungsnummer eingegeben" = "Social insurance number entered";
+
+"Deine Daten" = "Your data";
+"Profil" = "Profile";
+"Standort nicht mehr verwenden" = "Stop using location";
+"Berechtigungen verwalten" = "Manage permissions";
+"Du kannst den Standort in den iPhone-Einstellungen erlauben." = "You can allow location access in iPhone Settings.";
+"Dein Profil und deine Dokumente bleiben auf diesem Gerät." = "Your profile and documents stay on this device.";
+"Sovi kann gerade keine Verbindung herstellen. Bitte versuche es später erneut." = "Sovi cannot connect right now. Please try again later.";
+"Neues Gespräch" = "New conversation";
+"Hintergrund teilen" = "Share context";
+"Was soll Sovi bei deiner Frage berücksichtigen? Du kannst bis zu vier Einträge teilen." = "What should Sovi keep in mind? You can share up to four entries.";
+"Eintrag suchen" = "Find an entry";
+"Nur die ausgewählten Titel und Daten werden mit OpenAI geteilt. Deine Dokumente bleiben auf dem Gerät." = "Only the selected titles and dates are shared with OpenAI. Your documents stay on this device.";
+"Deine Nachrichten werden mit OpenAI verarbeitet. Profil und Dokumente bleiben auf deinem Gerät." = "Your messages are processed with OpenAI. Your profile and documents stay on your device.";
+"Im Chat werden deine Nachrichten über den Sovi-Server von OpenAI verarbeitet. Profil und Dokumente bleiben auf deinem Gerät. Einträge aus deinem Weg teilst du nur, wenn du sie auswählst." = "In chat, your messages are processed by OpenAI through the Sovi server. Your profile and documents stay on your device. Entries from your path are shared only when you select them.";
+"Hilfe für Angehörige" = "Help for family";
+"Meine Mutter braucht Hilfe im Alltag." = "My mother needs help with daily living.";
+
+"Eine neue Auswahl startet ein neues Gespräch." = "A new selection starts a new conversation.";
+"Vorderseite der e-card" = "Front of the e-card";
+"Rückseite der e-card" = "Back of the e-card";
+"Für die offenen Fragen konnte ich keine Angaben lesen." = "I couldn’t read any details for the remaining questions.";
+"Ich kann die Seiten nicht derselben Karte zuordnen. Bitte fotografiere die Rückseite noch einmal." = "I couldn’t match the two sides. Please take another photo of the back of the same card.";
+"Das ist die Rückseite. Bitte zeig mir zuerst die Vorderseite." = "That’s the back. Please show me the front first.";
+"Das ist die Vorderseite. Jetzt brauche ich die Rückseite." = "That’s the front. I need the back now.";
+"Ich konnte die Kartenseite nicht lesen. Versuche es mit einem deutlicheren Foto." = "I couldn’t read this side. Try a clearer photo.";
+"Scan verwerfen" = "Discard scan";
+"Zeig mir zuerst die Vorderseite deiner e-card." = "Show me the front of your e-card first.";
+"Jetzt die Rückseite, bitte." = "Now the back, please.";
+"Stimmen die Angaben?" = "Are these details correct?";
+"Gib Straße, Hausnummer, PLZ und Ort ein." = "Enter your street, house number, postcode and town.";
+"Sovi hilft dir, Anlaufstellen zu finden und Formulare vorzubereiten. Medizinische Fragen besprichst du mit Fachpersonal." = "Sovi helps you find services and prepare forms. Discuss medical questions with a healthcare professional.";
+"Profil, e-card-Fotos und Dokumente bleiben auf deinem Gerät. Unter „Deine Daten“ kannst du sie löschen." = "Your profile, e-card photos and documents stay on your device. You can delete them under “Your data”.";
+"Chatnachrichten und von dir geteilte Einträge verarbeitet OpenAI über Sovi. Deine Adresssuche geht an Apple. Standort und Mitteilungen sind freiwillig." = "OpenAI processes chat messages and the entries you choose to share through Sovi. Your address searches go to Apple. Location and notifications are optional.";
+"Chatnachrichten werden mit OpenAI verarbeitet." = "Chat messages are processed with OpenAI.";
+"Dokument wird gelesen …" = "Reading document …";
+"Wähle bis zu vier Einträge für das neue Gespräch." = "Choose up to four entries for the new conversation.";
+"Nur ausgewählte Titel und Daten werden mit OpenAI geteilt." = "Only selected titles and dates are shared with OpenAI.";
+"Unterlagen vorbereitet" = "Documents prepared";
+"Antragsart im PDF ankreuzen." = "Tick the application type in the PDF.";
+"Quellen" = "Sources";
+"Später" = "Later";
+"Du" = "You";
+"Den medizinischen Teil füllt die behandelnde Stelle aus." = "Your healthcare provider fills in the medical section.";
+
+"Ja, verwende meinen Standort" = "Yes, use my location";
+"Nein, ich gebe den Ort selbst ein" = "No, I’ll enter the location myself";
+"Ja, erinnere mich bitte" = "Yes, please remind me";
+"Nein, danke" = "No, thanks";
+"Ja, so stimmt’s" = "Yes, that looks right";
+"Ich stimme zu." = "I agree.";
+"Den Rest ergänze ich später." = "I’ll fill in the rest later.";
+"Das lasse ich erst mal offen." = "I’ll skip that for now.";
+"Ich habe meine Versicherungsnummer eingetragen." = "I’ve entered my insurance number.";
+"Ich kann deinen Standort gerade nicht verwenden." = "I can’t use your location right now.";
+"Ich kann dir gerade keine Erinnerungen schicken." = "I can’t send you reminders right now.";
+"Ich mache ohne Erinnerungen weiter." = "I’ll continue without reminders.";
+"Such bitte in meiner Nähe" = "Please look near me";
+"Ich finde deinen Standort gerade nicht. In welchem Ort soll ich suchen?" = "I can’t find your location right now. Which town should I look in?";
+"Sovi schreibt …" = "Sovi is typing…";
+"%lld von %lld erledigt" = "%lld of %lld completed";
+"Danke! Jetzt können wir loslegen." = "Thanks! We’re ready to get started.";

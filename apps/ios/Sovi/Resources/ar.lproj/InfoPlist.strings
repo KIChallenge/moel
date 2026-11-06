@@ -1,2 +1,4 @@
-"NSCameraUsageDescription" = "بإذنك، يستخدم Sovi الكاميرا لقراءة بيانات بطاقة e-card على هذا الجهاز.";
-"NSLocationWhenInUseUsageDescription" = "بإذنك، يستخدم Sovi موقعك للعثور على الخدمات القريبة. يُرسل الموقع إلى خادم Sovi فقط.";
+"NSCameraUsageDescription" = "صوّر وجهي بطاقة e-card لإكمال ملفك الشخصي.";
+"NSLocationWhenInUseUsageDescription" = "يستخدم Sovi موقعك للعثور على خدمات قريبة.";
+"NSMicrophoneUsageDescription" = "أملِ رسالة على Sovi.";
+"NSSpeechRecognitionUsageDescription" = "يحوّل Sovi كلامك إلى نص على هذا الجهاز.";

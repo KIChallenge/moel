@@ -79,6 +79,28 @@ final class DocumentChatUITests: XCTestCase {
         XCTAssertTrue(app.buttons["chat.insurance"].waitForExistence(timeout: 6))
     }
 
+    func testDoctorSearchAutomaticallyLeavesLocalDocumentConversation() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--uitesting", "--chat-ui-fixture", "-AppleLanguages", "(en)", "-AppleLocale", "en_AT"]
+        app.launch()
+        XCTAssertTrue(app.buttons["path.sovi"].waitForExistence(timeout: 12))
+        app.buttons["path.sovi"].tap()
+        app.buttons["focus.more"].tap()
+        app.buttons["focus.attachSample"].tap()
+        let attachment = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "focus.attachment.")).firstMatch
+        XCTAssertTrue(attachment.waitForExistence(timeout: 12))
+        let field = app.textFields["focus.composer"]
+        let editor = field.exists ? field : app.textViews["focus.composer"]
+        editor.tap(); editor.typeText("I want to find a doctor")
+        app.buttons["focus.send"].tap()
+        XCTAssertTrue(app.buttons["chat.general"].waitForExistence(timeout: 6))
+        XCTAssertFalse(app.buttons["focus.document.close"].exists)
+        app.buttons["chat.general"].tap()
+        XCTAssertTrue(app.buttons["chat.insurance"].waitForExistence(timeout: 6))
+        app.buttons["focus.close"].tap(); app.buttons["path.sovi"].tap()
+        XCTAssertTrue(app.buttons["chat.insurance"].waitForExistence(timeout: 6))
+    }
+
     func testLibraryReportAddsAStepThenExplainsItInChat() throws {
         let app = XCUIApplication()
         app.launchArguments = ["--uitesting", "-AppleLanguages", "(en)", "-AppleLocale", "en_AT"]
@@ -137,8 +159,7 @@ final class DocumentChatUITests: XCTestCase {
 
         XCTAssertTrue(day.waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["path.day.day-2021-12-09"].exists, "Other vaccine rows were not selected.")
-        app.buttons["path.sections"].tap()
-        app.buttons["path.jump.year-2022"].tap()
+        reveal(day, in: app, up: false)
         expectation(for: NSPredicate(format: "hittable == true"), evaluatedWith: day)
         waitForExpectations(timeout: 5)
         day.tap()

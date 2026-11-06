@@ -2,105 +2,35 @@
   "fill-specializations": [
     {
       "value": {
-        "automatic-gradient": "srgb:0.00000,0.55686,0.36078,1.00000",
-        "orientation": {
-          "start": {
-            "x": 0.5,
-            "y": 0
-          },
-          "stop": {
-            "x": 0.5,
-            "y": 0.7
-          }
-        }
+        "solid": "srgb:0.949,0.976,0.901,1.0"
       }
     },
     {
       "appearance": "dark",
       "value": {
-        "automatic-gradient": "srgb:0.00000,0.55686,0.36078,1.00000",
-        "orientation": {
-          "start": {
-            "x": 0.5,
-            "y": 0
-          },
-          "stop": {
-            "x": 0.5,
-            "y": 0.7
-          }
-        }
+        "solid": "srgb:0.106,0.157,0.098,1.0"
       }
     }
   ],
   "groups": [
     {
-      "layers": [],
-      "shadow": {
-        "kind": "neutral",
-        "opacity": 0.5
-      },
-      "translucency": {
-        "enabled": true,
-        "value": 0.5
-      }
-    },
-    {
+      "name": "Sovi",
       "layers": [
         {
-          "fill-specializations": [
-            {
-              "value": {
-                "solid": "srgb:1.00000,1.00000,1.00000,1.00000"
-              }
-            },
-            {
-              "appearance": "dark",
-              "value": {
-                "solid": "srgb:1.00000,1.00000,1.00000,1.00000"
-              }
-            }
-          ],
-          "image-name": "mouth.svg",
-          "name": "mouth",
+          "name": "Sovi",
+          "image-name": "leaf.svg",
           "position": {
-            "scale": 3,
+            "scale": 0.89,
             "translation-in-points": [
-              17.5445256109399,
-              287.8313288089754
-            ]
-          }
-        },
-        {
-          "image-name": "left.svg",
-          "name": "left",
-          "position": {
-            "scale": 3,
-            "translation-in-points": [
-              -223.00015624999992,
-              -149.09375
-            ]
-          }
-        },
-        {
-          "image-name": "right.svg",
-          "name": "right",
-          "position": {
-            "scale": 3,
-            "translation-in-points": [
-              224.65015625,
-              -149.09375
+              0,
+              0
             ]
           }
         }
       ],
-      "name": "Group",
-      "shadow": {
-        "kind": "neutral",
-        "opacity": 0.5
-      },
       "translucency": {
-        "enabled": true,
-        "value": 0.5
+        "enabled": false,
+        "value": 0.0
       }
     }
   ],

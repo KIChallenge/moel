@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3D192A97F52A4885A80A9DC7 /* e-card fixtures in Resources */ = {isa = PBXBuildFile; fileRef = C5A17A233EE14192AC312761 /* e-card fixtures */; };
 		02CAA02A7F6F2FA3E4F9BA52 /* PrototypeProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDCC3C082BF70345C5772A1A /* PrototypeProfile.swift */; };
 		02E457F1C61D83060DA08CAF /* CaseDocumentImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80FF180518EB05337AED093C /* CaseDocumentImport.swift */; };
 		087BF37344F071435D1EE7F1 /* AdministrativeDraftSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C141652ED5BBA94D3AF606 /* AdministrativeDraftSheet.swift */; };
@@ -92,6 +93,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C5A17A233EE14192AC312761 /* e-card fixtures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "e-card fixtures"; path = "../SoviUITests/Fixtures"; sourceTree = "<group>"; };
 		06A13AA9B3AA47609655C1F6 /* BefundReaderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BefundReaderTests.swift; sourceTree = "<group>"; };
 		5A43711EB03EF3BD908C6329 /* ECardReaderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ECardReaderTests.swift; sourceTree = "<group>"; };
 		0856DE028DD1D14CEAB966FD /* PathSmokeTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PathSmokeTests.swift; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 		7D17A2F73DF4FEE751EB9242 /* Debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		80EC53ABF76FBCF45AD32B05 /* VaccinationImport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VaccinationImport.swift; sourceTree = "<group>"; };
 		80FF180518EB05337AED093C /* CaseDocumentImport.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaseDocumentImport.swift; sourceTree = "<group>"; };
+		43F9387FA845C7ED26B80A12 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82D2C1709940C0BE0C25CD9B /* Base.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 		82E1B3BD7BE4B1ADC689C5C6 /* NodeEditorSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NodeEditorSheet.swift; sourceTree = "<group>"; };
 		85A3F5CD8E6C2BF2122F6094 /* Domain.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Domain.swift; sourceTree = "<group>"; };
@@ -226,6 +229,7 @@
 		43D343C5EB007BB026B3C7F2 /* SoviTests */ = {
 			isa = PBXGroup;
 			children = (
+				C5A17A233EE14192AC312761 /* e-card fixtures */,
 				1CD18EBF2FC06185B8891145 /* CompanionServiceTests.swift */,
 				B6D80344CD350DF03AF975B9 /* DomainTests.swift */,
 				5FC3228B8B4444CFD470A953 /* LifePathTests.swift */,
@@ -283,6 +287,7 @@
 			isa = PBXGroup;
 			children = (
 				82D2C1709940C0BE0C25CD9B /* Base.xcconfig */,
+				43F9387FA845C7ED26B80A12 /* Info.plist */,
 				F82B1EE54B36966EAD3420AC /* Local.xcconfig.example */,
 				7D17A2F73DF4FEE751EB9242 /* Debug.xcconfig */,
 				ECC2387AEB3612E5290E8133 /* Release.xcconfig */,
@@ -507,6 +512,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3D192A97F52A4885A80A9DC7 /* e-card fixtures in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -680,9 +686,9 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Sovi;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Sovi nutzt deinen Standort nur auf deinen Wunsch für die Suche nach Anlaufstellen. Er geht an den Sovi-Server, nicht an OpenAI.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Sovi nutzt das Mikrofon nur auf deinen Wunsch für lokale Spracheingabe. Es wird kein Audio gespeichert.";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Gesprochene Eingaben werden nur bei verfügbarer Erkennung auf diesem Gerät in bearbeitbaren Text umgewandelt.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Mit deinem Standort findet Sovi Anlaufstellen in deiner Nähe.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Diktiere eine Nachricht an Sovi.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Sovi wandelt dein Diktat auf diesem Gerät in Text um.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -871,9 +877,9 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Sovi;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Sovi nutzt deinen Standort nur auf deinen Wunsch für die Suche nach Anlaufstellen. Er geht an den Sovi-Server, nicht an OpenAI.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Sovi nutzt das Mikrofon nur auf deinen Wunsch für lokale Spracheingabe. Es wird kein Audio gespeichert.";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Gesprochene Eingaben werden nur bei verfügbarer Erkennung auf diesem Gerät in bearbeitbaren Text umgewandelt.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Mit deinem Standort findet Sovi Anlaufstellen in deiner Nähe.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Diktiere eine Nachricht an Sovi.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Sovi wandelt dein Diktat auf diesem Gerät in Text um.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

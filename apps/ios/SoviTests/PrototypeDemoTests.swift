@@ -1,10 +1,27 @@
 import XCTest
 import PDFKit
+import UIKit
 @testable import Sovi
 
 @MainActor
 final class PrototypeDemoTests: XCTestCase {
     func makeStore() throws -> SoviStore { try SoviStore(container: SoviStore.makeContainer(inMemory: true)) }
+
+    private func testPhoto(_ side: ECardSide) -> WelcomeECardPhoto {
+        let jpeg = UIGraphicsImageRenderer(size: CGSize(width: 24, height: 16)).jpegData(withCompressionQuality: 0.8) { context in
+            (side == .front ? UIColor.green : UIColor.blue).setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 24, height: 16))
+        }
+        return WelcomeECardPhoto(side: side, jpeg: jpeg)
+    }
+
+    private func postPair(_ store: SoviStore, front: [PersonField: String], back: [PersonField: String]) throws -> UUID {
+        try store.perform(.welcomeECard(.start))
+        let id = try XCTUnwrap(store.state.welcome?.eCardScan?.id)
+        try store.perform(.welcomeECard(.post(id, testPhoto(.front), front)))
+        try store.perform(.welcomeECard(.post(id, testPhoto(.back), back)))
+        return id
+    }
 
     func testWelcomeResumesValidatesAndDoesNotSendProfileToChat() throws {
         let container = try SoviStore.makeContainer(inMemory: true)
@@ -38,11 +55,92 @@ final class PrototypeDemoTests: XCTestCase {
         try store.perform(.answerWelcome(String(localized: "Akzeptieren")))
         for _ in WelcomeProgress.fields { try store.perform(.answerWelcome(nil)) }
         XCTAssertTrue(store.state.welcome?.isLocationStep == true)
-        try store.perform(.answerWelcome("Ohne Standort weiter"))
+        try store.perform(.answerWelcome(WelcomeReply.enterPlace.text))
         XCTAssertTrue(store.state.welcome?.isNotificationStep == true)
-        try store.perform(.answerWelcome("Ohne Erinnerungen weiter"))
+        try store.perform(.answerWelcome(WelcomeReply.noReminders.text))
         XCTAssertTrue(store.state.welcome?.completed == true)
         XCTAssertFalse(store.state.notificationsEnabled)
+        let replies = try XCTUnwrap(store.state.welcome).history.filter { $0.role == "user" }
+        XCTAssertEqual(replies.suffix(2).map(\.text), [WelcomeReply.enterPlace.text, WelcomeReply.noReminders.text])
+    }
+
+    func testPermissionAnswersKeepTheUsersWordsWhenAccessIsUnavailable() throws {
+        for unavailable in [false, true] {
+            var person = FormPerson(isSelf: true)
+            var welcome = WelcomeProgress(personID: person.id, step: WelcomeProgress.fields.count)
+            for (reply, notice) in [
+                (WelcomeReply.useLocation, String(localized: "Ich kann deinen Standort gerade nicht verwenden.")),
+                (.remindMe, String(localized: "Ich kann dir gerade keine Erinnerungen schicken."))
+            ] {
+                let previousCount = welcome.history.count
+                try welcome.recordAnswer(reply.text, permissionUnavailable: unavailable, person: &person, now: Date())
+                let turns = welcome.history.dropFirst(previousCount)
+                XCTAssertEqual(turns.map(\.role), unavailable ? ["user", "assistant", "assistant"] : ["user", "assistant"])
+                XCTAssertEqual(turns.first?.text, reply.text)
+                if unavailable { XCTAssertEqual(turns.dropFirst().first?.text, notice) }
+            }
+            XCTAssertTrue(welcome.completed)
+        }
+    }
+
+    func testChatShowsTheAnswerFirstAndTypesOnlyNewReplies() async {
+        let history = ChatTurnKey("old question", isUser: false)
+        let answer = ChatTurnKey("answer", isUser: true)
+        let question = ChatTurnKey("new question", isUser: false)
+        let delivery = ChatDelivery()
+        delivery.restore([history])
+        XCTAssertFalse(delivery.isTyping(ChatTimeline(turns: [history])))
+        let waiting = ChatTimeline(turns: [history, answer], awaitingNetwork: true)
+        await delivery.present(waiting, reduceMotion: false)
+        XCTAssertTrue(delivery.isTyping(waiting))
+        XCTAssertEqual(delivery.visible, [history.id, answer.id])
+        let received = ChatTimeline(turns: [history, answer, question])
+        XCTAssertTrue(delivery.isTyping(received))
+        XCTAssertEqual(delivery.writingID(received), question.id)
+        await delivery.present(received, reduceMotion: true)
+        XCTAssertFalse(delivery.isTyping(received))
+        XCTAssertNil(delivery.writingID(received))
+        XCTAssertTrue(delivery.visible.contains(question.id))
+    }
+
+    func testChatCancelsAnUnshownQuestionAndShowsUrgentRepliesImmediately() async {
+        let delivery = ChatDelivery()
+        delivery.restore([])
+        let question = ChatTimeline(turns: [ChatTurnKey("question", isUser: false)])
+        let reveal = Task { await delivery.present(question, reduceMotion: false) }
+        await Task.yield()
+        reveal.cancel()
+        await reveal.value
+        XCTAssertTrue(delivery.visible.isEmpty)
+        let urgent = ChatTimeline(turns: [ChatTurnKey("urgent", isUser: false)], immediate: true)
+        XCTAssertFalse(delivery.isTyping(urgent))
+        await delivery.present(urgent, reduceMotion: true)
+        XCTAssertEqual(delivery.visible, ["urgent"])
+    }
+
+    func testSavedPermissionLabelsReadAsConversationAndKeepTypedAnswers() {
+        for language in [ChatLanguage.de, .en] {
+            let lookup = language.text
+            let now = Date()
+            var welcome = WelcomeProgress(personID: UUID())
+            welcome.history = [
+                .init(role: "assistant", text: lookup("Wie heißt du mit Vornamen?"), date: now),
+                .init(role: "user", text: lookup("Standort erlaubt"), date: now),
+                .init(role: "assistant", text: lookup("Darf ich deinen Standort nutzen, um Angebote in deiner Nähe zu finden?"), date: now),
+                .init(role: "user", text: lookup("Standort erlaubt"), date: now),
+                .init(role: "assistant", text: lookup("Darf ich dich an deine Termine und nächsten Schritte erinnern?"), date: now),
+                .init(role: "user", text: lookup("Erinnerungen erlaubt"), date: now)
+            ]
+            let bubbles = welcome.displayHistory
+            XCTAssertEqual(bubbles.map(\.id), welcome.history.map(\.id))
+            XCTAssertEqual(bubbles[1], welcome.history[1])
+            XCTAssertEqual(bubbles[3].text, lookup(WelcomeReply.useLocation.rawValue))
+            XCTAssertEqual(bubbles[5].text, lookup(WelcomeReply.remindMe.rawValue))
+            XCTAssertEqual(welcome.history[3].text, lookup("Standort erlaubt"))
+            welcome.history[3].text = lookup("Standort nicht verfügbar – Ort bei Bedarf eingeben")
+            XCTAssertEqual(welcome.displayHistory[3].role, "assistant")
+            XCTAssertEqual(welcome.displayHistory[3].text, lookup("Ich kann deinen Standort gerade nicht verwenden."))
+        }
     }
 
     func testReviewedECardPersistsWithoutRepeatingQuestionsOrCopyingPersonalValuesIntoChat() throws {
@@ -54,12 +152,25 @@ final class PrototypeDemoTests: XCTestCase {
         let values: [PersonField: String] = [
             .firstName: "Ada", .lastName: "Beispiel", .birthDate: "06.07.1975", .insuranceNumber: "0000000000", .insurer: "ÖGK"
         ]
-        try store.perform(.confirmWelcomeECard(values))
+        try store.perform(.welcomeECard(.start))
+        let id = try XCTUnwrap(store.state.welcome?.eCardScan?.id)
+        let front = testPhoto(.front), back = testPhoto(.back)
+        try store.perform(.welcomeECard(.post(id, front, [.firstName: "Ada", .lastName: "Beispiel", .insuranceNumber: "0000000000"])))
+        let resumed = try SoviStore(container: container)
+        XCTAssertEqual(resumed.state.welcome?.history.compactMap(\.eCardPhoto), [front])
+        XCTAssertEqual(resumed.state.welcome?.eCardScan?.nextSide, .back)
+        XCTAssertThrowsError(try resumed.perform(.welcomeECard(.confirm(id, values))))
+        try resumed.perform(.welcomeECard(.post(id, back, values)))
+        XCTAssertEqual(resumed.state.welcome?.history.compactMap(\.eCardPhoto), [front, back])
+        XCTAssertTrue(resumed.state.formPeople?.first?.values.isEmpty == true)
+        try resumed.perform(.welcomeECard(.confirm(id, values)))
         let reopened = try SoviStore(container: container)
         let welcome = try XCTUnwrap(reopened.state.welcome)
         let person = try XCTUnwrap(reopened.state.formPeople?.first)
         XCTAssertEqual(welcome.field, .street)
         XCTAssertEqual(welcome.reviewedECardFields, Set(values.keys))
+        XCTAssertNil(welcome.eCardScan)
+        XCTAssertEqual(welcome.history.filter { $0.role == "user" }.compactMap(\.eCardPhoto), [front, back])
         for (field, value) in values {
             XCTAssertEqual(person.values[field.rawValue], value)
             XCTAssertFalse(welcome.history.contains { $0.text.contains(value) })
@@ -71,11 +182,13 @@ final class PrototypeDemoTests: XCTestCase {
         XCTAssertEqual(reopened.state.welcome?.field, .email)
         try reopened.perform(.answerWelcome(nil))
         XCTAssertTrue(reopened.state.welcome?.isLocationStep == true)
-        try reopened.perform(.answerWelcome("Ohne Standort weiter"))
+        try reopened.perform(.answerWelcome(WelcomeReply.enterPlace.text))
         XCTAssertTrue(reopened.state.welcome?.isNotificationStep == true)
-        try reopened.perform(.answerWelcome("Ohne Erinnerungen weiter"))
+        try reopened.perform(.answerWelcome(WelcomeReply.noReminders.text))
         XCTAssertTrue(reopened.state.welcome?.completed == true)
-        XCTAssertThrowsError(try reopened.perform(.confirmWelcomeECard(values)))
+        XCTAssertThrowsError(try reopened.perform(.welcomeECard(.confirm(id, values))))
+        try reopened.perform(.deleteLocalData)
+        XCTAssertNil(try SoviStore(container: container).state.welcome)
     }
 
     func testPartialECardKeepsManualAnswersAndOnlySkipsReviewedFields() throws {
@@ -87,7 +200,9 @@ final class PrototypeDemoTests: XCTestCase {
         var person = try XCTUnwrap(store.state.formPeople?.first)
         person.values["insurer"] = "Existing"
         try store.perform(.savePerson(person))
-        try store.perform(.confirmWelcomeECard([.firstName: "Another", .lastName: " Beispiel ", .insuranceNumber: "0000000000"]))
+        let id = try postPair(store, front: [.firstName: "Ada", .lastName: "Beispiel", .insuranceNumber: "0000000000"],
+                              back: [.insuranceNumber: "0000000000"])
+        try store.perform(.welcomeECard(.confirm(id, [.firstName: "Another", .lastName: " Beispiel ", .insuranceNumber: "0000000000"])))
         XCTAssertEqual(store.state.formPeople?.first?.values["firstName"], "Ada")
         XCTAssertEqual(store.state.formPeople?.first?.values["lastName"], "Beispiel")
         XCTAssertNil(store.state.formPeople?.first?.values["birthDate"])
@@ -103,19 +218,64 @@ final class PrototypeDemoTests: XCTestCase {
     func testOnlyAcceptedTermsAndValidCardFieldsCanChangeOnboarding() throws {
         let store = try makeStore()
         try store.perform(.startWelcome)
-        XCTAssertThrowsError(try store.perform(.confirmWelcomeECard([.firstName: "Ada"])))
+        XCTAssertThrowsError(try store.perform(.welcomeECard(.start)))
         try store.perform(.answerWelcome(String(localized: "Hi")))
-        XCTAssertThrowsError(try store.perform(.confirmWelcomeECard([.firstName: "Ada"])))
+        XCTAssertThrowsError(try store.perform(.welcomeECard(.start)))
         try store.perform(.answerWelcome(String(localized: "Akzeptieren")))
+        let id = try postPair(store, front: [.firstName: "Ada", .insuranceNumber: "0000000000"],
+                              back: [.birthDate: "06.07.1975", .insuranceNumber: "0000000000"])
         let before = store.state
         let invalid: [[PersonField: String]] = [
             [:], [.firstName: "Ada", .phone: "0123456789"], [.firstName: "Ada", .insuranceNumber: "123"],
             [.firstName: "Ada", .birthDate: "31.02.1990"]
         ]
         for values in invalid {
-            XCTAssertThrowsError(try store.perform(.confirmWelcomeECard(values)))
+            XCTAssertThrowsError(try store.perform(.welcomeECard(.confirm(id, values))))
             XCTAssertEqual(store.state, before)
         }
+    }
+
+    func testMaskedReverseStillAppearsAsAPhotoAndMissingFieldsAreAskedManually() throws {
+        let store = try makeStore()
+        try store.perform(.startWelcome)
+        try store.perform(.answerWelcome(String(localized: "Hi")))
+        try store.perform(.answerWelcome(String(localized: "Akzeptieren")))
+        let front: [PersonField: String] = [.firstName: "Ada", .lastName: "Beispiel", .insuranceNumber: "0000000000"]
+        let id = try postPair(store, front: front, back: [:])
+        try store.perform(.welcomeECard(.confirm(id, front)))
+        XCTAssertEqual(store.state.welcome?.history.compactMap { $0.eCardPhoto?.side }, [.front, .back])
+        XCTAssertEqual(store.state.welcome?.field, .birthDate)
+        XCTAssertNil(store.state.formPeople?.first?.values["insurer"])
+    }
+
+    func testCardScanKeepsTheFrontWhenTheBackIsRejectedAndDiscardsAnAbandonedPair() throws {
+        let store = try makeStore()
+        try store.perform(.startWelcome)
+        try store.perform(.answerWelcome(String(localized: "Hi")))
+        try store.perform(.answerWelcome(String(localized: "Akzeptieren")))
+        let original = store.state
+        try store.perform(.welcomeECard(.start))
+        let id = try XCTUnwrap(store.state.welcome?.eCardScan?.id)
+        let front = testPhoto(.front), back = testPhoto(.back)
+        let fields: [PersonField: String] = [.firstName: "Ada", .lastName: "Beispiel", .insuranceNumber: "0000000000"]
+        XCTAssertThrowsError(try store.perform(.welcomeECard(.post(id, back, fields))))
+        try store.perform(.welcomeECard(.post(id, front, fields)))
+        let afterFront = store.state
+        XCTAssertThrowsError(try store.perform(.welcomeECard(.post(id, front, fields))))
+        XCTAssertThrowsError(try store.perform(.welcomeECard(.post(id, back, [.insuranceNumber: "1111111111"]))))
+        XCTAssertThrowsError(try store.perform(.answerWelcome("Ada")))
+        XCTAssertEqual(store.state, afterFront)
+        try store.perform(.welcomeECard(.cancel(id)))
+        XCTAssertEqual(store.state, original)
+        try store.perform(.welcomeECard(.start))
+        XCTAssertThrowsError(try store.perform(.welcomeECard(.post(id, front, fields))))
+        XCTAssertTrue(store.state.welcome?.history.compactMap(\.eCardPhoto).isEmpty == true)
+        let nextID = try XCTUnwrap(store.state.welcome?.eCardScan?.id)
+        try store.perform(.welcomeECard(.post(nextID, front, fields)))
+        try store.perform(.answerWelcome(nil, finish: true))
+        XCTAssertNil(store.state.welcome?.eCardScan)
+        XCTAssertEqual(store.state.welcome?.history.compactMap(\.eCardPhoto), [front])
+        XCTAssertTrue(store.state.formPeople?.first?.values.isEmpty == true)
     }
 
     func testSingleAddressAndContactValidationPreserveFormFields() throws {
@@ -165,7 +325,8 @@ final class PrototypeDemoTests: XCTestCase {
         XCTAssertFalse(restored.isLocationStep)
         XCTAssertNil(restored.reviewedECardFields)
         XCTAssertTrue(restored.remainingECardFields(for: legacyPerson).isEmpty)
-        XCTAssertThrowsError(try restored.confirmECard([.insuranceNumber: "0000000000"], person: &legacyPerson, now: Date()))
+        XCTAssertNil(restored.eCardScan)
+        XCTAssertThrowsError(try restored.handleECard(.start, person: &legacyPerson, now: Date()))
         try restored.recordAnswer(nil, person: &legacyPerson, now: Date())
         XCTAssertEqual(restored.field, .insuranceNumber)
     }

@@ -1,9 +1,81 @@
 import XCTest
 import UIKit
+import PDFKit
 @testable import Sovi
 
 @MainActor
 final class DocumentChatTests: XCTestCase {
+    /// Local audit when the supplied files are present. Document contents are
+    /// never copied into source control, sent to a server, or logged.
+    private func suppliedExamples(in folder: String) throws -> [URL] {
+        var root = URL(fileURLWithPath: #filePath)
+        for _ in 0..<5 { root.deleteLastPathComponent() }
+        root.appendPathComponent("_KI Challenge Daten Use Case 1")
+        guard FileManager.default.fileExists(atPath: root.path) else {
+            throw XCTSkip("The supplied local example documents are not installed on this machine.")
+        }
+        let directories = try FileManager.default.contentsOfDirectory(at: root, includingPropertiesForKeys: nil)
+        let directory = try XCTUnwrap(directories.first {
+            $0.lastPathComponent.precomposedStringWithCanonicalMapping == folder
+        })
+        return try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+            .filter { $0.pathExtension.lowercased() == "pdf" }.sorted { $0.lastPathComponent < $1.lastPathComponent }
+    }
+
+    func testSuppliedMedicalPDFExamplesThroughActualChatImporter() throws {
+        let files = try suppliedExamples(in: "Befunde")
+        XCTAssertEqual(files.count, 5)
+        for url in files {
+            let input = try CaseDocumentImport.read(url)
+            XCTAssertFalse(input.text.isEmpty, url.lastPathComponent)
+            let clock = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-11-06T08:00:00Z"))
+            let store = try SoviStore(container: SoviStore.makeContainer(inMemory: true), clock: { clock })
+            let before = store.state
+            let imported = try store.importChatAttachment(input, title: url.lastPathComponent, language: .de)
+            let document = imported.document
+            XCTAssertEqual(document.importedPDFData, try Data(contentsOf: url))
+            XCTAssertEqual(store.state.discussedDocumentID, document.id)
+            XCTAssertEqual(store.state.appointments, before.appointments)
+            XCTAssertEqual(store.state.schedules, before.schedules)
+            XCTAssertFalse(imported.eventIDs.isEmpty, "No dated events extracted from \(url.lastPathComponent)")
+            for id in imported.eventIDs {
+                let event = try XCTUnwrap(store.node(id: id))
+                XCTAssertNotNil(event.date)
+                XCTAssertTrue(event.evidence.contains { $0.documentID == document.id && document.text.contains($0.quote) })
+            }
+            let followUp = try XCTUnwrap(DocumentDiscussion.reply(to: "Welche Ereignisse hast du gefunden?", state: store.state, language: .de))
+            XCTAssertFalse(followUp.response.text.isEmpty)
+            XCTAssertEqual(followUp.documentID, document.id)
+            let nodeCount = store.state.nodes.count
+            let again = try store.importChatAttachment(input, title: url.lastPathComponent, language: .de)
+            XCTAssertEqual(again.eventIDs, imported.eventIDs)
+            XCTAssertTrue(again.addedEventIDs.isEmpty)
+            XCTAssertEqual(store.state.nodes.count, nodeCount)
+            let actions = BefundReader.review(document, language: "de")?.actions.count ?? 0
+            let ocrPages = input.pageSpans?.filter { $0.usedTextRecognition == true }.count ?? 0
+            let pdf = try XCTUnwrap(input.pdf)
+            print("Local document check: \(url.lastPathComponent); pages=\(PDFDocument(data: pdf)?.pageCount ?? 0); OCR pages=\(ocrPages); events=\(imported.eventIDs.count); reviewed actions=\(actions)")
+        }
+    }
+
+    func testSevenSuppliedBlankFormsStayAttachmentsWithoutFalseLifeEvents() throws {
+        let files = try suppliedExamples(in: "Anträge und Formulare")
+        XCTAssertEqual(files.count, 7)
+        for url in files {
+            let input = try CaseDocumentImport.read(url)
+            let store = try SoviStore(container: SoviStore.makeContainer(inMemory: true))
+            let before = store.state
+            let imported = try store.importChatAttachment(input, title: url.lastPathComponent, language: .de)
+            XCTAssertFalse(imported.document.text.isEmpty)
+            XCTAssertEqual(imported.document.importedPDFData, try Data(contentsOf: url))
+            XCTAssertTrue(imported.eventIDs.isEmpty, "Blank form created events: \(url.lastPathComponent)")
+            XCTAssertEqual(store.state.nodes, before.nodes)
+            XCTAssertEqual(store.state.appointments, before.appointments)
+            XCTAssertEqual(store.state.schedules, before.schedules)
+            print("Local blank-form check: \(url.lastPathComponent); readable=true; events=\(imported.eventIDs.count)")
+        }
+    }
+
     func testChatPDFImportCreatesOnlyDocumentedEventAndPreservesItsSourceAfterReload() throws {
         let pdf = UIGraphicsPDFRenderer(bounds: CGRect(x: 0, y: 0, width: 490, height: 640)).pdfData { renderer in
             let pages = [

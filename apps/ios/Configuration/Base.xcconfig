@@ -1,12 +1,13 @@
 PRODUCT_BUNDLE_IDENTIFIER = at.sovi.companion
 PRODUCT_NAME = Sovi
 MARKETING_VERSION = 0.1.0
-CURRENT_PROJECT_VERSION = 4
+CURRENT_PROJECT_VERSION = 5
 IPHONEOS_DEPLOYMENT_TARGET = 18.0
 SWIFT_VERSION = 6.0
 SWIFT_STRICT_CONCURRENCY = complete
 TARGETED_DEVICE_FAMILY = 1,2
 GENERATE_INFOPLIST_FILE = YES
+INFOPLIST_FILE = Configuration/Info.plist
 INFOPLIST_KEY_CFBundleDisplayName = Sovi
 INFOPLIST_KEY_LSApplicationCategoryType = public.app-category.healthcare-fitness
 INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES
@@ -18,7 +19,7 @@ ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
 LOCALIZATION_PREFERS_STRING_CATALOGS = NO
 CODE_SIGN_STYLE = Automatic
 #include? "Local.xcconfig"
-INFOPLIST_KEY_NSCameraUsageDescription = Sovi nutzt die Kamera, um mit deiner Zustimmung Angaben von deiner e-card auf diesem Gerät zu lesen.
-INFOPLIST_KEY_NSMicrophoneUsageDescription = Sovi nutzt das Mikrofon nur auf deinen Wunsch für lokale Spracheingabe. Es wird kein Audio gespeichert.
-INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = Gesprochene Eingaben werden nur bei verfügbarer Erkennung auf diesem Gerät in bearbeitbaren Text umgewandelt.
-INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = Sovi nutzt deinen Standort nur auf deinen Wunsch für die Suche nach Anlaufstellen. Er geht an den Sovi-Server, nicht an OpenAI.
+INFOPLIST_KEY_NSCameraUsageDescription = Fotografiere beide Seiten deiner e-card für dein Profil.
+INFOPLIST_KEY_NSMicrophoneUsageDescription = Diktiere eine Nachricht an Sovi.
+INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = Sovi wandelt dein Diktat auf diesem Gerät in Text um.
+INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = Mit deinem Standort findet Sovi Anlaufstellen in deiner Nähe.

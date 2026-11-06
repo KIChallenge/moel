@@ -9,7 +9,7 @@ An iPhone companion for organizing health and social-insurance matters in Austri
 - Reusable profiles and editable PDF form drafts.
 - German and English UI, accessibility support and dark mode.
 
-The demo works offline with fictional data. Optional online navigation chat requires a configured [PHP backend](apps/backend/README.md) and a prototype API token.
+The path, forms and document reader work offline with fictional data. Chat connects automatically to the hosted [PHP backend](apps/backend/README.md), detects the conversation language and offers follow-up answers. Users enter no API credentials.
 
 Sovi helps organize next steps. It does not provide medical advice, book appointments or submit applications.
 
@@ -17,7 +17,8 @@ Sovi helps organize next steps. It does not provide medical advice, book appoint
 
 1. Open `apps/ios/Sovi.xcodeproj` in Xcode 26+.
 2. Select the **Sovi** scheme and an iPhone simulator running iOS 18+.
-3. Press **⌘R**. No credentials are needed for the offline demo.
+3. For a connected build, set `SOVI_CHAT_ACCESS_TOKEN` once in the ignored `apps/ios/Configuration/Local.xcconfig` to the existing server prototype token. Never use the OpenAI key. The token is bundled for the controlled test group; it is not user authentication.
+4. Press **⌘R**. Without a configured build token, local features still work and chat reports a connection error. UI tests use an isolated transport fixture.
 
 ## Checks
 

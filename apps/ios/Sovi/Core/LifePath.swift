@@ -14,6 +14,11 @@ enum PathProgress: Equatable, Sendable {
 }
 
 extension PathNode {
+    func haloProgress(in state: AppState, now: Date) -> PathProgress {
+        let status = progress(in: state, now: now)
+        return status == .neutral && informationRead ? .done : status
+    }
+
     func progress(in state: AppState, now: Date) -> PathProgress {
         if let id = appointmentID, let appointment = state.appointments.first(where: { $0.id == id }) {
             guard appointment.status != .cancelled else { return .inactive }

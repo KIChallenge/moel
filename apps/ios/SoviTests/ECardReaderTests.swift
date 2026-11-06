@@ -1,7 +1,59 @@
 import XCTest
+import ImageIO
+import UniformTypeIdentifiers
 @testable import Sovi
 
 final class ECardReaderTests: XCTestCase {
+    func testRealOCRReadsBothSidesAndProducesMetadataFreeChatPhotos() async throws {
+        let bundle = Bundle(for: Self.self)
+        func input(_ name: String, override: String) throws -> Data {
+            let path = ProcessInfo.processInfo.environment[override]
+            let url = try XCTUnwrap(path.map(URL.init(fileURLWithPath:)) ?? bundle.url(forResource: name, withExtension: "png", subdirectory: "Fixtures"))
+            return try Data(contentsOf: url)
+        }
+        let source = try XCTUnwrap(CGImageSourceCreateWithData(try input("synthetic-e-card-front", override: "SOVI_TEST_ECARD_FRONT") as CFData, nil))
+        let tagged = NSMutableData()
+        let output = try XCTUnwrap(CGImageDestinationCreateWithData(tagged, UTType.jpeg.identifier as CFString, 1, nil))
+        let gps: [CFString: Any] = [kCGImagePropertyGPSLatitude: 1, kCGImagePropertyGPSLatitudeRef: "N",
+                                    kCGImagePropertyGPSLongitude: 1, kCGImagePropertyGPSLongitudeRef: "E"]
+        CGImageDestinationAddImageFromSource(output, source, 0, [kCGImagePropertyGPSDictionary: gps] as CFDictionary)
+        XCTAssertTrue(CGImageDestinationFinalize(output))
+        let frontData = tagged as Data
+        let taggedSource = try XCTUnwrap(CGImageSourceCreateWithData(frontData as CFData, nil))
+        let taggedProperties = try XCTUnwrap(CGImageSourceCopyPropertiesAtIndex(taggedSource, 0, nil) as? [CFString: Any])
+        XCTAssertNotNil(taggedProperties[kCGImagePropertyGPSDictionary])
+        let front = try await ECardReader.read(frontData, expecting: .front)
+        let back = try await ECardReader.read(try input("synthetic-e-card", override: "SOVI_TEST_ECARD_BACK"), expecting: .back)
+        XCTAssertEqual([front.photo.side, back.photo.side], [.front, .back])
+        XCTAssertTrue(front.fields[.insuranceNumber] != nil && front.fields[.insuranceNumber] == back.fields[.insuranceNumber])
+        XCTAssertNotNil(back.fields[.birthDate])
+        XCTAssertNotNil(back.fields[.insurer])
+        var person = FormPerson(isSelf: true)
+        var welcome = WelcomeProgress(personID: person.id)
+        let now = Date()
+        try welcome.recordAnswer(String(localized: "Hi"), person: &person, now: now)
+        try welcome.recordAnswer(String(localized: "Akzeptieren"), person: &person, now: now)
+        try welcome.handleECard(.start, person: &person, now: now)
+        let id = try XCTUnwrap(welcome.eCardScan?.id)
+        try welcome.handleECard(.post(id, front.photo, front.fields), person: &person, now: now)
+        try welcome.handleECard(.post(id, back.photo, back.fields), person: &person, now: now)
+        let recognized = try XCTUnwrap(welcome.eCardScan?.recognized)
+        try welcome.handleECard(.confirm(id, recognized), person: &person, now: now)
+        XCTAssertEqual(welcome.field, .street)
+        XCTAssertTrue(WelcomeProgress.eCardFields.allSatisfy { person.values[$0.rawValue]?.isEmpty == false })
+        for photo in [front.photo, back.photo] {
+            XCTAssertLessThanOrEqual(photo.jpeg.count, WelcomeECardPhoto.maxBytes)
+            let image = try XCTUnwrap(CGImageSourceCreateWithData(photo.jpeg as CFData, nil))
+            XCTAssertEqual(CGImageSourceGetType(image) as String?, UTType.jpeg.identifier)
+            let props = try XCTUnwrap(CGImageSourceCopyPropertiesAtIndex(image, 0, nil) as? [CFString: Any])
+            XCTAssertNil(props[kCGImagePropertyGPSDictionary])
+        }
+        do {
+            _ = try await ECardReader.read(frontData, expecting: .back)
+            XCTFail("A second front must not be posted as the reverse.")
+        } catch { XCTAssertEqual(error.localizedDescription, String(localized: "Das ist die Vorderseite. Jetzt brauche ich die Rückseite.")) }
+    }
+
     private func line(_ text: String, x: CGFloat, y: CGFloat, width: CGFloat = 0.18, height: CGFloat = 0.03) -> ECardReader.Line {
         .init(text: text, box: CGRect(x: x, y: y, width: width, height: height))
     }

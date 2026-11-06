@@ -97,6 +97,55 @@ enum PersonField: String, CaseIterable, Identifiable, Codable, Sendable {
     }
 }
 
+enum ECardSide: String, Codable, Sendable {
+    case front, back
+
+    var caption: String {
+        switch self {
+        case .front: String(localized: "Vorderseite der e-card")
+        case .back: String(localized: "Rückseite der e-card")
+        }
+    }
+}
+
+struct WelcomeECardPhoto: Codable, Equatable, Sendable {
+    static let maxBytes = 512 * 1024
+    let side: ECardSide
+    let jpeg: Data
+}
+
+struct WelcomeECardScanDraft: Codable, Equatable, Sendable {
+    let id: UUID
+    var front: [PersonField: String]?
+    var back: [PersonField: String]?
+
+    var nextSide: ECardSide? {
+        if front == nil { return .front }
+        return back == nil ? .back : nil
+    }
+
+    var recognized: [PersonField: String] {
+        (front ?? [:]).merging(back ?? [:]) { frontValue, _ in frontValue }
+    }
+}
+
+enum WelcomeECardAction {
+    case start
+    case post(UUID, WelcomeECardPhoto, [PersonField: String])
+    case confirm(UUID, [PersonField: String])
+    case cancel(UUID)
+}
+
+enum WelcomeReply: String {
+    case useLocation = "Ja, verwende meinen Standort"
+    case enterPlace = "Nein, ich gebe den Ort selbst ein"
+    case remindMe = "Ja, erinnere mich bitte"
+    case noReminders = "Nein, danke"
+    case confirmCard = "Ja, so stimmt’s"
+
+    var text: String { ChatLanguage.app.text(rawValue) }
+}
+
 struct WelcomeProgress: Codable, Equatable, Sendable {
     static let fields: [PersonField] = [.firstName, .lastName, .birthDate, .street, .phone, .email, .insuranceNumber, .insurer]
     static let eCardFields: [PersonField] = [.firstName, .lastName, .birthDate, .insuranceNumber, .insurer]
@@ -111,8 +160,9 @@ struct WelcomeProgress: Codable, Equatable, Sendable {
     var termsAcceptedAt: Date?
     var acceptedTermsVersion: String?
     var termsMessageID: UUID?
-    // Values live in the profile. Only remember which questions a reviewed scan answered.
+    // Confirmed values live in the profile. This set identifies the questions to skip.
     private(set) var reviewedECardFields: Set<PersonField>?
+    private(set) var eCardScan: WelcomeECardScanDraft?
     var activeFields: [PersonField] { flowVersion == nil ? Self.legacyFields : Self.fields }
     var field: PersonField? { activeFields.indices.contains(step) ? activeFields[step] : nil }
     var isGreetingStep: Bool { step == -2 }
@@ -120,6 +170,40 @@ struct WelcomeProgress: Codable, Equatable, Sendable {
     var isAddressStep: Bool { field == .street }
     var isLocationStep: Bool { step == activeFields.count }
     var isNotificationStep: Bool { step == activeFields.count + 1 }
+
+    private static let locationQuestion = "Darf ich deinen Standort nutzen, um Angebote in deiner Nähe zu finden?"
+    private static let reminderQuestion = "Darf ich dich an deine Termine und nächsten Schritte erinnern?"
+
+    // Earlier builds saved localized status labels as user turns. Match the preceding
+    // permission question too, so ordinary typed answers keep their original text.
+    private static let legacyPermissionReplies: [String: [String: (role: String, text: String)]] = {
+        var result: [String: [String: (role: String, text: String)]] = [:]
+        for language in [ChatLanguage.de, .en] {
+            let t = language.text
+            result[t(locationQuestion)] = [
+                t("Standort erlaubt"): ("user", t(WelcomeReply.useLocation.rawValue)),
+                t("Ohne Standort weiter"): ("user", t(WelcomeReply.enterPlace.rawValue)),
+                t("Standort nicht verfügbar – Ort bei Bedarf eingeben"): ("assistant", t("Ich kann deinen Standort gerade nicht verwenden."))
+            ]
+            result[t(reminderQuestion)] = [
+                t("Erinnerungen erlaubt"): ("user", t(WelcomeReply.remindMe.rawValue)),
+                t("Ohne Erinnerungen weiter"): ("user", t("Ich mache ohne Erinnerungen weiter."))
+            ]
+        }
+        return result
+    }()
+
+    var displayHistory: [ConversationTurn] {
+        var turns = history
+        for index in history.indices.dropFirst() where history[index].role == "user" {
+            let previous = history[index - 1]
+            if previous.role == "assistant", let reply = Self.legacyPermissionReplies[previous.text]?[history[index].text] {
+                turns[index].role = reply.role
+                turns[index].text = reply.text
+            }
+        }
+        return turns
+    }
 
     func remainingECardFields(for person: FormPerson) -> [PersonField] {
         guard !completed, field != nil, person.id == personID, person.isSelf,
@@ -129,19 +213,82 @@ struct WelcomeProgress: Codable, Equatable, Sendable {
         }
     }
 
-    mutating func confirmECard(_ values: [PersonField: String], person: inout FormPerson, now: Date) throws {
+    mutating func handleECard(_ action: WelcomeECardAction, person: inout FormPerson, now: Date) throws {
+        switch action {
+        case .start:
+            guard eCardScan == nil, let field, remainingECardFields(for: person).contains(field) else { throw SoviError.invalidAction }
+            let prompt = ConversationTurn(role: "assistant", text: String(localized: "Zeig mir zuerst die Vorderseite deiner e-card."), date: now)
+            eCardScan = WelcomeECardScanDraft(id: prompt.id)
+            history.append(prompt)
+        case .post(let id, let photo, let fields):
+            guard var draft = eCardScan, draft.id == id, draft.nextSide == photo.side,
+                  !remainingECardFields(for: person).isEmpty, fields.keys.allSatisfy(Self.eCardFields.contains),
+                  photo.jpeg.starts(with: [0xFF, 0xD8]), photo.jpeg.count <= WelcomeECardPhoto.maxBytes else { throw SoviError.invalidAction }
+            let identity: [PersonField] = [.firstName, .lastName, .birthDate, .insuranceNumber]
+            if identity.contains(where: { Self.agrees(fields[$0], person.values[$0.rawValue]) == false }) {
+                throw SoviError.invalidInput(String(localized: "Die Angaben auf der Karte passen nicht zu deinen bisherigen Antworten."))
+            }
+            if photo.side == .front {
+                guard !fields.isEmpty else { throw SoviError.invalidAction }
+                draft.front = fields
+            } else {
+                guard let front = draft.front else { throw SoviError.invalidAction }
+                if !fields.isEmpty {
+                    let sameNumber = Self.agrees(fields[.insuranceNumber], front[.insuranceNumber]) == true
+                    let sameName = Self.agrees(fields[.firstName], front[.firstName]) == true && Self.agrees(fields[.lastName], front[.lastName]) == true
+                    guard (sameNumber || sameName), !identity.contains(where: { Self.agrees(fields[$0], front[$0]) == false }) else {
+                        throw SoviError.invalidInput(String(localized: "Ich kann die Seiten nicht derselben Karte zuordnen. Bitte fotografiere die Rückseite noch einmal."))
+                    }
+                }
+                draft.back = fields
+            }
+            history.append(ConversationTurn(role: "user", text: photo.side.caption, date: now, eCardPhoto: photo))
+            eCardScan = draft
+            let reply: String
+            if photo.side == .front {
+                reply = String(localized: "Jetzt die Rückseite, bitte.")
+            } else if remainingECardFields(for: person).contains(where: { draft.recognized[$0] != nil }) {
+                reply = String(localized: "Stimmen die Angaben?")
+            } else {
+                eCardScan = nil
+                reply = String(localized: "Für die offenen Fragen konnte ich keine Angaben lesen.") + " " + question
+            }
+            history.append(ConversationTurn(role: "assistant", text: reply, date: now))
+        case .confirm(let id, let values):
+            guard let scan = eCardScan, scan.id == id, scan.nextSide == nil else { throw SoviError.invalidAction }
+            try confirmECard(values, from: scan, person: &person, now: now)
+        case .cancel(let id):
+            guard eCardScan?.id == id else { throw SoviError.invalidAction }
+            discardECardDraft()
+        }
+    }
+
+    /// Missing values neither identify a cardholder nor contradict another side.
+    private static func agrees(_ lhs: String?, _ rhs: String?) -> Bool? {
+        guard let lhs, let rhs, !lhs.isEmpty, !rhs.isEmpty else { return nil }
+        return lhs.compare(rhs, options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "de_AT")) == .orderedSame
+    }
+
+    private mutating func discardECardDraft() {
+        if let start = history.firstIndex(where: { $0.id == eCardScan?.id }) { history.removeSubrange(start...) }
+        eCardScan = nil
+    }
+
+    private mutating func confirmECard(_ values: [PersonField: String], from scan: WelcomeECardScanDraft, person: inout FormPerson, now: Date) throws {
         guard values.keys.allSatisfy(Self.eCardFields.contains) else { throw SoviError.invalidAction }
         let available = remainingECardFields(for: person)
         var accepted: [PersonField: String] = [:]
         for field in available {
             guard let value = values[field]?.trimmingCharacters(in: .whitespacesAndNewlines), !value.isEmpty else { continue }
+            guard scan.recognized[field] != nil else { throw SoviError.invalidAction }
             if let error = field.validate(value) { throw SoviError.invalidInput(error) }
             accepted[field] = value
         }
         guard !accepted.isEmpty else { throw SoviError.invalidAction }
         for (field, value) in accepted { person.values[field.rawValue] = value }
         reviewedECardFields = (reviewedECardFields ?? []).union(accepted.keys)
-        history.append(ConversationTurn(role: "user", text: String(localized: "Angaben von meiner e-card übernehmen"), date: now))
+        eCardScan = nil
+        history.append(ConversationTurn(role: "user", text: WelcomeReply.confirmCard.text, date: now))
         skipReviewedECardFields(in: person)
         history.append(ConversationTurn(role: "assistant", text: question, date: now))
     }
@@ -156,20 +303,26 @@ struct WelcomeProgress: Codable, Equatable, Sendable {
         if isGreetingStep { return String(localized: "Hi, ich bin Sovi, dein persönlicher Gesundheitsbegleiter.") }
         if isTermsStep { return String(localized: "Hier findest du die Nutzungsbedingungen. Bitte lies sie kurz durch, bevor wir starten.") }
         if let field { return field.question }
-        if isLocationStep { return String(localized: "Darf ich deinen Standort nutzen, um Angebote in deiner Nähe zu finden?") }
-        return String(localized: "Darf ich dich an deine Termine und nächsten Schritte erinnern?")
+        return ChatLanguage.app.text(isLocationStep ? Self.locationQuestion : Self.reminderQuestion)
     }
 
-    mutating func recordAnswer(_ value: String?, address: WelcomeAddress? = nil, finish: Bool = false, person: inout FormPerson, now: Date) throws {
-        guard !completed else { throw SoviError.invalidAction }
+    mutating func recordAnswer(_ value: String?, address: WelcomeAddress? = nil, finish: Bool = false, permissionUnavailable: Bool = false, person: inout FormPerson, now: Date) throws {
+        guard !completed, eCardScan == nil || finish else { throw SoviError.invalidAction }
+        if permissionUnavailable {
+            let expected = isLocationStep ? WelcomeReply.useLocation : .remindMe
+            guard !finish, isLocationStep || isNotificationStep, value == expected.text else { throw SoviError.invalidAction }
+        }
+        // Leaving onboarding keeps posted messages. Only the explicit discard action removes photos.
+        if finish { eCardScan = nil }
         let value = value?.trimmingCharacters(in: .whitespacesAndNewlines)
-        var reply = value ?? String(localized: finish ? "Später ergänzen" : "Überspringen")
+        var reply = value ?? String(localized: finish ? "Den Rest ergänze ich später." : "Das lasse ich erst mal offen.")
         if !finish {
             if isGreetingStep {
                 guard value == String(localized: "Hi") else { throw SoviError.invalidAction }
             } else if isTermsStep {
                 guard value == String(localized: "Akzeptieren") else { throw SoviError.invalidAction }
                 termsAcceptedAt = now; acceptedTermsVersion = Self.termsVersion
+                reply = String(localized: "Ich stimme zu.")
             } else if isAddressStep, let value, !value.isEmpty {
                 let entered = try address ?? WelcomeAddress(manual: value)
                 try entered.validate()
@@ -181,11 +334,16 @@ struct WelcomeProgress: Codable, Equatable, Sendable {
                 if field == .birthDate, let date = Self.birthDateFormatter.date(from: value) {
                     reply = date.formatted(date: .long, time: .omitted)
                 } else if field == .insuranceNumber {
-                    reply = String(localized: "Sozialversicherungsnummer eingegeben")
+                    reply = String(localized: "Ich habe meine Versicherungsnummer eingetragen.")
                 }
             }
         }
         history.append(ConversationTurn(role: "user", text: reply, date: now))
+        if permissionUnavailable {
+            let notice = isLocationStep ? String(localized: "Ich kann deinen Standort gerade nicht verwenden.")
+                : String(localized: "Ich kann dir gerade keine Erinnerungen schicken.")
+            history.append(ConversationTurn(role: "assistant", text: notice, date: now))
+        }
         let wasAddress = isAddressStep
         step = finish ? activeFields.count + 2 : step + 1
         if wasAddress && !finish { step = activeFields.firstIndex(of: .phone) ?? step }
@@ -194,7 +352,7 @@ struct WelcomeProgress: Codable, Equatable, Sendable {
         if isTermsStep {
             history.append(ConversationTurn(role: "assistant", text: String(localized: "Damit ich dir wirklich helfen kann, würde ich dich gern besser kennenlernen."), date: now))
         }
-        let message = ConversationTurn(role: "assistant", text: completed ? String(localized: "Danke! Jetzt können wir loslegen. Du kannst deine Angaben jederzeit ändern.") : question, date: now)
+        let message = ConversationTurn(role: "assistant", text: completed ? String(localized: "Danke! Jetzt können wir loslegen.") : question, date: now)
         if isTermsStep { termsMessageID = message.id }
         history.append(message)
     }

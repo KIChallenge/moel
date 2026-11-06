@@ -30,6 +30,7 @@ final class PathSmokeTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["focus.response"].label.contains("Physiotherapie"))
         XCTAssertTrue(app.staticTexts["focus.response"].label.contains("?"))
         XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "focus.checkIn.")).count, 3)
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "focus.timeline.")).firstMatch.exists)
         let field = app.textFields["focus.composer"]
         let editor = field.exists ? field : app.textViews["focus.composer"]
         editor.tap(); editor.typeText("My draft stays here")
@@ -50,6 +51,7 @@ final class PathSmokeTests: XCTestCase {
         let next = app.buttons["focus.progress"]
         reveal(next); next.tap()
         let done = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "focus.entry.done."))
+        XCTAssertTrue(done.firstMatch.waitForExistence(timeout: 5))
         XCTAssertEqual(done.count, 2)
         let notDone = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "focus.entry.notDone.")).firstMatch
         reveal(notDone); notDone.tap()
@@ -128,14 +130,14 @@ final class PathSmokeTests: XCTestCase {
         XCTAssertTrue(app.buttons["controls.forms"].waitForExistence(timeout: 5))
         app.buttons["sheet.close"].tap()
         let shot = XCTAttachment(screenshot: app.screenshot()); shot.name = "Compact path and navigation"; shot.lifetime = .keepAlways; add(shot)
-        app.buttons["path.sections"].tap(); app.buttons["path.jump.year-1993"].tap()
+        revealPath(app.buttons["path.day.day-1993-03-12"], in: app)
         XCTAssertTrue(app.buttons["path.day.day-1993-03-12"].isHittable)
         app.buttons["path.today"].tap()
         expectation(for: NSPredicate(format: "hittable == true"), evaluatedWith: today)
         waitForExpectations(timeout: 5)
-        app.buttons["path.sections"].tap(); app.buttons["path.history.toggle"].tap()
+        revealPath(app.buttons["path.history.toggle"], in: app); app.buttons["path.history.toggle"].tap()
         XCTAssertEqual(entries.count, 208)
-        app.buttons["path.sections"].tap(); app.buttons["path.history.toggle"].tap()
+        revealPath(app.buttons["path.history.toggle"], in: app); app.buttons["path.history.toggle"].tap()
         XCTAssertEqual(entries.count, 15)
         XCTAssertTrue(today.isHittable)
     }
@@ -145,10 +147,10 @@ final class PathSmokeTests: XCTestCase {
         let today = app.buttons["path.day.day-2026-11-05"]
         XCTAssertTrue(today.waitForExistence(timeout: 10))
         let bar = app.statusBars.firstMatch
-        let navigationRight = max(app.buttons["path.controls"].frame.maxX, app.buttons["path.sections"].frame.maxX)
+        let navigationRight = app.buttons["path.controls"].frame.maxX
         let rail = app.frame.maxX - navigationRight > 40
         if !bar.exists && rail { throw XCTSkip("This simulator exposes a system side rail instead of a tappable status bar.") }
-        app.buttons["path.sections"].tap(); app.buttons["path.jump.year-2011"].tap()
+        revealPath(app.buttons["path.day.day-2011-09-01"], in: app)
         if bar.exists { bar.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.5)).tap() }
         else { app.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.035)).tap() }
         expectation(for: NSPredicate(format: "hittable == true"), evaluatedWith: today)
@@ -183,9 +185,17 @@ final class PathSmokeTests: XCTestCase {
         let composer = app.textFields["focus.composer"]
         let editor = composer.exists ? composer : app.textViews["focus.composer"]
         editor.tap(); editor.typeText("Ich möchte einen Arzttermin.")
-        app.buttons["focus.send"].tap()
+        let send = app.buttons["focus.send"]
+        XCTAssertTrue(send.isEnabled)
+        send.tap()
         let general = app.buttons["chat.general"]
-        XCTAssertTrue(general.waitForExistence(timeout: 5)); XCTAssertTrue(general.isHittable)
+        guard general.waitForExistence(timeout: 5) else {
+            let failure = XCTAttachment(screenshot: app.screenshot())
+            failure.name = "German message after send failure"; failure.lifetime = .keepAlways; add(failure)
+            XCTFail("No first follow-up. Composer: \(editor.value ?? "missing"); send enabled: \(send.isEnabled)")
+            return
+        }
+        XCTAssertTrue(general.isHittable)
         // The padded trailing area must answer too, not just the text itself.
         general.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.5)).tap()
         let insurance = app.buttons["chat.insurance"]
@@ -251,11 +261,8 @@ final class PathSmokeTests: XCTestCase {
 
     func testSingleInformationEntryHasDirectContentAndReadAction() {
         let app = launch()
-        let sections = app.buttons["path.sections"]
-        XCTAssertTrue(sections.waitForExistence(timeout: 10))
-        sections.tap()
-        app.buttons["path.jump.year-2011"].tap()
         let entry = app.buttons["path.day.day-2011-09-01"]
+        revealPath(entry, in: app)
         expectation(for: NSPredicate(format: "hittable == true"), evaluatedWith: entry)
         waitForExpectations(timeout: 5)
         let bubble = entry.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0)).withOffset(CGVector(dx: 0, dy: -16))
@@ -284,10 +291,7 @@ final class PathSmokeTests: XCTestCase {
 
     func testCardOpensAboveLowerButtonAndDismissesOutside() throws {
         let app = launch()
-        let sections = app.buttons["path.sections"]
-        XCTAssertTrue(sections.waitForExistence(timeout: 10))
-        sections.tap()
-        app.buttons["path.jump.planned"].tap()
+        revealPath(app.staticTexts["path.planned"], in: app)
         let path = app.scrollViews["path.scroll"]
         let entries = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "path.day."))
         let viewport = path.frame
@@ -316,8 +320,7 @@ final class PathSmokeTests: XCTestCase {
         let today = app.buttons["path.day.day-2026-11-05"]
         XCTAssertTrue(today.waitForExistence(timeout: 10))
         XCTAssertTrue(today.isHittable)
-        app.buttons["path.sections"].tap()
-        app.buttons["path.jump.year-1993"].tap()
+        revealPath(app.buttons["path.day.day-1993-03-12"], in: app)
         XCTAssertTrue(app.staticTexts["path.year-1993"].waitForExistence(timeout: 5))
         let historical = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "path.day.day-1993-")).firstMatch
         XCTAssertTrue(historical.isHittable)
@@ -331,8 +334,7 @@ final class PathSmokeTests: XCTestCase {
         app.buttons["focus.close"].tap()
         XCTAssertTrue(historical.waitForExistence(timeout: 5))
         XCTAssertEqual(historical.frame.minY, oldY, accuracy: 3)
-        app.buttons["path.sections"].tap()
-        app.buttons["path.jump.planned"].tap()
+        revealPath(app.staticTexts["path.planned"], in: app)
         XCTAssertTrue(app.staticTexts["path.planned"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["path.planned"].isHittable)
         let shot = XCTAttachment(screenshot: app.screenshot()); shot.name = "Reachable outlook section"; shot.lifetime = .keepAlways; add(shot)
@@ -395,13 +397,11 @@ final class PathSmokeTests: XCTestCase {
         XCTAssertTrue(composer.exists)
     }
 
-    /// Seed the most recent simulator photo with the synthetic ALMA PROBE card before opting in.
-    func testWelcomeECardFromSystemPhotosPickerConfirmsCorrections() throws {
-        // Run on a test simulator after adding SoviUITests/Fixtures/synthetic-e-card.png with simctl addmedia.
-        // Set TEST_RUNNER_SOVI_ECARD_PHOTO_QA=1 so the picker uses only the intended test input.
+    /// Run on a dedicated simulator seeded only with the two synthetic e-card photos in Fixtures.
+    func testWelcomePostsBothECardPhotosAndContinuesWithTheFirstMissingAnswer() throws {
         let environment = ProcessInfo.processInfo.environment
         try XCTSkipUnless(environment["SOVI_ECARD_PHOTO_QA"] == "1" || environment["TEST_RUNNER_SOVI_ECARD_PHOTO_QA"] == "1",
-                          "This UI check needs a simulator photo library seeded with the synthetic e-card.")
+                          "This UI check needs a simulator photo library seeded with both synthetic card sides.")
         let app = XCUIApplication()
         app.launchArguments = ["--uitesting", "--welcome", "-AppleLanguages", "(en)", "-AppleLocale", "en_AT"]
         app.launch()
@@ -409,45 +409,81 @@ final class PathSmokeTests: XCTestCase {
         app.buttons["welcome.hi"].tap()
         app.buttons["welcome.accept"].tap()
         app.buttons["welcome.scanECard"].tap()
-        app.buttons["welcome.ecard.photo"].tap()
-
-        let thumbnail = app.images.matching(NSPredicate(
-            format: "identifier == %@ OR label BEGINSWITH[c] %@ OR label BEGINSWITH[c] %@",
-            "PXGGridLayout-Info", "Photo,", "Foto,")).firstMatch
-        guard thumbnail.waitForExistence(timeout: 30) else {
-            XCTFail("The native Photos picker should contain the seeded card.")
-            return
+        let scroll = app.scrollViews["welcome.scroll"]
+        func reveal(_ item: XCUIElement) {
+            for _ in 0..<8 where !item.isHittable {
+                if item.frame.midY < scroll.frame.midY { scroll.swipeDown() } else { scroll.swipeUp() }
+            }
+            XCTAssertTrue(item.isHittable)
         }
-        thumbnail.tap()
+        func choose(_ index: Int) {
+            let photo = app.buttons["welcome.ecard.photo"]
+            reveal(photo)
+            photo.tap()
+            let thumbnails = app.images.matching(NSPredicate(format: "identifier == %@ OR label BEGINSWITH[c] %@ OR label BEGINSWITH[c] %@",
+                                                              "PXGGridLayout-Info", "Photo,", "Foto,"))
+            let item = thumbnails.element(boundBy: index)
+            XCTAssertTrue(item.waitForExistence(timeout: 30))
+            item.tap()
+        }
 
+        let front = app.buttons["welcome.ecard.message.front"]
+        let back = app.buttons["welcome.ecard.message.back"]
+        var frontIndex = 0
+        choose(frontIndex)
+        if !front.waitForExistence(timeout: 10) {
+            // The system picker can sort by capture date or import time.
+            XCTAssertEqual(app.staticTexts["welcome.ecard.error"].label, "That’s the back. Please show me the front first.")
+            frontIndex = 1
+            choose(frontIndex)
+        }
+        XCTAssertTrue(front.waitForExistence(timeout: 15))
+        XCTAssertFalse(back.exists)
+        XCTAssertFalse(app.buttons["welcome.ecard.confirm"].exists)
+        reveal(front); front.tap()
+        let close = app.buttons["welcome.ecard.preview.close"]
+        XCTAssertTrue(close.waitForExistence(timeout: 5)); close.tap()
+
+        choose(frontIndex)
+        let error = app.staticTexts["welcome.ecard.error"]
+        XCTAssertTrue(error.waitForExistence(timeout: 15))
+        XCTAssertEqual(error.label, "That’s the front. I need the back now.")
+        XCTAssertFalse(back.exists)
+        choose(1 - frontIndex)
+        XCTAssertTrue(back.waitForExistence(timeout: 15))
+        XCTAssertEqual(app.buttons.matching(identifier: "welcome.ecard.message.front").count, 1)
+        XCTAssertEqual(app.buttons.matching(identifier: "welcome.ecard.message.back").count, 1)
+        let pair = XCTAttachment(screenshot: app.screenshot())
+        pair.name = "Two-sided e-card in the welcome conversation"; pair.lifetime = .keepAlways; add(pair)
         let name = app.textFields["welcome.ecard.field.firstName"]
-        XCTAssertTrue(name.waitForExistence(timeout: 20))
+        XCTAssertTrue(name.waitForExistence(timeout: 5))
         XCTAssertEqual(name.value as? String, "ALMA")
         XCTAssertEqual(app.textFields["welcome.ecard.field.lastName"].value as? String, "PROBE")
         XCTAssertEqual(app.textFields["welcome.ecard.field.birthDate"].value as? String, "09.03.1980")
         XCTAssertEqual(app.textFields["welcome.ecard.field.insuranceNumber"].value as? String, "0000000000")
         XCTAssertEqual(app.textFields["welcome.ecard.field.insurer"].value as? String, "ÖGK")
+        reveal(name)
         name.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
         name.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: 4) + "Alina")
         XCTAssertEqual(name.value as? String, "Alina")
         let confirm = app.buttons["welcome.ecard.confirm"]
-        for _ in 0..<6 where !confirm.isHittable { app.scrollViews["sheet.content"].swipeUp(velocity: .slow) }
-        confirm.tap()
-
+        reveal(confirm); confirm.tap()
         let skip = app.buttons["welcome.skip"]
         for next in ["Street", "Phone", "Email"] {
             expectation(for: NSPredicate(format: "value == %@", next), evaluatedWith: skip)
             waitForExpectations(timeout: 5)
             skip.tap()
         }
-        let location = app.buttons["Continue without location"]
+        let location = app.buttons["welcome.skipLocation"]
         XCTAssertTrue(location.waitForExistence(timeout: 5))
-        for _ in 0..<6 where !location.isHittable { app.swipeUp() }
-        location.tap()
-        app.buttons["Continue without reminders"].tap()
+        XCTAssertEqual(app.buttons["welcome.location"].label, "Yes, use my location")
+        reveal(location); location.tap()
+        let reminders = app.buttons["welcome.skipNotifications"]
+        XCTAssertTrue(reminders.waitForExistence(timeout: 5))
+        reveal(reminders); reminders.tap()
         let review = app.buttons["Review details"]
         XCTAssertTrue(review.waitForExistence(timeout: 5))
-        review.tap()
+        reveal(review); review.tap()
         XCTAssertEqual(app.textFields["profile.firstName"].value as? String, "Alina")
     }
 
@@ -478,7 +514,10 @@ final class PathSmokeTests: XCTestCase {
         app.buttons["welcome.date.confirm"].tap()
         XCTAssertTrue(composer.waitForExistence(timeout: 5))
         composer.tap(); composer.typeText("Musterstraße 12, 1010 Wien")
-        XCTAssertTrue(app.buttons["welcome.send"].isEnabled); app.buttons["welcome.send"].tap()
+        let addressSend = app.buttons["welcome.send"]
+        expectation(for: NSPredicate(format: "enabled == true"), evaluatedWith: addressSend)
+        waitForExpectations(timeout: 5)
+        addressSend.tap()
         expectation(for: NSPredicate(format: "value == %@", "Telefon"), evaluatedWith: skip)
         waitForExpectations(timeout: 5)
         composer.tap(); composer.typeText("123")
@@ -494,6 +533,8 @@ final class PathSmokeTests: XCTestCase {
         expectation(for: NSPredicate(format: "value == %@", "Sozialversicherungsnummer"), evaluatedWith: skip)
         waitForExpectations(timeout: 5)
         composer.tap(); composer.typeText("1234567890123")
+        expectation(for: NSPredicate(format: "value == %@", "1234567890"), evaluatedWith: composer)
+        waitForExpectations(timeout: 5)
         XCTAssertEqual(composer.value as? String, "1234567890")
         XCTAssertLessThan(composer.frame.height, 100)
         let inputShot = XCTAttachment(screenshot: app.screenshot()); inputShot.name = "Welcome ten digit insurance input"; inputShot.lifetime = .keepAlways; add(inputShot)
@@ -501,14 +542,20 @@ final class PathSmokeTests: XCTestCase {
         skip.tap()
         let location = app.buttons["welcome.location"]
         XCTAssertTrue(location.waitForExistence(timeout: 5))
+        XCTAssertEqual(location.label, "Ja, verwende meinen Standort")
         for _ in 0..<4 { if location.isHittable { break }; app.swipeUp() }
-        app.buttons["Ohne Standort weiter"].tap()
+        app.buttons["welcome.skipLocation"].tap()
         XCTAssertTrue(app.buttons["welcome.notifications"].waitForExistence(timeout: 5))
-        app.buttons["Ohne Erinnerungen weiter"].tap()
+        XCTAssertEqual(app.buttons["welcome.notifications"].label, "Ja, erinnere mich bitte")
+        app.buttons["welcome.skipNotifications"].tap()
         XCTAssertTrue(app.buttons["welcome.done"].waitForExistence(timeout: 5))
         let shot = XCTAttachment(screenshot: app.screenshot()); shot.name = "Welcome conversation and optional permissions"; shot.lifetime = .keepAlways; add(shot)
         app.buttons["welcome.done"].tap()
         XCTAssertTrue(app.buttons["path.sovi"].waitForExistence(timeout: 5))
+        app.buttons["path.sovi"].tap()
+        XCTAssertTrue(app.staticTexts["Hi, ich bin Sovi, dein persönlicher Gesundheitsbegleiter."].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts.matching(NSPredicate(format: "label == %@", "Erika")).count, 1)
+
     }
 
     func testWelcomeMapKitAddressSuggestion() throws {
@@ -568,7 +615,13 @@ final class PathSmokeTests: XCTestCase {
         for answer in ["purpose.first", "payer.pv", "role.applicant", "reports.yes"] {
             let choice = app.buttons["case.answer.\(answer)"]
             XCTAssertTrue(choice.waitForExistence(timeout: 5))
-            XCTAssertTrue(choice.isHittable, "A new follow-up should remain visible without hunting through the conversation")
+            let visible = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in choice.isHittable }, object: nil)
+            guard XCTWaiter.wait(for: [visible], timeout: 3) == .completed else {
+                let shot = XCTAttachment(screenshot: app.screenshot())
+                shot.name = "Guided follow-up \(answer)"; shot.lifetime = .keepAlways; add(shot)
+                XCTFail("A new follow-up should remain visible without hunting through the conversation")
+                return
+            }
             choice.tap()
         }
         let save = app.buttons["scenario.save"]
@@ -576,20 +629,33 @@ final class PathSmokeTests: XCTestCase {
         save.tap()
         XCTAssertTrue(app.staticTexts["scenario.saved"].waitForExistence(timeout: 5))
         let forms = app.buttons["case.forms"]
-        for _ in 0..<10 { if forms.isHittable { break }; app.swipeDown() }
+        XCTAssertTrue(forms.waitForExistence(timeout: 5))
+        let transcript = app.scrollViews.firstMatch
+        for _ in 0..<12 where !forms.isHittable {
+            if forms.frame.midY < transcript.frame.midY { transcript.swipeDown() } else { transcript.swipeUp() }
+        }
+        XCTAssertTrue(forms.isHittable)
         forms.tap()
         XCTAssertTrue(app.navigationBars["Profile und Formulare"].waitForExistence(timeout: 5))
         let shot = XCTAttachment(screenshot: app.screenshot()); shot.name = "Care demonstration and supplied forms"; shot.lifetime = .keepAlways; add(shot)
         app.buttons["forms.close"].tap()
         XCTAssertTrue(app.buttons["scenario.close"].waitForExistence(timeout: 5)); app.buttons["scenario.close"].tap()
         app.buttons["focus.close"].tap()
-        app.buttons["path.sections"].tap()
-        app.buttons["path.jump.undated"].tap()
+        revealPath(app.staticTexts["path.undated"], in: app)
         XCTAssertTrue(app.staticTexts["path.undated"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["path.undated"].isHittable)
         let ownStep = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "path.day.entry-")).firstMatch
         XCTAssertTrue(ownStep.isHittable)
         let ownShot = XCTAttachment(screenshot: app.screenshot()); ownShot.name = "Saved care steps on the path"; ownShot.lifetime = .keepAlways; add(ownShot)
+    }
+
+    private func revealPath(_ element: XCUIElement, in app: XCUIApplication) {
+        let path = app.scrollViews["path.scroll"]
+        XCTAssertTrue(element.waitForExistence(timeout: 6))
+        for _ in 0..<18 where !element.isHittable {
+            if element.frame.midY < path.frame.midY { path.swipeDown() } else { path.swipeUp() }
+        }
+        XCTAssertTrue(element.isHittable)
     }
 
     func launch(_ largeText: Bool = false, language: String = "de") -> XCUIApplication {
@@ -617,7 +683,7 @@ final class PathSmokeTests: XCTestCase {
         keyboardShot.name = "Sovi Focus with keyboard"; keyboardShot.lifetime = .keepAlways
         add(keyboardShot)
         app.buttons["focus.send"].tap()
-        XCTAssertTrue(app.staticTexts["focus.response"].exists)
+        XCTAssertTrue(app.staticTexts["focus.response"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["focus.action"].exists)
         let savedReply = app.staticTexts["focus.response"].label
         editor.tap(); editor.typeText("Ein Entwurf")
@@ -633,25 +699,27 @@ final class PathSmokeTests: XCTestCase {
         XCTAssertEqual(editor.value as? String, "Ein Entwurf")
     }
 
-    func testOnlineChatSetupRequiresConsentAndKeepsFreeTextComposer() {
-        let app = launch()
+    func testDoctorSearchNeedsNoConnectionSettings() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--uitesting", "--chat-ui-fixture", "-AppleLanguages", "(en)", "-AppleLocale", "en_AT"]
+        app.launch()
         let mascot = app.buttons["path.sovi"]
         XCTAssertTrue(mascot.waitForExistence(timeout: 10)); mascot.tap()
-        app.buttons["chat.settings"].tap()
-        XCTAssertTrue(app.secureTextFields["chat.token"].waitForExistence(timeout: 5))
-        let enabled = app.switches["chat.enabled"]
-        enabled.tap()
-        for _ in 0..<8 { if app.buttons["chat.save"].isHittable { break }; app.swipeUp() }
-        XCTAssertFalse(app.buttons["chat.save"].isEnabled)
-        let consent = app.switches["chat.consent"]
-        for _ in 0..<12 { if consent.isHittable { break }; app.swipeDown() }
-        XCTAssertTrue(consent.exists)
-        consent.tap()
-        for _ in 0..<12 { if app.buttons["chat.save"].isHittable { break }; app.swipeUp() }
-        XCTAssertTrue(app.buttons["chat.save"].isEnabled)
-        // No request or permission prompt is initiated merely by opening settings.
+        XCTAssertFalse(app.buttons["chat.settings"].exists)
+        XCTAssertEqual(app.secureTextFields.count, 0)
+        let field = app.textFields["focus.composer"]
+        let editor = field.exists ? field : app.textViews["focus.composer"]
+        editor.tap(); editor.typeText("I want to find a doctor")
+        app.buttons["focus.send"].tap()
+        let firstReply = app.staticTexts["focus.response"]
+        XCTAssertTrue(app.buttons["chat.general"].waitForExistence(timeout: 5))
+        let initialText = firstReply.label
+        app.buttons["chat.general"].tap()
+        XCTAssertTrue(app.buttons["chat.insurance"].waitForExistence(timeout: 5))
+        XCTAssertNotEqual(firstReply.label, initialText)
         let shot = XCTAttachment(screenshot: app.screenshot())
-        shot.name = "Online chat consent and reviewed background"; shot.lifetime = .keepAlways; add(shot)
+        shot.name = "Automatic connected chat with a different follow-up"
+        shot.lifetime = .keepAlways; add(shot)
     }
 
     func testPreviewDoesNotCompleteAndLargeTextFocus() {

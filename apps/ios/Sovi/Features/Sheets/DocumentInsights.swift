@@ -9,6 +9,7 @@ struct DocumentInsights: View {
     @State private var error: String?
     @State private var formID: String?
     @State private var showsCare = false
+    @State private var restoredCareTurns = 0
     @State private var inspecting: EvidenceReference?
     @State private var saved = false
 
@@ -34,7 +35,7 @@ struct DocumentInsights: View {
                     .environment(\.locale, Locale(identifier: language.rawValue))
             }
         }
-        .sheet(isPresented: $showsCare) { DemoScenarioChat(scenario: .care) }
+        .sheet(isPresented: $showsCare) { DemoScenarioChat(scenario: .care, restoredTurnCount: restoredCareTurns) }
         .sheetError($error)
     }
 
@@ -57,6 +58,7 @@ struct DocumentInsights: View {
             if report.actions.contains(where: \.isCareRequest) {
                 Button(language.text("Pflegeantrag vorbereiten")) {
                     do {
+                        restoredCareTurns = store.state.demoScenarios?[DemoScenario.care.rawValue]?.history.count ?? 0
                         try store.perform(.linkCareReport(document.id, language))
                         showsCare = true
                     } catch { self.error = error.localizedDescription }

@@ -2,3 +2,6 @@
 // Use your own Apple Developer team and a registered bundle identifier.
 DEVELOPMENT_TEAM = YOUR_TEAM_ID
 PRODUCT_BUNDLE_IDENTIFIER = at.yourorganisation.sovi
+// Restricted prototype API access only. Never use the OpenAI API key here.
+// The shared token is distributed inside builds for the controlled test group.
+SOVI_CHAT_ACCESS_TOKEN =
